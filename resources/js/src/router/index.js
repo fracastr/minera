@@ -11,6 +11,7 @@ import pages from './routes/pages'
 import chartsMaps from './routes/charts-maps'
 import formsTable from './routes/forms-tables'
 import others from './routes/others'
+import balances from './routes/balances'
 
 Vue.use(VueRouter)
 
@@ -29,6 +30,7 @@ const router = new VueRouter({
     ...formsTable,
     ...uiElements,
     ...others,
+    ...balances,
     {
       path: '*',
       redirect: 'error-404',

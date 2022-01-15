@@ -9,7 +9,7 @@ export default [
 //   },
   {
     title: 'Balance',
-    route: 'dashboard-ecommerce',
+    route: 'balances-Balances',
     icon: 'PieChartIcon',
   },
 //   {
