@@ -226,6 +226,7 @@ import { required, email } from '@validations'
 import { togglePasswordVisibility } from '@core/mixins/ui/forms'
 import store from '@/store/index'
 import useJwt from '@/auth/jwt/useJwt'
+import ToastificationContent from '@core/components/toastification/ToastificationContent.vue'
 
 export default {
   components: {
@@ -246,6 +247,7 @@ export default {
     // validations
     ValidationProvider,
     ValidationObserver,
+    ToastificationContent,
   },
   mixins: [togglePasswordVisibility],
   data() {
@@ -282,9 +284,28 @@ export default {
             email: this.userEmail,
             password: this.password,
             c_password: this.password
-            }).then(res => console.log(res))
+            }).then(
+                res =>{
+                console.log(res)
+                this.showToast('success','top-center')
+                this.$router.push('/login')
+                })
         }
         })
+    },
+    showToast(variant, position) {
+      this.$toast({
+        component: ToastificationContent,
+        props: {
+          title: 'Usuario creado con exito',
+          icon: 'BellIcon',
+          text: 'Puede iniciar sesión',
+          variant,
+        },
+      },
+      {
+        position,
+      })
     },
     },
 }
