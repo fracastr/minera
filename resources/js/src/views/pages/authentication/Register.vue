@@ -7,7 +7,7 @@
         <vuexy-logo />
 
         <h2 class="brand-text text-primary ml-1">
-          Vuexy
+          Sondek
         </h2>
       </b-link>
       <!-- /Brand logo-->
@@ -39,10 +39,10 @@
           class="px-xl-2 mx-auto"
         >
           <b-card-title class="mb-1">
-            Adventure starts here 🚀
+            Crea tu cuenta 🚀
           </b-card-title>
           <b-card-text class="mb-2">
-            Make your app management easy and fun!
+            Registrate como nuevo usuario
           </b-card-text>
 
           <!-- form -->
@@ -151,7 +151,7 @@
                 type="submit"
                 :disabled="invalid"
               >
-                Sign up
+                Registrar
               </b-button>
             </b-form>
           </validation-observer>
@@ -275,28 +275,18 @@ export default {
   },
   methods: {
     register() {
-      this.$refs.registerForm.validate().then(success => {
+        this.$refs.registerForm.validate().then(success => {
         if (success) {
-          useJwt
-            .register({
-              username: this.username,
-              email: this.userEmail,
-              password: this.password,
-            })
-            .then(response => {
-              useJwt.setToken(response.data.accessToken)
-              useJwt.setRefreshToken(response.data.refreshToken)
-              localStorage.setItem('userData', JSON.stringify(response.data.userData))
-              this.$ability.update(response.data.userData.ability)
-              this.$router.push('/')
-            })
-            .catch(error => {
-              this.$refs.registerForm.setErrors(error.response.data.error)
-            })
+            this.$http.post('/api/auth/register', {
+            name: this.username,
+            email: this.userEmail,
+            password: this.password,
+            c_password: this.password
+            }).then(res => console.log(res))
         }
-      })
+        })
     },
-  },
+    },
 }
 /* eslint-disable global-require */
 </script>
