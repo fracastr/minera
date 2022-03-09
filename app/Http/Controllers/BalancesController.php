@@ -92,7 +92,7 @@ class BalancesController extends Controller
     {
         try {
             $path = $request->file('file')->store('balances');
-        $path = '/home/ubuntu/minera/storage/app/'. $path;
+            $path = '/home/ubuntu/minera/storage/app/'. $path;
 
 
         $url = 'http://54.89.227.139:8080/flaskapi/get_balance';
@@ -103,8 +103,10 @@ class BalancesController extends Controller
         ]);
         //dd($response);
         //dd(json_decode($response->getBody()->getContents()));
-        return json_decode($response->getBody()->getContents());
+        $data = json_decode($response->getBody()->getContents());
+        return ['data' => $data, 'path' => $path];
         } catch (\GuzzleHttp\Exception\BadResponseException $e) {
+            return "ERROR";
             return $e->getResponse()->getBody()->getContents();
         }
 
