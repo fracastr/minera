@@ -91,7 +91,7 @@ class BalancesController extends Controller
     public function import(Request $request)
     {
         try {
-            $path = $request->file('file')->store('balances');
+            $path = $request->file('file')->store('public');
             $path = '/home/ubuntu/minera/storage/app/'. $path;
 
 
