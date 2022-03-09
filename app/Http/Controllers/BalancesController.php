@@ -5,7 +5,10 @@ namespace App\Http\Controllers;
 use App\Imports\BalancesImport;
 use App\Models\Balances;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Maatwebsite\Excel\Facades\Excel;
+use GuzzleHttp\Client;
+use Illuminate\Support\Facades\Http;
 
 class BalancesController extends Controller
 {
@@ -87,12 +90,25 @@ class BalancesController extends Controller
 
     public function import(Request $request)
     {
-         $request->validate([
-            'import_file' => 'required|file|mimes:xls,xlsx'
-        ]);
+        try {
+            $path = $request->file('file')->store('balances');
+        $path = '/home/ubuntu/minera/storage/app/'. $path;
 
-        $path = $request->file('import_file');
-        $data = Excel::import(new BalancesImport, $path);
+
+        $url = 'http://54.89.227.139:8080/flaskapi/get_balance';
+        $myBody['path_name'] = $path;
+        // $response = Http::acceptJson()->post($url, array($myBody));
+        $response = Http::acceptJson()->post($url, [
+            'path_name' => $path,
+        ]);
+        //dd($response);
+        //dd(json_decode($response->getBody()->getContents()));
+        return json_decode($response->getBody()->getContents());
+        } catch (\GuzzleHttp\Exception\BadResponseException $e) {
+            return $e->getResponse()->getBody()->getContents();
+        }
+
+;
 
         return response()->json(['message' => 'uploaded successfully'], 200);
     }
