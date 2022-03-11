@@ -101,7 +101,7 @@ class BalancesController extends Controller
         $response = Http::acceptJson()->post($url, [
             'path_name' => $path,
         ]);
-        dd($response);
+        //dd($response);
         //dd(json_decode($response->getBody()->getContents()));
         $data = json_decode($response->getBody()->getContents());
         return ['data' => $data, 'path' => $path];
