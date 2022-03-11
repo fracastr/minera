@@ -101,8 +101,8 @@ class BalancesController extends Controller
         $response = Http::acceptJson()->post($url, [
             'path_name' => $path,
         ]);
-        //dd($response);
-        dd(json_decode($response->getBody()->getContents()));
+        dd($response);
+        //dd(json_decode($response->getBody()->getContents()));
         $data = json_decode($response->getBody()->getContents());
         return ['data' => $data, 'path' => $path];
         } catch (\GuzzleHttp\Exception\BadResponseException $e) {
