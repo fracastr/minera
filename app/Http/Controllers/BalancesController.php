@@ -104,13 +104,13 @@ class BalancesController extends Controller
         //dd($response);
         //dd(json_decode($response->getBody()->getContents()));
         $data = json_decode($response->getBody()->getContents());
-        foreach ($data as $key => &$value) {
-            if($key == "datos_entrada"){
-                $value = json_decode($value);
-                dd($value);
-            }
-            $value = json_decode($value);
-        }
+        // foreach ($data as $key => &$value) {
+        //     if($key == "datos_entrada"){
+        //         $value = json_decode($value);
+        //         dd($value);
+        //     }
+        //     $value = json_decode($value);
+        // }
         return ['data' => $data, 'path' => $path];
         } catch (\GuzzleHttp\Exception\BadResponseException $e) {
             return "ERROR";
