@@ -106,7 +106,7 @@ class BalancesController extends Controller
         $data = json_decode($response->getBody()->getContents());
         foreach ($data as $key => &$value) {
             $value = str_replace('\"','',$value);
-            $value = json_decode($value, true);
+            //$value = json_decode($value, true);
         }
         return ['data' => $data, 'path' => $path];
         } catch (\GuzzleHttp\Exception\BadResponseException $e) {
