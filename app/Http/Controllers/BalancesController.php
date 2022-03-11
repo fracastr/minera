@@ -104,7 +104,7 @@ class BalancesController extends Controller
         //dd($response);
         //dd(json_decode($response->getBody()->getContents()));
         $data = json_decode($response->getBody()->getContents());
-        return ['data' => json_encode($data), 'path' => $path];
+        return ['data' => json_decode($data, true), 'path' => $path];
         } catch (\GuzzleHttp\Exception\BadResponseException $e) {
             return "ERROR";
             return $e->getResponse()->getBody()->getContents();
