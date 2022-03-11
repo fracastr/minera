@@ -105,6 +105,7 @@ class BalancesController extends Controller
         //dd(json_decode($response->getBody()->getContents()));
         $data = json_decode($response->getBody()->getContents());
         foreach ($data as $key => &$value) {
+            $value = str_replace('\\','',$value);
             $value = json_decode($value, true);
         }
         return ['data' => $data, 'path' => $path];
