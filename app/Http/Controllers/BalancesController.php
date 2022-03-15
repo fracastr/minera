@@ -109,7 +109,7 @@ class BalancesController extends Controller
             $old = $value;
             $value = json_decode($value, true);
             if($key == 'datos_entrada'){
-                dd(typeOf($old));
+                dd(gettype($old));
                 dd($old, $value);
             }
 
