@@ -108,7 +108,7 @@ class BalancesController extends Controller
             // $value = json_decode( preg_replace('/[\x00-\x1F\x80-\xFF]/', '', $value), true );
             $old = $value;
             $value = json_decode($value);
-            if($key == 'datos_entrada'){
+            if($key != 'datos_entrada'){
                 dd($old, $value);
             }
 
