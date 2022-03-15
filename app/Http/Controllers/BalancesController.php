@@ -104,10 +104,11 @@ class BalancesController extends Controller
         //dd($response);
         //dd(json_decode($response->getBody()->getContents()));
         $data = json_decode($response->getBody()->getContents());
-        // foreach ($data as $key => &$value) {
-        //     // $value = json_decode( preg_replace('/[\x00-\x1F\x80-\xFF]/', '', $value), true );
-        //     $value = json_decode($value);
-        // }
+        foreach ($data as $key => &$value) {
+            // $value = json_decode( preg_replace('/[\x00-\x1F\x80-\xFF]/', '', $value), true );
+            $value = json_decode($value);
+            dd($value);
+        }
         return ['data' => $data, 'path' => $path];
         } catch (\GuzzleHttp\Exception\BadResponseException $e) {
             return "ERROR";
