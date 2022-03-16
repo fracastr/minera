@@ -106,6 +106,9 @@ class BalancesController extends Controller
         $data = json_decode($response->getBody()->getContents());
         foreach ($data as $key => &$value) {
             // $value = json_decode( preg_replace('/[\x00-\x1F\x80-\xFF]/', '', $value), true );
+            if($key == 'datos_entrada'){
+                dd($value);
+            }
             $value = json_decode($value, true);
 
         }
