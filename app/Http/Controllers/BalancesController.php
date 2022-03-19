@@ -93,9 +93,9 @@ class BalancesController extends Controller
     public function import(Request $request)
     {
         try {
-            // $path = $request->file('file')->store('public');
-            // $path = '/home/ubuntu/minera/storage/app/'. $path;
-            $path = '/home/ubuntu/minera/storage/app/public/iYTQWSjieGJPHoKE6rVrPmsaeIDjZGach602nWVe.xlsx';
+            $path = $request->file('file')->store('public');
+            $path = '/home/ubuntu/minera/storage/app/'. $path;
+            //$path = '/home/ubuntu/minera/storage/app/public/iYTQWSjieGJPHoKE6rVrPmsaeIDjZGach602nWVe.xlsx';
 
 
         $url = 'http://54.89.227.139:8080/flaskapi/get_balance';
@@ -134,7 +134,7 @@ class BalancesController extends Controller
             }
             array_push($array_mediciones, (object)$object_mediciones);
         }
-        
+
         return ['data' => $data, 'mediciones_table' => $array_mediciones, 'path' => $path];
         } catch (\GuzzleHttp\Exception\BadResponseException $e) {
             return "ERROR";
