@@ -1,4 +1,5 @@
 <template>
+<div>
   <b-form @submit.prevent @submit="onSubmit">
     <b-row>
       <b-col cols="12">
@@ -43,11 +44,13 @@
     </b-row>
 
   </b-form>
+  <b-table title="Balance" responsive="sm" :items="items"/>
+  </div>
 </template>
 
 <script>
 import {
-  BRow, BCol, BFormGroup, BFormInput, BFormCheckbox, BForm, BButton, BFormFile
+  BRow, BCol, BFormGroup, BFormInput, BFormCheckbox, BForm, BButton, BFormFile, BTable
 } from 'bootstrap-vue'
 import Ripple from 'vue-ripple-directive'
 import axios from 'axios'
@@ -55,10 +58,17 @@ import axios from 'axios'
 export default {
     data(){
         return{
-            file_1: null
+            file_1: null,
+            isBusy: false,
+            items: [],
         }
     },
     methods: {
+      myProvider(){
+          console.log("provider");
+          console.log(this.items);
+          return this.items;
+      },
       onSubmit(event) {
         event.preventDefault()
         let formData = new FormData();
@@ -70,11 +80,13 @@ export default {
               'Content-Type': 'multipart/form-data'
             }
           }
-        ).then(function () {
-          console.log('SUCCESS!!');
+        ).then((response) => {
+            this.items = response.data.mediciones_table;
+            console.log("items after call");
+            console.log(this.items);
         })
-        .catch(function () {
-          console.log('FAILURE!!');
+        .catch(function (e) {
+          console.log('FAILURE!!', e);
         });
       },
     },
@@ -87,6 +99,7 @@ export default {
     BForm,
     BButton,
     BFormFile,
+    BTable,
   },
   directives: {
     Ripple,

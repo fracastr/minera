@@ -8,7 +8,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Maatwebsite\Excel\Facades\Excel;
 use GuzzleHttp\Client;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Http;
+use stdClass;
 
 class BalancesController extends Controller
 {
@@ -91,8 +93,9 @@ class BalancesController extends Controller
     public function import(Request $request)
     {
         try {
-            $path = $request->file('file')->store('public');
-            $path = '/home/ubuntu/minera/storage/app/'. $path;
+            // $path = $request->file('file')->store('public');
+            // $path = '/home/ubuntu/minera/storage/app/'. $path;
+            $path = '/home/ubuntu/minera/storage/app/public/iYTQWSjieGJPHoKE6rVrPmsaeIDjZGach602nWVe.xlsx';
 
 
         $url = 'http://54.89.227.139:8080/flaskapi/get_balance';
@@ -107,9 +110,32 @@ class BalancesController extends Controller
         foreach ($data as $key => &$value) {
             // $value = json_decode( preg_replace('/[\x00-\x1F\x80-\xFF]/', '', $value), true );
             $value = json_decode($value, true);
-
         }
-        return ['data' => $data, 'path' => $path];
+
+        $mediciones = $data->datos_entrada['mediciones'];
+        $array_mediciones = array();
+        $medicion_bd =  new stdClass();
+
+        foreach($mediciones as $key_mediciones => $value_mediciones){
+            $object_mediciones = array();
+            if(sizeof($value_mediciones) == 4){
+                $object_mediciones['TMS medido'] = $value_mediciones[0];
+                $object_mediciones['TMS balance'] = $value_mediciones[1];
+                $object_mediciones['Fet [%] Medido'] = $value_mediciones[2];
+                $object_mediciones['Fet [%] Balance'] = $value_mediciones[3];
+            }
+            else if(sizeof($value_mediciones) == 6){
+                $object_mediciones['TMS medido'] = $value_mediciones[0];
+                $object_mediciones['TMS balance'] = $value_mediciones[1];
+                $object_mediciones['Fet [%] Medido'] = $value_mediciones[2];
+                $object_mediciones['Fet [%] Balance'] = $value_mediciones[3];
+                $object_mediciones['FeMag [%] Medido'] = $value_mediciones[4];
+                $object_mediciones['FeMag [%] Balance'] = $value_mediciones[5];
+            }
+            array_push($array_mediciones, (object)$object_mediciones);
+        }
+        
+        return ['data' => $data, 'mediciones_table' => $array_mediciones, 'path' => $path];
         } catch (\GuzzleHttp\Exception\BadResponseException $e) {
             return "ERROR";
             return $e->getResponse()->getBody()->getContents();
