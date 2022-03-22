@@ -95,7 +95,7 @@ class BalancesController extends Controller
         try {
             $path = $request->file('file')->store('public');
             $path = '/home/ubuntu/minera/storage/app/'. $path;
-            //$path = '/home/ubuntu/minera/storage/app/public/iYTQWSjieGJPHoKE6rVrPmsaeIDjZGach602nWVe.xlsx';
+            // $path = '/home/ubuntu/minera/storage/app/public/iYTQWSjieGJPHoKE6rVrPmsaeIDjZGach602nWVe.xlsx';
 
 
         $url = 'http://54.163.216.118:8080/flaskapi/get_balance';
@@ -167,32 +167,48 @@ class BalancesController extends Controller
         }
 
         // logica tabla resultado restricciones
-        $resultado_restricciones = $data->datos_entrada['jerarquia'];
+        $resultado_restricciones = $data->datos_entrada['restricciones'];
         $jerarquia = $data->datos_entrada['jerarquia'];
-        $array_restricciones = array();
+        $array_resultado_restricciones = array();
 
         foreach ($resultado_restricciones as $key_resultado_restricciones => $value_resultado_restricciones) {
             $object_resultado_restricciones = array();
-            if(sizeof($value_restricciones) == 4){
-                $object_restricciones['TMS inf[%]'] = $value_restricciones[0];
-                $object_restricciones['TMS sup[%]'] = $value_restricciones[1];
-                $object_restricciones['Fet [%] inf'] = $value_restricciones[2];
-                $object_restricciones['Fet [%] sup'] = $value_restricciones[3];
-                $object_restricciones['Jerarquia'] = $jerarquia[$key_restricciones];
+            if(sizeof($value_resultado_restricciones) == 4){
+                $object_resultado_restricciones['TMS inf[%]'] = 0;
+                $object_resultado_restricciones['TMS sup[%]'] = 0;
+                $object_resultado_restricciones['Fet [%] inf'] = 0;
+                $object_resultado_restricciones['Fet [%] sup'] = 0;
             }
-            else if(sizeof($value_restricciones) == 6){
-                $object_restricciones['TMS inf[%]'] = $value_restricciones[0];
-                $object_restricciones['TMS sup[%]'] = $value_restricciones[1];
-                $object_restricciones['Fet [%] inf'] = $value_restricciones[2];
-                $object_restricciones['Fet [%] sup'] = $value_restricciones[3];
-                $object_restricciones['FeMag [%] Inf'] = $value_restricciones[4];
-                $object_restricciones['FeMag [%] sup'] = $value_restricciones[5];
-                $object_restricciones['Jerarquia'] = $jerarquia[$key_restricciones];
+            else if(sizeof($value_resultado_restricciones) == 6){
+                $object_resultado_restricciones['TMS inf[%]'] = 0;
+                $object_resultado_restricciones['TMS sup[%]'] = 0;
+                $object_resultado_restricciones['Fet [%] inf'] = 0;
+                $object_resultado_restricciones['Fet [%] sup'] = 0;
+                $object_resultado_restricciones['FeMag [%] Inf'] = 0;
+                $object_resultado_restricciones['FeMag [%] sup'] = 0;
             }
-            array_push($array_restricciones, (object)$object_restricciones);
+            array_push($array_resultado_restricciones, (object)$object_resultado_restricciones);
         }
 
-        return ['data' => $data, 'balances_table' => $array_mediciones, 'restricciones_table' => $array_restricciones, 'path' => $path];
+        // logica tabla balance nodos
+        $balance_nodos = $data->datos_entrada['matriz'];
+        $jerarquia = $data->datos_entrada['jerarquia'];
+        $array_balance_nodos = array();
+
+        foreach ($balance_nodos as $key_balance_nodos => $value_balance_nodos) {
+            $object_balance_nodos = array();
+            $object_balance_nodos['TMS'] = 0;
+            $object_balance_nodos['Finos FeT'] = 0;
+            array_push($array_balance_nodos, (object)$object_balance_nodos);
+        }
+
+        return [
+        'data' => $data,
+        'balances_table' => $array_mediciones,
+        'restricciones_table' => $array_restricciones,
+        'resultado_restricciones' => $array_resultado_restricciones,
+        'balance_nodos' => $array_balance_nodos,
+        'path' => $path];
         } catch (\GuzzleHttp\Exception\BadResponseException $e) {
             return "ERROR";
             return $e->getResponse()->getBody()->getContents();

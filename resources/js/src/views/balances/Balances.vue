@@ -40,9 +40,10 @@
         </b-col>
       </b-row>
     </b-form>
+    <hr>
     <b-container>
       <b-row cols="4">
-        <b-col md="6" sm="12">
+        <b-col md="4" sm="12">
           <b-table
             ref="table1"
             title="Balances"
@@ -52,7 +53,7 @@
             v-on:scroll.native="scrolled"
           />
         </b-col>
-        <b-col md="6" sm="12">
+        <b-col md="4" sm="12">
           <b-table
             ref="restricciones"
             title="Restricciones"
@@ -61,7 +62,7 @@
             sticky-header="500px"
           />
         </b-col>
-        <b-col md="6" sm="12">
+        <b-col md="4" sm="12">
           <b-table
             ref="resultado_restricciones"
             title="Resultado_restricciones"
@@ -71,7 +72,7 @@
             v-on:scroll.native="scrolled"
           />
         </b-col>
-        <b-col md="6" sm="12">
+        <b-col md="12" sm="12">
           <b-table
             ref="balance_nodos"
             title="Balance_nodos"
