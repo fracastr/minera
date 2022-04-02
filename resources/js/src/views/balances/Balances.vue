@@ -34,8 +34,18 @@
             v-ripple.400="'rgba(186, 191, 199, 0.15)'"
             type="reset"
             variant="outline-secondary"
+            class="mr-1"
           >
             Reset
+          </b-button>
+          <b-button
+            v-ripple.400="'rgba(255, 255, 255, 0.15)'"
+            type="button"
+            variant="warning"
+            @click="correr_tables"
+            v-show="correr_button"
+          >
+            Correr
           </b-button>
         </b-col>
       </b-row>
@@ -44,7 +54,8 @@
     <b-container>
       <b-row cols="4">
         <b-col md="4" sm="12">
-          <b-table
+          <b-table-lite
+            hover
             ref="table1"
             title="Balances"
             responsive
@@ -53,16 +64,19 @@
             v-on:scroll.native="scrolled"
           />
         </b-col>
-        <b-col md="4" sm="12">
-          <b-table
+        <b-col md="8" sm="12">
+          <b-table-lite
+            hover
             ref="restricciones"
             title="Restricciones"
             responsive
             :items="restricciones_table"
+            :fields="restricciones_fields"
             sticky-header="500px"
+            v-show="show_tables"
           />
         </b-col>
-        <b-col md="4" sm="12">
+        <!-- <b-col md="4" sm="12">
           <b-table
             ref="resultado_restricciones"
             title="Resultado_restricciones"
@@ -71,14 +85,16 @@
             sticky-header="500px"
             v-on:scroll.native="scrolled"
           />
-        </b-col>
-        <b-col md="12" sm="12">
-          <b-table
+        </b-col> -->
+        <b-col md="4" sm="12" offset-md="4">
+          <b-table-lite
+            hover
             ref="balance_nodos"
             title="Balance_nodos"
             responsive
             :items="balance_nodos"
             sticky-header="500px"
+            v-show="show_tables"
           />
         </b-col>
       </b-row>
@@ -97,6 +113,7 @@ import {
   BButton,
   BFormFile,
   BTable,
+  BTableLite
 } from "bootstrap-vue";
 import Ripple from "vue-ripple-directive";
 import axios from "axios";
@@ -110,6 +127,10 @@ export default {
       restricciones_table: [],
       resultado_restricciones: [],
       balance_nodos: [],
+      restricciones_fields: [],
+      correr_button: false,
+      show_tables: false,
+      datos_entrada: {},
     };
   },
   mounted(){
@@ -124,6 +145,27 @@ export default {
           this.$refs.restricciones.scrollHeight = e.target.scrollHeight;
           this.$refs.restricciones.scrollLeft = e.target.scrollLeft;
       },
+    correr_tables(event) {
+        console.log(this.datos_entrada);
+      axios
+        .post("correr_balance", {"datos_entrada": this.datos_entrada}, {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        })
+        .then((response) => {
+          this.balances_table = response.data.balances_table;
+          this.restricciones_table = response.data.restricciones_table;
+          //this.resultado_restricciones = response.data.resultado_restricciones;
+          this.balance_nodos = response.data.balance_nodos;
+          this.restricciones_fields = response.data.restricciones_fields;
+          this.datos_entrada = response.data.datos_entrada;
+        })
+        .catch(function (e) {
+          console.log("FAILURE!! correr_balance", e);
+        });
+      this.show_tables = true;
+    },
     onSubmit(event) {
       event.preventDefault();
       let formData = new FormData();
@@ -138,10 +180,13 @@ export default {
         .then((response) => {
           this.balances_table = response.data.balances_table;
           this.restricciones_table = response.data.restricciones_table;
-          this.resultado_restricciones = response.data.resultado_restricciones;
+          //this.resultado_restricciones = response.data.resultado_restricciones;
           this.balance_nodos = response.data.balance_nodos;
+          this.restricciones_fields = response.data.restricciones_fields;
+          this.datos_entrada = response.data.data.datos_entrada;
+          this.correr_button = true;
           console.log("items after call");
-          console.log(this.items);
+          console.log(this.datos_entrada);
         })
         .catch(function (e) {
           console.log("FAILURE!!", e);
@@ -158,6 +203,7 @@ export default {
     BButton,
     BFormFile,
     BTable,
+    BTableLite,
   },
   directives: {
     Ripple,

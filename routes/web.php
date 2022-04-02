@@ -17,3 +17,4 @@ use App\Http\Controllers\BalancesController;
 
 Route::get('/{any}', [ApplicationController::class, 'index'])->where('any', '.*');
 Route::post('balances/import', [BalancesController::class, 'import']);
+Route::post('balances/correr_balance', [BalancesController::class, 'correr_balance']);
