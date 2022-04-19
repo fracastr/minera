@@ -91,35 +91,32 @@ class BalancesController extends Controller
         //
     }
 
-    public function import(Request $request)
-    {
-        try {
-            // $path = $request->file('file')->store('public');
-            // $path = '/home/ubuntu/minera/storage/app/'. $path;
-            $path = '/home/ubuntu/minera/storage/app/public/iYTQWSjieGJPHoKE6rVrPmsaeIDjZGach602nWVe.xlsx';
-
-
-        $url = 'http://34.229.82.49:8080/flaskapi/get_balance';
-        $myBody['path_name'] = $path;
-        // $response = Http::acceptJson()->post($url, array($myBody));
-        $response = Http::acceptJson()->post($url, [
-            'path_name' => $path,
-        ]);
-        //dd($response);
-        //dd(json_decode($response->getBody()->getContents()));
-        $data = json_decode($response->getBody()->getContents());
-        foreach ($data as $key => &$value) {
-            // $value = json_decode( preg_replace('/[\x00-\x1F\x80-\xFF]/', '', $value), true );
-            $value = json_decode($value, true);
+    public function createTableMedicionesFields($mediciones, $flujos){
+        $tabla_mediciones_fields = array();
+        foreach($mediciones as $key_mediciones => $value_mediciones){
+            if(sizeof($value_mediciones) == 4){
+                $tabla_mediciones_fields[0] = (object) ['field' => 'Flujos', 'resizable' => true, 'editable' => false];
+                $tabla_mediciones_fields[1] = (object) ['field' => 'TMS medido', 'resizable' => true, 'editable' => true];
+                $tabla_mediciones_fields[2] = (object) ['field' => 'TMS balance', 'resizable' => true, 'editable' => false];
+                $tabla_mediciones_fields[3] = (object) ['field' => 'Fet [%] Medido', 'resizable' => true, 'editable' => true];
+                $tabla_mediciones_fields[4] = (object) ['field' => 'Fet [%] Balance', 'resizable' => true, 'editable' => false];
+            }
+            else if(sizeof($value_mediciones) == 6){
+                $tabla_mediciones_fields[0] = (object) ['field' => 'Flujos', 'resizable' => true, 'editable' => false];
+                $tabla_mediciones_fields[1] = (object) ['field' => 'TMS medido', 'resizable' => true, 'editable' => true];
+                $tabla_mediciones_fields[2] = (object) ['field' => 'TMS balance', 'resizable' => true, 'editable' => false];
+                $tabla_mediciones_fields[3] = (object) ['field' => 'Fet [%] Medido', 'resizable' => true, 'editable' => true];
+                $tabla_mediciones_fields[4] = (object) ['field' => 'Fet [%] Balance', 'resizable' => true, 'editable' => false];
+                $tabla_mediciones_fields[5] = (object) ['field' => 'FeMag [%] Medido', 'resizable' => true, 'editable' => true];
+                $tabla_mediciones_fields[6] = (object) ['field' => 'FeMag [%] Balance', 'resizable' => true, 'editable' => false];
+            }
         }
 
-        // logica para tabla mediciones
-        $mediciones = $data->datos_entrada['mediciones'];
-        $flujos = $data->datos_entrada['flujos'];
-        $desviaciones = $data->desviaciones;
-        $array_mediciones = array();
-        $medicion_bd =  new stdClass();
+        return $tabla_mediciones_fields;
+    }
 
+    public function createTableMediciones($mediciones, $flujos){
+        $array_mediciones = array();
         foreach($mediciones as $key_mediciones => $value_mediciones){
             $object_mediciones = array();
             if(sizeof($value_mediciones) == 4){
@@ -141,12 +138,11 @@ class BalancesController extends Controller
             array_push($array_mediciones, (object)$object_mediciones);
         }
 
-        // logica tabla restricciones
+        return $array_mediciones;
+    }
 
-        $restricciones = $data->datos_entrada['restricciones'];
-        $jerarquia = $data->datos_entrada['jerarquia'];
+    public function createTableRestricciones($restricciones, $jerarquia){
         $array_restricciones = array();
-
         foreach ($restricciones as $key_restricciones => $value_restricciones) {
             $object_restricciones = array();
             if(sizeof($value_restricciones) == 4){
@@ -168,68 +164,43 @@ class BalancesController extends Controller
             array_push($array_restricciones, (object)$object_restricciones);
         }
 
-        // logica tabla resultado restricciones
-        // $resultado_restricciones = $data->datos_entrada['restricciones'];
-        // $jerarquia = $data->datos_entrada['jerarquia'];
-        // $array_resultado_restricciones = array();
+        return $array_restricciones;
+    }
 
-        // foreach ($resultado_restricciones as $key_resultado_restricciones => $value_resultado_restricciones) {
-        //     $object_resultado_restricciones = array();
-        //     if(sizeof($value_resultado_restricciones) == 4){
-        //         $object_resultado_restricciones['TMS inf[%]'] = 0;
-        //         $object_resultado_restricciones['TMS sup[%]'] = 0;
-        //         $object_resultado_restricciones['Fet [%] inf'] = 0;
-        //         $object_resultado_restricciones['Fet [%] sup'] = 0;
-        //     }
-        //     else if(sizeof($value_resultado_restricciones) == 6){
-        //         $object_resultado_restricciones['TMS inf[%]'] = 0;
-        //         $object_resultado_restricciones['TMS sup[%]'] = 0;
-        //         $object_resultado_restricciones['Fet [%] inf'] = 0;
-        //         $object_resultado_restricciones['Fet [%] sup'] = 0;
-        //         $object_resultado_restricciones['FeMag [%] Inf'] = 0;
-        //         $object_resultado_restricciones['FeMag [%] sup'] = 0;
-        //     }
-        //     array_push($array_resultado_restricciones, (object)$object_resultado_restricciones);
-        // }
-
-
-
-
-        $tabla_restricciones = array();
+    public function createTableRestriccionesFields($restricciones, $jerarquia){
         $tabla_restricciones_fields = array();
         if(sizeof($restricciones[0]) == 4){
-            $tabla_restricciones_fields[0] = (object) ['key' => 'TMS inf[%]'];
-            $tabla_restricciones_fields[1] = (object) ['key' => 'TMS inf[%] ', 'variant' => 'success'];
-            $tabla_restricciones_fields[2] = (object) ['key' => 'TMS sup[%]'];
-            $tabla_restricciones_fields[3] = (object) ['key' => 'TMS sup[%] ', 'variant' => 'success'];
-            $tabla_restricciones_fields[4] = (object) ['key' => 'Fet [%] inf'];
-            $tabla_restricciones_fields[5] = (object) ['key' => 'Fet [%] inf ', 'variant' => 'success'];
-            $tabla_restricciones_fields[6] = (object) ['key' => 'Fet [%] sup'];
-            $tabla_restricciones_fields[7] = (object) ['key' => 'Fet [%] sup ', 'variant' => 'success'];
-            $tabla_restricciones_fields[8] = (object) ['key' => 'Jerarquia'];
+            $tabla_restricciones_fields[0] = (object) ['field' => 'TMS inf[%]', 'resizable' => true, 'editable' => true];
+            $tabla_restricciones_fields[1] = (object) ['field' => 'TMS inf[%] ', 'resizable' => true];
+            $tabla_restricciones_fields[2] = (object) ['field' => 'TMS sup[%]', 'resizable' => true, 'editable' => true];
+            $tabla_restricciones_fields[3] = (object) ['field' => 'TMS sup[%] ', 'resizable' => true];
+            $tabla_restricciones_fields[4] = (object) ['field' => 'Fet [%] inf', 'resizable' => true, 'editable' => true];
+            $tabla_restricciones_fields[5] = (object) ['field' => 'Fet [%] inf ', 'resizable' => true];
+            $tabla_restricciones_fields[6] = (object) ['field' => 'Fet [%] sup', 'resizable' => true, 'editable' => true];
+            $tabla_restricciones_fields[7] = (object) ['field' => 'Fet [%] sup ', 'resizable' => true];
+            $tabla_restricciones_fields[8] = (object) ['field' => 'Jerarquia', 'resizable' => true];
         }
         else if(sizeof($restricciones[0]) == 6){
-            $tabla_restricciones_fields[0] = (object) ['key' => 'TMS inf[%]'];
-            $tabla_restricciones_fields[1] = (object) ['key' => 'TMS inf[%] ', 'variant' => 'success'];
-            $tabla_restricciones_fields[2] = (object) ['key' => 'TMS sup[%]'];
-            $tabla_restricciones_fields[3] = (object) ['key' => 'TMS sup[%] ', 'variant' => 'success'];
-            $tabla_restricciones_fields[4] = (object) ['key' => 'Fet [%] inf'];
-            $tabla_restricciones_fields[5] = (object) ['key' => 'Fet [%] inf ', 'variant' => 'success'];
-            $tabla_restricciones_fields[6] = (object) ['key' => 'Fet [%] sup'];
-            $tabla_restricciones_fields[7] = (object) ['key' => 'Fet [%] sup ', 'variant' => 'success'];
-            $tabla_restricciones_fields[8] = (object) ['key' => 'FeMag [%] Inf'];
-            $tabla_restricciones_fields[9] = (object) ['key' => 'FeMag [%] Inf ', 'variant' => 'success'];
-            $tabla_restricciones_fields[10] = (object) ['key' => 'FeMag [%] sup'];
-            $tabla_restricciones_fields[11] = (object) ['key' => 'FeMag [%] sup ', 'variant' => 'success'];
-            $tabla_restricciones_fields[12] = (object) ['key' => 'Jerarquia'];
+            $tabla_restricciones_fields[0] = (object) ['field' => 'TMS inf[%]', 'resizable' => true, 'editable' => true];
+            $tabla_restricciones_fields[1] = (object) ['field' => 'TMS inf[%] ', 'resizable' => true];
+            $tabla_restricciones_fields[2] = (object) ['field' => 'TMS sup[%]', 'resizable' => true, 'editable' => true];
+            $tabla_restricciones_fields[3] = (object) ['field' => 'TMS sup[%] ', 'resizable' => true];
+            $tabla_restricciones_fields[4] = (object) ['field' => 'Fet [%] inf', 'resizable' => true, 'editable' => true];
+            $tabla_restricciones_fields[5] = (object) ['field' => 'Fet [%] inf ', 'resizable' => true];
+            $tabla_restricciones_fields[6] = (object) ['field' => 'Fet [%] sup', 'resizable' => true, 'editable' => true];
+            $tabla_restricciones_fields[7] = (object) ['field' => 'Fet [%] sup ', 'resizable' => true];
+            $tabla_restricciones_fields[8] = (object) ['field' => 'FeMag [%] Inf', 'resizable' => true, 'editable' => true];
+            $tabla_restricciones_fields[9] = (object) ['field' => 'FeMag [%] Inf ', 'resizable' => true];
+            $tabla_restricciones_fields[10] = (object) ['field' => 'FeMag [%] sup', 'resizable' => true, 'editable' => true];
+            $tabla_restricciones_fields[11] = (object) ['field' => 'FeMag [%] sup ', 'resizable' => true];
+            $tabla_restricciones_fields[12] = (object) ['field' => 'Jerarquia', 'resizable' => true];
         }
 
-        foreach ($desviaciones as $key_desviaciones => &$value_desviaciones) {
-            foreach($value_desviaciones as $key_value_desviaciones => &$value_desviaciones_item){
-                $value_desviaciones_item = number_format($value_desviaciones_item * 100, 2);
-            }
-        }
+        return $tabla_restricciones_fields;
+    }
 
+    public function createTableRestriccionesData($restricciones, $jerarquia, $desviaciones){
+        $tabla_restricciones = array();
         foreach ($restricciones as $key_restricciones => $value_restricciones) {
             $object_restricciones = array();
             if(sizeof($value_restricciones) == 4){
@@ -261,6 +232,78 @@ class BalancesController extends Controller
             array_push($tabla_restricciones, (object)$object_restricciones);
         }
 
+        return $tabla_restricciones;
+    }
+
+    public function createTableBalanceNodosFields(){
+        $array_nodos_fields = array();
+        $array_nodos_fields[0] = (object) ['field' => 'Nodos', 'resizable' => true, 'editable' => false];
+        $array_nodos_fields[1] = (object) ['field' => 'TMS', 'resizable' => true, 'editable' => false];
+        $array_nodos_fields[2] = (object) ['field' => 'Finos FeT', 'resizable' => true, 'editable' => false];
+
+        return $array_nodos_fields;
+    }
+
+    public function createTableBalanceNodos($balance_nodos, $nodos_data, $nodos){
+        $array_balance_nodos = array();
+        foreach ($balance_nodos as $key_balance_nodos => $value_balance_nodos) {
+            $object_balance_nodos = array();
+            $object_balance_nodos['Nodos'] = $nodos[$key_balance_nodos];
+            $object_balance_nodos['TMS'] = $nodos_data[$key_balance_nodos][0];
+            $object_balance_nodos['Finos FeT'] = $nodos_data[$key_balance_nodos][1];
+            array_push($array_balance_nodos, (object)$object_balance_nodos);
+        }
+
+        return $array_balance_nodos;
+    }
+
+    public function import(Request $request)
+    {
+        try {
+            // $path = $request->file('file')->store('public');
+            // $path = '/home/ubuntu/minera/storage/app/'. $path;
+            $path = '/home/ubuntu/minera/storage/app/public/yoaeVg4JQXd6hDsQdMR9n6Omz3RSiup4HtatMwgS.xlsx';
+
+
+        $url = 'http://34.229.82.49:8080/flaskapi/get_balance';
+        $myBody['path_name'] = $path;
+        // $response = Http::acceptJson()->post($url, array($myBody));
+        $response = Http::acceptJson()->post($url, [
+            'path_name' => $path,
+        ]);
+        //dd($response);
+        //dd(json_decode($response->getBody()->getContents()));
+        $data = json_decode($response->getBody()->getContents());
+        foreach ($data as $key => &$value) {
+            // $value = json_decode( preg_replace('/[\x00-\x1F\x80-\xFF]/', '', $value), true );
+            $value = json_decode($value, true);
+        }
+
+        // logica para tabla mediciones
+        $mediciones = $data->datos_entrada['mediciones'];
+        $flujos = $data->datos_entrada['flujos'];
+        $desviaciones = $data->desviaciones;
+
+        foreach ($desviaciones as $key_desviaciones => &$value_desviaciones) {
+            foreach($value_desviaciones as $key_value_desviaciones => &$value_desviaciones_item){
+                $value_desviaciones_item = number_format($value_desviaciones_item * 100, 2);
+            }
+        }
+
+        $table_mediciones_fields = $this->createTableMedicionesFields($mediciones, $flujos);
+        $array_mediciones = $this->createTableMediciones($mediciones, $flujos);
+
+        // logica tabla restricciones
+        $restricciones = $data->datos_entrada['restricciones'];
+        $jerarquia = $data->datos_entrada['jerarquia'];
+        $array_restricciones = $this->createTableRestricciones($restricciones, $jerarquia);
+
+        // logica tabla restricciones fields
+        $tabla_restricciones_fields = $this->createTableRestriccionesFields($restricciones, $jerarquia);
+        // logica tabla restricciones data
+        $tabla_restricciones = $this->createTableRestriccionesData($restricciones, $jerarquia, $desviaciones);
+
+        // logica tabla nodos
         $nodos_data = $data->nodos_data;
         foreach ($nodos_data as $key_nodos_data => &$value_nodos_data) {
             foreach($value_nodos_data as $key_value_nodos_data => &$value_nodos_data_item){
@@ -271,14 +314,13 @@ class BalancesController extends Controller
         // logica tabla balance nodos
         $balance_nodos = $data->datos_entrada['matriz'];
         $jerarquia = $data->datos_entrada['jerarquia'];
-        $array_balance_nodos = array();
+        $nodos = $data->datos_entrada['nodos'];
 
-        foreach ($balance_nodos as $key_balance_nodos => $value_balance_nodos) {
-            $object_balance_nodos = array();
-            $object_balance_nodos['TMS'] = $nodos_data[$key_balance_nodos][0];
-            $object_balance_nodos['Finos FeT'] = $nodos_data[$key_balance_nodos][1];
-            array_push($array_balance_nodos, (object)$object_balance_nodos);
-        }
+
+        $balance_nodos_fields = $this->createTableBalanceNodosFields();
+        $array_balance_nodos = $this->createTableBalanceNodos($balance_nodos, $nodos_data, $nodos);
+
+
 
         $data_entrada = $balance_nodos = $data->datos_entrada;
         $datos_entrada_model = new Datos_entrada();
@@ -288,10 +330,12 @@ class BalancesController extends Controller
         return [
         'data' => $data,
         'balances_table' => $array_mediciones,
+        'balances_fields' => $table_mediciones_fields,
         'nodos_data' => $nodos_data,
         'restricciones_table' => $tabla_restricciones,
         'balance_nodos' => $array_balance_nodos,
         'restricciones_fields' => $tabla_restricciones_fields,
+        'balance_nodos_fields' => $balance_nodos_fields,
         'path' => $path];
         } catch (\GuzzleHttp\Exception\BadResponseException $e) {
             return "ERROR";
@@ -406,30 +450,30 @@ class BalancesController extends Controller
         $tabla_restricciones = array();
         $tabla_restricciones_fields = array();
         if(sizeof($restricciones[0]) == 4){
-            $tabla_restricciones_fields[0] = (object) ['key' => 'TMS inf[%]'];
-            $tabla_restricciones_fields[1] = (object) ['key' => 'TMS inf[%] ', 'variant' => 'success'];
-            $tabla_restricciones_fields[2] = (object) ['key' => 'TMS sup[%]'];
-            $tabla_restricciones_fields[3] = (object) ['key' => 'TMS sup[%] ', 'variant' => 'success'];
-            $tabla_restricciones_fields[4] = (object) ['key' => 'Fet [%] inf'];
-            $tabla_restricciones_fields[5] = (object) ['key' => 'Fet [%] inf ', 'variant' => 'success'];
-            $tabla_restricciones_fields[6] = (object) ['key' => 'Fet [%] sup'];
-            $tabla_restricciones_fields[7] = (object) ['key' => 'Fet [%] sup ', 'variant' => 'success'];
-            $tabla_restricciones_fields[8] = (object) ['key' => 'Jerarquia'];
+            $tabla_restricciones_fields[0] = (object) ['field' => 'TMS inf[%]', 'resizable' => true, 'editable' => true];
+            $tabla_restricciones_fields[1] = (object) ['field' => 'TMS inf[%] ', 'resizable' => true];
+            $tabla_restricciones_fields[2] = (object) ['field' => 'TMS sup[%]', 'resizable' => true, 'editable' => true];
+            $tabla_restricciones_fields[3] = (object) ['field' => 'TMS sup[%] ', 'resizable' => true];
+            $tabla_restricciones_fields[4] = (object) ['field' => 'Fet [%] inf', 'resizable' => true, 'editable' => true];
+            $tabla_restricciones_fields[5] = (object) ['field' => 'Fet [%] inf ', 'resizable' => true];
+            $tabla_restricciones_fields[6] = (object) ['field' => 'Fet [%] sup', 'resizable' => true, 'editable' => true];
+            $tabla_restricciones_fields[7] = (object) ['field' => 'Fet [%] sup ', 'resizable' => true];
+            $tabla_restricciones_fields[8] = (object) ['field' => 'Jerarquia', 'resizable' => true];
         }
         else if(sizeof($restricciones[0]) == 6){
-            $tabla_restricciones_fields[0] = (object) ['key' => 'TMS inf[%]'];
-            $tabla_restricciones_fields[1] = (object) ['key' => 'TMS inf[%] ', 'variant' => 'success'];
-            $tabla_restricciones_fields[2] = (object) ['key' => 'TMS sup[%]'];
-            $tabla_restricciones_fields[3] = (object) ['key' => 'TMS sup[%] ', 'variant' => 'success'];
-            $tabla_restricciones_fields[4] = (object) ['key' => 'Fet [%] inf'];
-            $tabla_restricciones_fields[5] = (object) ['key' => 'Fet [%] inf ', 'variant' => 'success'];
-            $tabla_restricciones_fields[6] = (object) ['key' => 'Fet [%] sup'];
-            $tabla_restricciones_fields[7] = (object) ['key' => 'Fet [%] sup ', 'variant' => 'success'];
-            $tabla_restricciones_fields[8] = (object) ['key' => 'FeMag [%] Inf'];
-            $tabla_restricciones_fields[9] = (object) ['key' => 'FeMag [%] Inf ', 'variant' => 'success'];
-            $tabla_restricciones_fields[10] = (object) ['key' => 'FeMag [%] sup'];
-            $tabla_restricciones_fields[11] = (object) ['key' => 'FeMag [%] sup ', 'variant' => 'success'];
-            $tabla_restricciones_fields[12] = (object) ['key' => 'Jerarquia'];
+            $tabla_restricciones_fields[0] = (object) ['field' => 'TMS inf[%]', 'resizable' => true, 'editable' => true];
+            $tabla_restricciones_fields[1] = (object) ['field' => 'TMS inf[%] ', 'resizable' => true];
+            $tabla_restricciones_fields[2] = (object) ['field' => 'TMS sup[%]', 'resizable' => true, 'editable' => true];
+            $tabla_restricciones_fields[3] = (object) ['field' => 'TMS sup[%] ', 'resizable' => true];
+            $tabla_restricciones_fields[4] = (object) ['field' => 'Fet [%] inf', 'resizable' => true, 'editable' => true];
+            $tabla_restricciones_fields[5] = (object) ['field' => 'Fet [%] inf ', 'resizable' => true];
+            $tabla_restricciones_fields[6] = (object) ['field' => 'Fet [%] sup', 'resizable' => true, 'editable' => true];
+            $tabla_restricciones_fields[7] = (object) ['field' => 'Fet [%] sup ', 'resizable' => true];
+            $tabla_restricciones_fields[8] = (object) ['field' => 'FeMag [%] Inf', 'resizable' => true, 'editable' => true];
+            $tabla_restricciones_fields[9] = (object) ['field' => 'FeMag [%] Inf ', 'resizable' => true];
+            $tabla_restricciones_fields[10] = (object) ['field' => 'FeMag [%] sup', 'resizable' => true, 'editable' => true];
+            $tabla_restricciones_fields[11] = (object) ['field' => 'FeMag [%] sup ', 'resizable' => true];
+            $tabla_restricciones_fields[12] = (object) ['field' => 'Jerarquia', 'resizable' => true];
         }
 
         foreach ($desviaciones as $key_desviaciones => &$value_desviaciones) {

@@ -52,14 +52,43 @@
     </b-form>
     <hr>
     <b-container>
-      <b-row cols="4">
-        <b-col md="4" sm="12">
+        <b-row cols="4">
+            <b-col md="4" sm="12">
+                <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet" />
+                <ag-grid-vue style="width: auto; height: 500px;"
+                    class="ag-theme-alpine"
+                    :columnDefs="balances_fields"
+                    :rowData="balances_table">
+                </ag-grid-vue>
+            </b-col>
+            <b-col md="8" sm="12">
+                <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet" />
+                <ag-grid-vue style="width: auto; height: 500px;"
+                    class="ag-theme-alpine"
+                    :columnDefs="restricciones_fields"
+                    :rowData="restricciones_table">
+                </ag-grid-vue>
+            </b-col>
+        </b-row>
+        <br>
+        <b-row cols="4">
+            <b-col md="8" sm="12" offset-md="2">
+                <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet" />
+                <ag-grid-vue style="width: auto; height: 500px;"
+                    class="ag-theme-alpine"
+                    :columnDefs="balance_nodos_fields"
+                    :rowData="balance_nodos">
+                </ag-grid-vue>
+            </b-col>
+        </b-row>
+        <!-- <b-col md="4" sm="12">
           <b-table-lite
             hover
             ref="table1"
             title="Balances"
             responsive
             :items="balances_table"
+            :fields="balances_fields"
             sticky-header="500px"
             v-on:scroll.native="scrolled"
           />
@@ -75,7 +104,7 @@
             sticky-header="500px"
             v-show="show_tables"
           />
-        </b-col>
+        </b-col> -->
         <!-- <b-col md="4" sm="12">
           <b-table
             ref="resultado_restricciones"
@@ -86,7 +115,7 @@
             v-on:scroll.native="scrolled"
           />
         </b-col> -->
-        <b-col md="4" sm="12" offset-md="4">
+        <!-- <b-col md="4" sm="12" offset-md="4">
           <b-table-lite
             hover
             ref="balance_nodos"
@@ -96,8 +125,18 @@
             sticky-header="500px"
             v-show="show_tables"
           />
+        </b-col> -->
+
+      <!-- <b-row>
+        <b-col md="12" sm="12">
+            <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet" />
+            <ag-grid-vue style="width: auto; height: 500px;"
+                class="ag-theme-material"
+                :columnDefs="restricciones_fields"
+                :rowData="restricciones_table">
+            </ag-grid-vue>
         </b-col>
-      </b-row>
+      </b-row> -->
     </b-container>
   </div>
 </template>
@@ -117,6 +156,7 @@ import {
 } from "bootstrap-vue";
 import Ripple from "vue-ripple-directive";
 import axios from "axios";
+import { AgGridVue } from "ag-grid-vue";
 
 export default {
   data() {
@@ -127,15 +167,32 @@ export default {
       restricciones_table: [],
       resultado_restricciones: [],
       balance_nodos: [],
+      balance_nodos_fields: [],
       restricciones_fields: [],
+      balances_fields: [],
       correr_button: false,
       show_tables: false,
       datos_entrada: {},
+      columnDefs: null,
+      rowData: null,
     };
   },
   mounted(){
       console.log("mounted");
       console.log(this.$refs);
+  },
+  beforeMount() {
+    this.columnDefs = [
+    { field: 'make', editable: true },
+    { field: 'model', editable: true },
+    { field: 'price', editable: true }
+];
+
+    this.rowData = [
+      { make: "Toyota", model: "Celica", price: 35000 },
+      { make: "Ford", model: "Mondeo", price: 32000 },
+      { make: "Porsche", model: "Boxter", price: 72000 },
+    ];
   },
   methods: {
       scrolled(e){
@@ -158,7 +215,9 @@ export default {
           this.restricciones_table = response.data.restricciones_table;
           //this.resultado_restricciones = response.data.resultado_restricciones;
           this.balance_nodos = response.data.balance_nodos;
+          this.balance_nodos_fields = response.data.balance_nodos_fields;
           this.restricciones_fields = response.data.restricciones_fields;
+          this.balances_fields = response.data.balances_fields;
           this.datos_entrada = response.data.datos_entrada;
         })
         .catch(function (e) {
@@ -182,7 +241,9 @@ export default {
           this.restricciones_table = response.data.restricciones_table;
           //this.resultado_restricciones = response.data.resultado_restricciones;
           this.balance_nodos = response.data.balance_nodos;
+          this.balance_nodos_fields = response.data.balance_nodos_fields;
           this.restricciones_fields = response.data.restricciones_fields;
+          this.balances_fields = response.data.balances_fields;
           this.datos_entrada = response.data.data.datos_entrada;
           this.correr_button = true;
           console.log("items after call");
@@ -204,9 +265,16 @@ export default {
     BFormFile,
     BTable,
     BTableLite,
+    AgGridVue,
   },
   directives: {
     Ripple,
   },
 };
 </script>
+
+<style lang="scss">
+  @import "~ag-grid-community/dist/styles/ag-grid.css";
+  @import "~ag-grid-community/dist/styles/ag-theme-material.css";
+  @import "~ag-grid-community/dist/styles/ag-theme-alpine.css";
+</style>
