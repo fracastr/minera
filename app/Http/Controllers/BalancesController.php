@@ -121,15 +121,15 @@ class BalancesController extends Controller
             $object_mediciones = array();
             if(sizeof($value_mediciones) == 4){
                 $object_mediciones['Flujos'] = $flujos[$key_mediciones];
-                $object_mediciones['TMS medido'] = number_format($value_mediciones[0], 0, ',', '.');
-                $object_mediciones['TMS balance'] = number_format($value_mediciones[1], 0, ',', '.');
-                $object_mediciones['Fet [%] Medido'] = number_format($value_mediciones[2] * 100, 2);
-                $object_mediciones['Fet [%] Balance'] = number_format($value_mediciones[3] * 100, 2);
+                $object_mediciones['TMS medido'] = number_format($value_mediciones[0], 10,);
+                $object_mediciones['TMS balance'] = number_format($value_mediciones[1], 10);
+                $object_mediciones['Fet [%] Medido'] = number_format($value_mediciones[2], 4);
+                $object_mediciones['Fet [%] Balance'] = number_format($value_mediciones[3], 4);
             }
             else if(sizeof($value_mediciones) == 6){
                 $object_mediciones['Flujos'] = $flujos[$key_mediciones];
-                $object_mediciones['TMS medido'] = number_format($value_mediciones[0], 0, ',', '.');
-                $object_mediciones['TMS balance'] = number_format($value_mediciones[1], 0, ',', '.');
+                $object_mediciones['TMS medido'] = number_format($value_mediciones[0]);
+                $object_mediciones['TMS balance'] = number_format($value_mediciones[1]);
                 $object_mediciones['Fet [%] Medido'] = number_format($value_mediciones[2] * 100, 2);
                 $object_mediciones['Fet [%] Balance'] = number_format($value_mediciones[3] * 100, 2);
                 $object_mediciones['FeMag [%] Medido'] = number_format($value_mediciones[4] * 100, 2);
@@ -262,7 +262,7 @@ class BalancesController extends Controller
         try {
             // $path = $request->file('file')->store('public');
             // $path = '/home/ubuntu/minera/storage/app/'. $path;
-            $path = '/home/ubuntu/minera/storage/app/public/yoaeVg4JQXd6hDsQdMR9n6Omz3RSiup4HtatMwgS.xlsx';
+            $path = '/home/ubuntu/minera/storage/app/public/dc0pZ7f2h9gbF4oQ1q7tZWuMlbcY5pbBBRKRUTfM.xlsx';
 
 
         $url = 'http://34.229.82.49:8080/flaskapi/get_balance';
@@ -327,6 +327,8 @@ class BalancesController extends Controller
         $datos_entrada_model->datos_entrada = json_encode($data_entrada);
         $datos_entrada_model->save();
 
+        $datos_entrada_id = $datos_entrada_model->id;
+
         return [
         'data' => $data,
         'balances_table' => $array_mediciones,
@@ -336,7 +338,8 @@ class BalancesController extends Controller
         'balance_nodos' => $array_balance_nodos,
         'restricciones_fields' => $tabla_restricciones_fields,
         'balance_nodos_fields' => $balance_nodos_fields,
-        'path' => $path];
+        'path' => $path,
+        'datos_entrada_id' => $datos_entrada_id];
         } catch (\GuzzleHttp\Exception\BadResponseException $e) {
             return "ERROR";
             return $e->getResponse()->getBody()->getContents();
@@ -350,16 +353,39 @@ class BalancesController extends Controller
         try {
         //     $datos_entrada = $request->datos_entrada;
         //     $datos_entrada = json_encode($datos_entrada);
+        //dd($request->datos_entrada["mediciones"]);
+        $datos_entrada_id = $request->datos_entrada_id;
+        $datos_entrada = $request->datos_entrada;
+        $balances_table = $request->balances_table;
+        $restricciones_table = $request->restricciones_table;
 
+        $size_mediciones = sizeof($request->datos_entrada["mediciones"][0]);
+        //dd($size_mediciones);
+        $new_mediciones = array();
+
+        foreach($balances_table as $key => $value){
+            $new_mediciones_array = array();
+            foreach($value as $key2 => $value2){
+                if($key2 != "Flujos"){
+                    array_push($new_mediciones_array, $value2);
+                    // array_push($new_mediciones_array, intval(str_replace(".","",$value2)));
+                }
+            }
+            array_push($new_mediciones, $new_mediciones_array);
+        }
+        //dd($new_mediciones);
 
         $url = 'http://34.229.82.49:8080/flaskapi/correr_balance';
-        // $myBody['datos_entrada'] = $datos_entrada;
-        // $response = Http::acceptJson()->post($url, array($myBody));
-        $response = Http::acceptJson()->get($url);
+        $myBody['datos_entrada_id'] = $datos_entrada_id;
+        //$response = Http::acceptJson()->post($url, array($myBody));
+        $response = Http::acceptJson()->post($url, [
+            'datos_entrada_id' => 39,
+        ]);
+        //$response = Http::acceptJson()->get($url);
         //dd($response);
         //dd(json_decode($response->getBody()->getContents()));
         $data = json_decode($response->getBody()->getContents());
-        dd($response);
+        //dd($data);
         foreach ($data as $key => &$value) {
             // $value = json_decode( preg_replace('/[\x00-\x1F\x80-\xFF]/', '', $value), true );
             $value = json_decode($value, true);
@@ -369,112 +395,6 @@ class BalancesController extends Controller
         $mediciones = $data->datos_entrada['mediciones'];
         $flujos = $data->datos_entrada['flujos'];
         $desviaciones = $data->desviaciones;
-        $array_mediciones = array();
-        $medicion_bd =  new stdClass();
-
-        foreach($mediciones as $key_mediciones => $value_mediciones){
-            $object_mediciones = array();
-            if(sizeof($value_mediciones) == 4){
-                $object_mediciones['Flujos'] = $flujos[$key_mediciones];
-                $object_mediciones['TMS medido'] = number_format($value_mediciones[0], 0, ',', '.');
-                $object_mediciones['TMS balance'] = number_format($value_mediciones[1], 0, ',', '.');
-                $object_mediciones['Fet [%] Medido'] = number_format($value_mediciones[2] * 100, 2);
-                $object_mediciones['Fet [%] Balance'] = number_format($value_mediciones[3] * 100, 2);
-            }
-            else if(sizeof($value_mediciones) == 6){
-                $object_mediciones['Flujos'] = $flujos[$key_mediciones];
-                $object_mediciones['TMS medido'] = number_format($value_mediciones[0], 0, ',', '.');
-                $object_mediciones['TMS balance'] = number_format($value_mediciones[1], 0, ',', '.');
-                $object_mediciones['Fet [%] Medido'] = number_format($value_mediciones[2] * 100, 2);
-                $object_mediciones['Fet [%] Balance'] = number_format($value_mediciones[3] * 100, 2);
-                $object_mediciones['FeMag [%] Medido'] = number_format($value_mediciones[4] * 100, 2);
-                $object_mediciones['FeMag [%] Balance'] = number_format($value_mediciones[5] * 100, 2);
-            }
-            array_push($array_mediciones, (object)$object_mediciones);
-        }
-
-        // logica tabla restricciones
-
-        $restricciones = $data->datos_entrada['restricciones'];
-        $jerarquia = $data->datos_entrada['jerarquia'];
-        $array_restricciones = array();
-
-        foreach ($restricciones as $key_restricciones => $value_restricciones) {
-            $object_restricciones = array();
-            if(sizeof($value_restricciones) == 4){
-                $object_restricciones['TMS inf[%]'] = $value_restricciones[0];
-                $object_restricciones['TMS sup[%]'] = $value_restricciones[1];
-                $object_restricciones['Fet [%] inf'] = $value_restricciones[2];
-                $object_restricciones['Fet [%] sup'] = $value_restricciones[3];
-                $object_restricciones['Jerarquia'] = $jerarquia[$key_restricciones];
-            }
-            else if(sizeof($value_restricciones) == 6){
-                $object_restricciones['TMS inf[%]'] = $value_restricciones[0];
-                $object_restricciones['TMS sup[%]'] = $value_restricciones[1];
-                $object_restricciones['Fet [%] inf'] = $value_restricciones[2];
-                $object_restricciones['Fet [%] sup'] = $value_restricciones[3];
-                $object_restricciones['FeMag [%] Inf'] = $value_restricciones[4];
-                $object_restricciones['FeMag [%] sup'] = $value_restricciones[5];
-                $object_restricciones['Jerarquia'] = $jerarquia[$key_restricciones];
-            }
-            array_push($array_restricciones, (object)$object_restricciones);
-        }
-
-        // logica tabla resultado restricciones
-        // $resultado_restricciones = $data->datos_entrada['restricciones'];
-        // $jerarquia = $data->datos_entrada['jerarquia'];
-        // $array_resultado_restricciones = array();
-
-        // foreach ($resultado_restricciones as $key_resultado_restricciones => $value_resultado_restricciones) {
-        //     $object_resultado_restricciones = array();
-        //     if(sizeof($value_resultado_restricciones) == 4){
-        //         $object_resultado_restricciones['TMS inf[%]'] = 0;
-        //         $object_resultado_restricciones['TMS sup[%]'] = 0;
-        //         $object_resultado_restricciones['Fet [%] inf'] = 0;
-        //         $object_resultado_restricciones['Fet [%] sup'] = 0;
-        //     }
-        //     else if(sizeof($value_resultado_restricciones) == 6){
-        //         $object_resultado_restricciones['TMS inf[%]'] = 0;
-        //         $object_resultado_restricciones['TMS sup[%]'] = 0;
-        //         $object_resultado_restricciones['Fet [%] inf'] = 0;
-        //         $object_resultado_restricciones['Fet [%] sup'] = 0;
-        //         $object_resultado_restricciones['FeMag [%] Inf'] = 0;
-        //         $object_resultado_restricciones['FeMag [%] sup'] = 0;
-        //     }
-        //     array_push($array_resultado_restricciones, (object)$object_resultado_restricciones);
-        // }
-
-
-
-
-        $tabla_restricciones = array();
-        $tabla_restricciones_fields = array();
-        if(sizeof($restricciones[0]) == 4){
-            $tabla_restricciones_fields[0] = (object) ['field' => 'TMS inf[%]', 'resizable' => true, 'editable' => true];
-            $tabla_restricciones_fields[1] = (object) ['field' => 'TMS inf[%] ', 'resizable' => true];
-            $tabla_restricciones_fields[2] = (object) ['field' => 'TMS sup[%]', 'resizable' => true, 'editable' => true];
-            $tabla_restricciones_fields[3] = (object) ['field' => 'TMS sup[%] ', 'resizable' => true];
-            $tabla_restricciones_fields[4] = (object) ['field' => 'Fet [%] inf', 'resizable' => true, 'editable' => true];
-            $tabla_restricciones_fields[5] = (object) ['field' => 'Fet [%] inf ', 'resizable' => true];
-            $tabla_restricciones_fields[6] = (object) ['field' => 'Fet [%] sup', 'resizable' => true, 'editable' => true];
-            $tabla_restricciones_fields[7] = (object) ['field' => 'Fet [%] sup ', 'resizable' => true];
-            $tabla_restricciones_fields[8] = (object) ['field' => 'Jerarquia', 'resizable' => true];
-        }
-        else if(sizeof($restricciones[0]) == 6){
-            $tabla_restricciones_fields[0] = (object) ['field' => 'TMS inf[%]', 'resizable' => true, 'editable' => true];
-            $tabla_restricciones_fields[1] = (object) ['field' => 'TMS inf[%] ', 'resizable' => true];
-            $tabla_restricciones_fields[2] = (object) ['field' => 'TMS sup[%]', 'resizable' => true, 'editable' => true];
-            $tabla_restricciones_fields[3] = (object) ['field' => 'TMS sup[%] ', 'resizable' => true];
-            $tabla_restricciones_fields[4] = (object) ['field' => 'Fet [%] inf', 'resizable' => true, 'editable' => true];
-            $tabla_restricciones_fields[5] = (object) ['field' => 'Fet [%] inf ', 'resizable' => true];
-            $tabla_restricciones_fields[6] = (object) ['field' => 'Fet [%] sup', 'resizable' => true, 'editable' => true];
-            $tabla_restricciones_fields[7] = (object) ['field' => 'Fet [%] sup ', 'resizable' => true];
-            $tabla_restricciones_fields[8] = (object) ['field' => 'FeMag [%] Inf', 'resizable' => true, 'editable' => true];
-            $tabla_restricciones_fields[9] = (object) ['field' => 'FeMag [%] Inf ', 'resizable' => true];
-            $tabla_restricciones_fields[10] = (object) ['field' => 'FeMag [%] sup', 'resizable' => true, 'editable' => true];
-            $tabla_restricciones_fields[11] = (object) ['field' => 'FeMag [%] sup ', 'resizable' => true];
-            $tabla_restricciones_fields[12] = (object) ['field' => 'Jerarquia', 'resizable' => true];
-        }
 
         foreach ($desviaciones as $key_desviaciones => &$value_desviaciones) {
             foreach($value_desviaciones as $key_value_desviaciones => &$value_desviaciones_item){
@@ -482,37 +402,20 @@ class BalancesController extends Controller
             }
         }
 
-        foreach ($restricciones as $key_restricciones => $value_restricciones) {
-            $object_restricciones = array();
-            if(sizeof($value_restricciones) == 4){
-                $object_restricciones['TMS inf[%]'] = $value_restricciones[0];
-                $object_restricciones['TMS inf[%] '] = $desviaciones[$key_restricciones][0];
-                $object_restricciones['TMS sup[%]'] = $value_restricciones[1];
-                $object_restricciones['TMS sup[%] '] = $desviaciones[$key_restricciones][1];
-                $object_restricciones['Fet [%] inf'] = $value_restricciones[2];
-                $object_restricciones['Fet [%] inf '] = $desviaciones[$key_restricciones][2];
-                $object_restricciones['Fet [%] sup'] = $value_restricciones[3];
-                $object_restricciones['Fet [%] sup '] = $desviaciones[$key_restricciones][3];
-                $object_restricciones['Jerarquia'] = $jerarquia[$key_restricciones];
-            }
-            else if(sizeof($value_restricciones) == 6){
-                $object_restricciones['TMS inf[%]'] = $value_restricciones[0];
-                $object_restricciones['TMS inf[%] '] = $desviaciones[$key_restricciones][0];
-                $object_restricciones['TMS sup[%]'] = $value_restricciones[1];
-                $object_restricciones['TMS sup[%] '] = $desviaciones[$key_restricciones][1];
-                $object_restricciones['Fet [%] inf'] = $value_restricciones[2];
-                $object_restricciones['Fet [%] inf '] = $desviaciones[$key_restricciones][2];
-                $object_restricciones['Fet [%] sup'] = $value_restricciones[3];
-                $object_restricciones['Fet [%] sup '] = $desviaciones[$key_restricciones][3];
-                $object_restricciones['FeMag [%] Inf'] = $value_restricciones[4];
-                $object_restricciones['FeMag [%] Inf '] = $desviaciones[$key_restricciones][4];
-                $object_restricciones['FeMag [%] sup'] = $value_restricciones[5];
-                $object_restricciones['FeMag [%] sup '] = $desviaciones[$key_restricciones][5];
-                $object_restricciones['Jerarquia'] = $jerarquia[$key_restricciones];
-            }
-            array_push($tabla_restricciones, (object)$object_restricciones);
-        }
+        $table_mediciones_fields = $this->createTableMedicionesFields($mediciones, $flujos);
+        $array_mediciones = $this->createTableMediciones($mediciones, $flujos);
 
+        // logica tabla restricciones
+        $restricciones = $data->datos_entrada['restricciones'];
+        $jerarquia = $data->datos_entrada['jerarquia'];
+        $array_restricciones = $this->createTableRestricciones($restricciones, $jerarquia);
+
+        // logica tabla restricciones fields
+        $tabla_restricciones_fields = $this->createTableRestriccionesFields($restricciones, $jerarquia);
+        // logica tabla restricciones data
+        $tabla_restricciones = $this->createTableRestriccionesData($restricciones, $jerarquia, $desviaciones);
+
+        // logica tabla nodos
         $nodos_data = $data->nodos_data;
         foreach ($nodos_data as $key_nodos_data => &$value_nodos_data) {
             foreach($value_nodos_data as $key_value_nodos_data => &$value_nodos_data_item){
@@ -523,28 +426,34 @@ class BalancesController extends Controller
         // logica tabla balance nodos
         $balance_nodos = $data->datos_entrada['matriz'];
         $jerarquia = $data->datos_entrada['jerarquia'];
-        $array_balance_nodos = array();
-
-        foreach ($balance_nodos as $key_balance_nodos => $value_balance_nodos) {
-            $object_balance_nodos = array();
-            $object_balance_nodos['TMS'] = $nodos_data[$key_balance_nodos][0];
-            $object_balance_nodos['Finos FeT'] = $nodos_data[$key_balance_nodos][1];
-            array_push($array_balance_nodos, (object)$object_balance_nodos);
-        }
+        $nodos = $data->datos_entrada['nodos'];
 
 
+        $balance_nodos_fields = $this->createTableBalanceNodosFields();
+        $array_balance_nodos = $this->createTableBalanceNodos($balance_nodos, $nodos_data, $nodos);
+
+
+
+        // $data_entrada = $balance_nodos = $data->datos_entrada;
+        // $datos_entrada_model = new Datos_entrada();
+        // $datos_entrada_model->datos_entrada = json_encode($data_entrada);
+        // $datos_entrada_model->save();
 
         return [
         'data' => $data,
         'balances_table' => $array_mediciones,
+        'balances_fields' => $table_mediciones_fields,
         'nodos_data' => $nodos_data,
         'restricciones_table' => $tabla_restricciones,
         'balance_nodos' => $array_balance_nodos,
         'restricciones_fields' => $tabla_restricciones_fields,
+        'balance_nodos_fields' => $balance_nodos_fields,
         'path' => ""];
         } catch (\GuzzleHttp\Exception\BadResponseException $e) {
             return "ERROR";
             return $e->getResponse()->getBody()->getContents();
         }
+
+        return response()->json(['message' => 'uploaded successfully'], 200);
     }
 }

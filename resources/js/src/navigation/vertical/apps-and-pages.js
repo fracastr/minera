@@ -2,15 +2,20 @@ export default [
   {
     header: 'Menú de aplicaciones',
   },
-//   {
-//     title: 'Email',
-//     route: 'apps-email',
-//     icon: 'MailIcon',
-//   },
+  {
+    title: 'Inventario',
+    route: 'apps-email',
+    icon: 'FileTextIcon',
+  },
   {
     title: 'Balance',
     route: 'balances-Balances',
     icon: 'PieChartIcon',
+  },
+  {
+    title: 'Resultado',
+    route: 'apps-chat',
+    icon: 'CheckSquareIcon',
   },
 //   {
 //     title: 'Chat',

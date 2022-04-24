@@ -157,7 +157,17 @@ import {
 import Ripple from "vue-ripple-directive";
 import axios from "axios";
 import { AgGridVue } from "ag-grid-vue";
-
+function decimalFormatter(params) {
+    console.log("params decimal", params.value);
+    console.log(parseFloat(params.value));
+    return (parseFloat(params.value) * 100).toFixed(2);
+}
+function intFormatter(params) {
+    console.log("params int", params.value);
+    console.log(parseInt(params.value));
+    return parseInt(params.value.replace(/,/g, ''), 10)
+    // return (parseFloat(params.value) * 100).toFixed(2);
+}
 export default {
   data() {
     return {
@@ -175,6 +185,7 @@ export default {
       datos_entrada: {},
       columnDefs: null,
       rowData: null,
+      datos_entrada_id: null,
     };
   },
   mounted(){
@@ -205,7 +216,13 @@ export default {
     correr_tables(event) {
         console.log(this.datos_entrada);
       axios
-        .post("correr_balance", {"datos_entrada": this.datos_entrada}, {
+        .post("correr_balance", {
+            "datos_entrada": this.datos_entrada,
+            "datos_entrada_id": this.datos_entrada_id,
+            "balances_table": this.balances_table,
+            "restricciones_table": this.restricciones_table,
+            "balance_nodos": this.balance_nodos
+            }, {
           headers: {
             "Content-Type": "application/json",
           },
@@ -219,6 +236,7 @@ export default {
           this.restricciones_fields = response.data.restricciones_fields;
           this.balances_fields = response.data.balances_fields;
           this.datos_entrada = response.data.datos_entrada;
+          this.datos_entrada_id = response.data.datos_entrada_id;
         })
         .catch(function (e) {
           console.log("FAILURE!! correr_balance", e);
@@ -245,9 +263,21 @@ export default {
           this.restricciones_fields = response.data.restricciones_fields;
           this.balances_fields = response.data.balances_fields;
           this.datos_entrada = response.data.data.datos_entrada;
+          this.datos_entrada_id = response.data.datos_entrada_id;
           this.correr_button = true;
           console.log("items after call");
           console.log(this.datos_entrada);
+
+          // armar formateo dinamico de numeros
+          this.balances_fields.map(function(value, index){
+              console.log("index y value");
+              if(index === 1 || index === 2){
+                  value.valueFormatter = intFormatter;
+              }
+              if(index === 3 || index === 4){
+                  value.valueFormatter = decimalFormatter;
+              }
+          })
         })
         .catch(function (e) {
           console.log("FAILURE!!", e);
