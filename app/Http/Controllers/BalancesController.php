@@ -121,19 +121,19 @@ class BalancesController extends Controller
             $object_mediciones = array();
             if(sizeof($value_mediciones) == 4){
                 $object_mediciones['Flujos'] = $flujos[$key_mediciones];
-                $object_mediciones['TMS medido'] = number_format($value_mediciones[0], 10,);
-                $object_mediciones['TMS balance'] = number_format($value_mediciones[1], 10);
+                $object_mediciones['TMS medido'] = number_format($value_mediciones[0], 10, '.', '');
+                $object_mediciones['TMS balance'] = number_format($value_mediciones[1], 10, '.', '');
                 $object_mediciones['Fet [%] Medido'] = number_format($value_mediciones[2], 4);
                 $object_mediciones['Fet [%] Balance'] = number_format($value_mediciones[3], 4);
             }
             else if(sizeof($value_mediciones) == 6){
                 $object_mediciones['Flujos'] = $flujos[$key_mediciones];
-                $object_mediciones['TMS medido'] = number_format($value_mediciones[0]);
-                $object_mediciones['TMS balance'] = number_format($value_mediciones[1]);
-                $object_mediciones['Fet [%] Medido'] = number_format($value_mediciones[2] * 100, 2);
-                $object_mediciones['Fet [%] Balance'] = number_format($value_mediciones[3] * 100, 2);
-                $object_mediciones['FeMag [%] Medido'] = number_format($value_mediciones[4] * 100, 2);
-                $object_mediciones['FeMag [%] Balance'] = number_format($value_mediciones[5] * 100, 2);
+                $object_mediciones['TMS medido'] = number_format($value_mediciones[0], 10, '.', '');
+                $object_mediciones['TMS balance'] = number_format($value_mediciones[1], 10, '.', '');
+                $object_mediciones['Fet [%] Medido'] = number_format($value_mediciones[2], 4);
+                $object_mediciones['Fet [%] Balance'] = number_format($value_mediciones[3], 4);
+                $object_mediciones['FeMag [%] Medido'] = number_format($value_mediciones[4], 4);
+                $object_mediciones['FeMag [%] Balance'] = number_format($value_mediciones[5], 4);
             }
             array_push($array_mediciones, (object)$object_mediciones);
         }
@@ -141,31 +141,31 @@ class BalancesController extends Controller
         return $array_mediciones;
     }
 
-    public function createTableRestricciones($restricciones, $jerarquia){
-        $array_restricciones = array();
-        foreach ($restricciones as $key_restricciones => $value_restricciones) {
-            $object_restricciones = array();
-            if(sizeof($value_restricciones) == 4){
-                $object_restricciones['TMS inf[%]'] = $value_restricciones[0];
-                $object_restricciones['TMS sup[%]'] = $value_restricciones[1];
-                $object_restricciones['Fet [%] inf'] = $value_restricciones[2];
-                $object_restricciones['Fet [%] sup'] = $value_restricciones[3];
-                $object_restricciones['Jerarquia'] = $jerarquia[$key_restricciones];
-            }
-            else if(sizeof($value_restricciones) == 6){
-                $object_restricciones['TMS inf[%]'] = $value_restricciones[0];
-                $object_restricciones['TMS sup[%]'] = $value_restricciones[1];
-                $object_restricciones['Fet [%] inf'] = $value_restricciones[2];
-                $object_restricciones['Fet [%] sup'] = $value_restricciones[3];
-                $object_restricciones['FeMag [%] Inf'] = $value_restricciones[4];
-                $object_restricciones['FeMag [%] sup'] = $value_restricciones[5];
-                $object_restricciones['Jerarquia'] = $jerarquia[$key_restricciones];
-            }
-            array_push($array_restricciones, (object)$object_restricciones);
-        }
+    // public function createTableRestricciones($restricciones, $jerarquia){
+    //     $array_restricciones = array();
+    //     foreach ($restricciones as $key_restricciones => $value_restricciones) {
+    //         $object_restricciones = array();
+    //         if(sizeof($value_restricciones) == 4){
+    //             $object_restricciones['TMS inf[%]'] = $value_restricciones[0];
+    //             $object_restricciones['TMS sup[%]'] = $value_restricciones[1];
+    //             $object_restricciones['Fet [%] inf'] = $value_restricciones[2];
+    //             $object_restricciones['Fet [%] sup'] = $value_restricciones[3];
+    //             $object_restricciones['Jerarquia'] = $jerarquia[$key_restricciones];
+    //         }
+    //         else if(sizeof($value_restricciones) == 6){
+    //             $object_restricciones['TMS inf[%]'] = $value_restricciones[0];
+    //             $object_restricciones['TMS sup[%]'] = $value_restricciones[1];
+    //             $object_restricciones['Fet [%] inf'] = $value_restricciones[2];
+    //             $object_restricciones['Fet [%] sup'] = $value_restricciones[3];
+    //             $object_restricciones['FeMag [%] Inf'] = $value_restricciones[4];
+    //             $object_restricciones['FeMag [%] sup'] = $value_restricciones[5];
+    //             $object_restricciones['Jerarquia'] = $jerarquia[$key_restricciones];
+    //         }
+    //         array_push($array_restricciones, (object)$object_restricciones);
+    //     }
 
-        return $array_restricciones;
-    }
+    //     return $array_restricciones;
+    // }
 
     public function createTableRestriccionesFields($restricciones, $jerarquia){
         $tabla_restricciones_fields = array();
@@ -283,12 +283,14 @@ class BalancesController extends Controller
         $mediciones = $data->datos_entrada['mediciones'];
         $flujos = $data->datos_entrada['flujos'];
         $desviaciones = $data->desviaciones;
+        $balances_finales = $data->balances_finales;
+        //$mediciones = $balances_finales;
 
-        foreach ($desviaciones as $key_desviaciones => &$value_desviaciones) {
-            foreach($value_desviaciones as $key_value_desviaciones => &$value_desviaciones_item){
-                $value_desviaciones_item = number_format($value_desviaciones_item * 100, 2);
-            }
-        }
+        // foreach ($desviaciones as $key_desviaciones => &$value_desviaciones) {
+        //     foreach($value_desviaciones as $key_value_desviaciones => &$value_desviaciones_item){
+        //         $value_desviaciones_item = number_format($value_desviaciones_item * 100, 2);
+        //     }
+        // }
 
         $table_mediciones_fields = $this->createTableMedicionesFields($mediciones, $flujos);
         $array_mediciones = $this->createTableMediciones($mediciones, $flujos);
@@ -296,7 +298,7 @@ class BalancesController extends Controller
         // logica tabla restricciones
         $restricciones = $data->datos_entrada['restricciones'];
         $jerarquia = $data->datos_entrada['jerarquia'];
-        $array_restricciones = $this->createTableRestricciones($restricciones, $jerarquia);
+        //$array_restricciones = $this->createTableRestricciones($restricciones, $jerarquia);
 
         // logica tabla restricciones fields
         $tabla_restricciones_fields = $this->createTableRestriccionesFields($restricciones, $jerarquia);
@@ -358,8 +360,10 @@ class BalancesController extends Controller
         $datos_entrada = $request->datos_entrada;
         $balances_table = $request->balances_table;
         $restricciones_table = $request->restricciones_table;
+        //dd($request->all());
+        //dd($request->balances_table);
+        //$size_mediciones = sizeof($request->datos_entrada["mediciones"][0]);
 
-        $size_mediciones = sizeof($request->datos_entrada["mediciones"][0]);
         //dd($size_mediciones);
         $new_mediciones = array();
 
@@ -367,19 +371,49 @@ class BalancesController extends Controller
             $new_mediciones_array = array();
             foreach($value as $key2 => $value2){
                 if($key2 != "Flujos"){
-                    array_push($new_mediciones_array, $value2);
+                    array_push($new_mediciones_array, floatval(str_replace(",","",$value2)));
                     // array_push($new_mediciones_array, intval(str_replace(".","",$value2)));
                 }
             }
             array_push($new_mediciones, $new_mediciones_array);
         }
-        //dd($new_mediciones);
+
+        //actualizo las mediciones
+        $datos_entrada['mediciones'] = $new_mediciones;
+        $new_restricciones = array();
+        foreach($restricciones_table as $key_restricciones => $value_restricciones){
+            //dd($value_restricciones);
+            $contador = 0;
+            $new_restricciones_array = array();
+            foreach($value_restricciones as $key_value_restricciones => $value_restricciones_data){
+                if($contador % 2 == 0 && $key_value_restricciones != "Jerarquia"){
+                    //dd($key_value_restricciones, $value_restricciones_data);
+                    array_push($new_restricciones_array, floatval(str_replace(",","",$value_restricciones_data)));
+                    //dd($new_restricciones_array);
+                }
+                $contador++;
+            }
+
+            array_push($new_restricciones, $new_restricciones_array);
+        }
+
+        //dd($new_restricciones);
+        // actualiza las restricciones
+        $datos_entrada['restricciones'] = $new_restricciones;
+
+        //update el json en la tabla de la base de datos
+        $datos_entrada_data = Datos_entrada::find($datos_entrada_id);
+        $datos_entrada_data->datos_entrada = json_encode($datos_entrada);
+        $datos_entrada_data->save();
+
+        //dd($datos_entrada_data->mediciones);
+
 
         $url = 'http://34.229.82.49:8080/flaskapi/correr_balance';
         $myBody['datos_entrada_id'] = $datos_entrada_id;
         //$response = Http::acceptJson()->post($url, array($myBody));
         $response = Http::acceptJson()->post($url, [
-            'datos_entrada_id' => 39,
+            'datos_entrada_id' => $datos_entrada_id,
         ]);
         //$response = Http::acceptJson()->get($url);
         //dd($response);
@@ -395,12 +429,14 @@ class BalancesController extends Controller
         $mediciones = $data->datos_entrada['mediciones'];
         $flujos = $data->datos_entrada['flujos'];
         $desviaciones = $data->desviaciones;
+        $balances_finales = $data->balances_finales;
+        $mediciones = $balances_finales;
 
-        foreach ($desviaciones as $key_desviaciones => &$value_desviaciones) {
-            foreach($value_desviaciones as $key_value_desviaciones => &$value_desviaciones_item){
-                $value_desviaciones_item = number_format($value_desviaciones_item * 100, 2);
-            }
-        }
+        // foreach ($desviaciones as $key_desviaciones => &$value_desviaciones) {
+        //     foreach($value_desviaciones as $key_value_desviaciones => &$value_desviaciones_item){
+        //         $value_desviaciones_item = number_format($value_desviaciones_item * 100, 2);
+        //     }
+        // }
 
         $table_mediciones_fields = $this->createTableMedicionesFields($mediciones, $flujos);
         $array_mediciones = $this->createTableMediciones($mediciones, $flujos);
@@ -408,7 +444,7 @@ class BalancesController extends Controller
         // logica tabla restricciones
         $restricciones = $data->datos_entrada['restricciones'];
         $jerarquia = $data->datos_entrada['jerarquia'];
-        $array_restricciones = $this->createTableRestricciones($restricciones, $jerarquia);
+        //$array_restricciones = $this->createTableRestricciones($restricciones, $jerarquia);
 
         // logica tabla restricciones fields
         $tabla_restricciones_fields = $this->createTableRestriccionesFields($restricciones, $jerarquia);
@@ -448,7 +484,8 @@ class BalancesController extends Controller
         'balance_nodos' => $array_balance_nodos,
         'restricciones_fields' => $tabla_restricciones_fields,
         'balance_nodos_fields' => $balance_nodos_fields,
-        'path' => ""];
+        'path' => "",
+        'datos_entrada_id' => $datos_entrada_id];
         } catch (\GuzzleHttp\Exception\BadResponseException $e) {
             return "ERROR";
             return $e->getResponse()->getBody()->getContents();

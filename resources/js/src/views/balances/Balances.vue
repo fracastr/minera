@@ -158,13 +158,13 @@ import Ripple from "vue-ripple-directive";
 import axios from "axios";
 import { AgGridVue } from "ag-grid-vue";
 function decimalFormatter(params) {
-    console.log("params decimal", params.value);
-    console.log(parseFloat(params.value));
+    // console.log("params decimal", params.value);
+    // console.log(parseFloat(params.value));
     return (parseFloat(params.value) * 100).toFixed(2);
 }
 function intFormatter(params) {
-    console.log("params int", params.value);
-    console.log(parseInt(params.value));
+    // console.log("params int", params.value);
+    // console.log(parseInt(params.value));
     return parseInt(params.value.replace(/,/g, ''), 10)
     // return (parseFloat(params.value) * 100).toFixed(2);
 }
@@ -235,8 +235,28 @@ export default {
           this.balance_nodos_fields = response.data.balance_nodos_fields;
           this.restricciones_fields = response.data.restricciones_fields;
           this.balances_fields = response.data.balances_fields;
-          this.datos_entrada = response.data.datos_entrada;
+          this.datos_entrada = response.data.data.datos_entrada;
           this.datos_entrada_id = response.data.datos_entrada_id;
+            console.log("response", response);
+          // armar formateo dinamico de numeros
+          this.balances_fields.map(function(value, index){
+            //   console.log("index y value");
+              if(index === 1 || index === 2){
+                  value.valueFormatter = intFormatter;
+              }
+              if(index === 3 || index === 4){
+                  value.valueFormatter = decimalFormatter;
+              }
+          })
+        let data_restricciones = this.restricciones_fields;
+          // armar formateo dinamico de numeros tabla 2
+          this.restricciones_fields.map(function(value, index){
+              console.log("index y value", index, value, data_restricciones.length);
+              if(index != data_restricciones.length - 1){
+                  console.log(index);
+                  value.valueFormatter = decimalFormatter;
+              }
+          })
         })
         .catch(function (e) {
           console.log("FAILURE!! correr_balance", e);
@@ -270,11 +290,20 @@ export default {
 
           // armar formateo dinamico de numeros
           this.balances_fields.map(function(value, index){
-              console.log("index y value");
+            //   console.log("index y value");
               if(index === 1 || index === 2){
                   value.valueFormatter = intFormatter;
               }
               if(index === 3 || index === 4){
+                  value.valueFormatter = decimalFormatter;
+              }
+          })
+        let data_restricciones = this.restricciones_fields;
+          // armar formateo dinamico de numeros tabla 2
+          this.restricciones_fields.map(function(value, index){
+              console.log("index y value", index, value, data_restricciones.length);
+              if(index != data_restricciones.length - 1){
+                  console.log(index);
                   value.valueFormatter = decimalFormatter;
               }
           })
