@@ -58,7 +58,9 @@
                 <ag-grid-vue style="width: auto; height: 500px;"
                     class="ag-theme-alpine"
                     :columnDefs="balances_fields"
-                    :rowData="balances_table">
+                    :rowData="balances_table"
+                    @grid-ready="onGridReadyBalancesTable"
+                    :getRowStyle="getRowStyle">
                 </ag-grid-vue>
             </b-col>
             <b-col md="8" sm="12">
@@ -66,7 +68,9 @@
                 <ag-grid-vue style="width: auto; height: 500px;"
                     class="ag-theme-alpine"
                     :columnDefs="restricciones_fields"
-                    :rowData="restricciones_table">
+                    :rowData="restricciones_table"
+                    @grid-ready="onGridReadyRestriccionesTable"
+                    :getRowStyle="getRowStyle">
                 </ag-grid-vue>
             </b-col>
         </b-row>
@@ -77,66 +81,11 @@
                 <ag-grid-vue style="width: auto; height: 500px;"
                     class="ag-theme-alpine"
                     :columnDefs="balance_nodos_fields"
-                    :rowData="balance_nodos">
+                    :rowData="balance_nodos"
+                    @row-clicked="onRowClicked">
                 </ag-grid-vue>
             </b-col>
         </b-row>
-        <!-- <b-col md="4" sm="12">
-          <b-table-lite
-            hover
-            ref="table1"
-            title="Balances"
-            responsive
-            :items="balances_table"
-            :fields="balances_fields"
-            sticky-header="500px"
-            v-on:scroll.native="scrolled"
-          />
-        </b-col>
-        <b-col md="8" sm="12">
-          <b-table-lite
-            hover
-            ref="restricciones"
-            title="Restricciones"
-            responsive
-            :items="restricciones_table"
-            :fields="restricciones_fields"
-            sticky-header="500px"
-            v-show="show_tables"
-          />
-        </b-col> -->
-        <!-- <b-col md="4" sm="12">
-          <b-table
-            ref="resultado_restricciones"
-            title="Resultado_restricciones"
-            responsive
-            :items="resultado_restricciones"
-            sticky-header="500px"
-            v-on:scroll.native="scrolled"
-          />
-        </b-col> -->
-        <!-- <b-col md="4" sm="12" offset-md="4">
-          <b-table-lite
-            hover
-            ref="balance_nodos"
-            title="Balance_nodos"
-            responsive
-            :items="balance_nodos"
-            sticky-header="500px"
-            v-show="show_tables"
-          />
-        </b-col> -->
-
-      <!-- <b-row>
-        <b-col md="12" sm="12">
-            <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet" />
-            <ag-grid-vue style="width: auto; height: 500px;"
-                class="ag-theme-material"
-                :columnDefs="restricciones_fields"
-                :rowData="restricciones_table">
-            </ag-grid-vue>
-        </b-col>
-      </b-row> -->
     </b-container>
   </div>
 </template>
@@ -168,6 +117,7 @@ function intFormatter(params) {
     return parseInt(params.value.replace(/,/g, ''), 10)
     // return (parseFloat(params.value) * 100).toFixed(2);
 }
+
 export default {
   data() {
     return {
@@ -186,6 +136,12 @@ export default {
       columnDefs: null,
       rowData: null,
       datos_entrada_id: null,
+      yellow: [],
+      green: [],
+      gridApiBalancesTable: null,
+      gridColumnApiBalancesTable: null,
+      gridApiRestriccionesTable: null,
+      columnApiRestriccionesTable: null,
     };
   },
   mounted(){
@@ -206,6 +162,45 @@ export default {
     ];
   },
   methods: {
+    onGridReadyBalancesTable(params) {
+      this.gridApiBalancesTable = params.api;
+      this.gridColumnApiBalancesTable = params.columnApi;
+    },
+    onGridReadyRestriccionesTable(params) {
+      this.gridApiRestriccionesTable = params.api;
+      this.columnApiRestriccionesTable = params.columnApi;
+    },
+    getRowStyle(params){
+    //console.log("rowstyle", params);
+    // if (params.node.rowIndex % 2 === 0) {
+    //     return { background: 'yellow' };
+    // }
+    //console.log("yellow", this.yellow);
+    let yellow = this.yellow;
+    let green = this.green;
+    let resp = "";
+
+    if(yellow.length > 0){
+        yellow.map(function(value, index){
+            //console.log(params.node.rowIndex, value);
+            if (params.node.rowIndex === value) {
+                console.log("valido");
+                resp =  { background: 'yellow' };
+            }
+        })
+    }
+    if(green.length > 0){
+        green.map(function(value, index){
+            //console.log(params.node.rowIndex, value);
+            if (params.node.rowIndex === value) {
+                console.log("valido");
+                resp =  { background: 'green' };
+            }
+        })
+    }
+
+    return resp;
+    },
       scrolled(e){
           console.log("estoy haciendo scroll",e);
           console.log(this.$refs.restricciones);
@@ -213,6 +208,31 @@ export default {
           this.$refs.restricciones.scrollHeight = e.target.scrollHeight;
           this.$refs.restricciones.scrollLeft = e.target.scrollLeft;
       },
+    onRowClicked(event) {
+        console.log("se ha hecho click en una fila");
+        console.log(event);
+        // llamado al endpoint
+        axios
+        .post("paint_tables", {
+            "datos_entrada_id": this.datos_entrada_id,
+            "rowIndex": event.rowIndex
+            }, {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        })
+        .then((response) => {
+            this.yellow = response.data.yellow;
+            this.green = response.data.green;
+
+            this.gridApiBalancesTable.redrawRows();
+            this.gridApiRestriccionesTable.redrawRows();
+        })
+        .catch(function (e) {
+          console.log("FAILURE!! correr_balance", e);
+        });
+
+    },
     correr_tables(event) {
         console.log(this.datos_entrada);
       axios
@@ -237,7 +257,7 @@ export default {
           this.balances_fields = response.data.balances_fields;
           this.datos_entrada = response.data.data.datos_entrada;
           this.datos_entrada_id = response.data.datos_entrada_id;
-            console.log("response", response);
+            //console.log("response", response);
           // armar formateo dinamico de numeros
           this.balances_fields.map(function(value, index){
             //   console.log("index y value");
@@ -285,7 +305,7 @@ export default {
           this.datos_entrada = response.data.data.datos_entrada;
           this.datos_entrada_id = response.data.datos_entrada_id;
           this.correr_button = true;
-          console.log("items after call");
+          //console.log("items after call");
           console.log(this.datos_entrada);
 
           // armar formateo dinamico de numeros
@@ -301,7 +321,7 @@ export default {
         let data_restricciones = this.restricciones_fields;
           // armar formateo dinamico de numeros tabla 2
           this.restricciones_fields.map(function(value, index){
-              console.log("index y value", index, value, data_restricciones.length);
+              //console.log("index y value", index, value, data_restricciones.length);
               if(index != data_restricciones.length - 1){
                   console.log(index);
                   value.valueFormatter = decimalFormatter;

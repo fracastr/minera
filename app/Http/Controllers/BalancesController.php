@@ -493,4 +493,46 @@ class BalancesController extends Controller
 
         return response()->json(['message' => 'uploaded successfully'], 200);
     }
+
+    public function paint_tables(Request $request)
+    {
+        try {
+            $datos_entrada_id = $request->datos_entrada_id;
+            $rowIndex = $request->rowIndex;
+
+            $url = 'http://34.229.82.49:8080/flaskapi/paint_tables';
+
+            //$response = Http::acceptJson()->post($url, array($myBody));
+            $response = Http::acceptJson()->post($url, [
+                'datos_entrada_id' => $datos_entrada_id,
+                'rowIndex' => $rowIndex
+            ]);
+            //$response = Http::acceptJson()->get($url);
+            //dd($response);
+            //dd(json_decode($response->getBody()->getContents()));
+            $data = json_decode($response->getBody()->getContents());
+            foreach ($data as $key => &$value) {
+                // $value = json_decode( preg_replace('/[\x00-\x1F\x80-\xFF]/', '', $value), true );
+                $value = json_decode($value, true);
+            }
+            //dd($data);
+            $yellow = array();
+            $green = array();
+            foreach($data->indices as $key => $value){
+                if($key == 0){
+                   $yellow = $value;
+                }
+                else{
+                    $green = $value;
+                }
+            }
+            return[
+                "yellow" => $yellow,
+                "green" => $green
+            ];
+        } catch (\Throwable $th) {
+            //throw $th;
+            return "ERROR";
+        }
+    }
 }
