@@ -118,6 +118,17 @@ function intFormatter(params) {
     // return (parseFloat(params.value) * 100).toFixed(2);
 }
 
+function nodosCellStyle(params) {
+    console.log("nodosStyle", params);
+    console.log(!isNaN(params.value));
+    console.log(parseFloat(params.value));
+    if(!isNaN(params.value) && parseFloat(params.value) > 0.001){
+        return {
+            backgroundColor: "red",
+        };
+    }
+};
+
 export default {
   data() {
     return {
@@ -277,6 +288,11 @@ export default {
                   value.valueFormatter = decimalFormatter;
               }
           })
+
+          this.balance_nodos_fields.map(function(value, index){
+            value.cellStyle = nodosCellStyle;
+
+          })
         })
         .catch(function (e) {
           console.log("FAILURE!! correr_balance", e);
@@ -326,6 +342,11 @@ export default {
                   console.log(index);
                   value.valueFormatter = decimalFormatter;
               }
+          })
+
+          this.balance_nodos_fields.map(function(value, index){
+            value.cellStyle = nodosCellStyle;
+
           })
         })
         .catch(function (e) {

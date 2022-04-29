@@ -249,8 +249,8 @@ class BalancesController extends Controller
         foreach ($balance_nodos as $key_balance_nodos => $value_balance_nodos) {
             $object_balance_nodos = array();
             $object_balance_nodos['Nodos'] = $nodos[$key_balance_nodos];
-            $object_balance_nodos['TMS'] = $nodos_data[$key_balance_nodos][0];
-            $object_balance_nodos['Finos FeT'] = $nodos_data[$key_balance_nodos][1];
+            $object_balance_nodos['TMS'] = str_replace(",",".",str_replace(".","",$nodos_data[$key_balance_nodos][0]));
+            $object_balance_nodos['Finos FeT'] = str_replace(",",".",str_replace(".","",$nodos_data[$key_balance_nodos][1]));
             array_push($array_balance_nodos, (object)$object_balance_nodos);
         }
 
@@ -262,7 +262,7 @@ class BalancesController extends Controller
         try {
             // $path = $request->file('file')->store('public');
             // $path = '/home/ubuntu/minera/storage/app/'. $path;
-            $path = '/home/ubuntu/minera/storage/app/public/dc0pZ7f2h9gbF4oQ1q7tZWuMlbcY5pbBBRKRUTfM.xlsx';
+            $path = '/home/ubuntu/minera/storage/app/public/b8tn1uKCL2o5Qg3ImeGGWJZYV5VrBrg7YNahFiWH.xlsx';
 
 
         $url = 'http://34.229.82.49:8080/flaskapi/get_balance';
