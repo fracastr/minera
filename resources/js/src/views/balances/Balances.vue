@@ -60,7 +60,9 @@
                     :columnDefs="balances_fields"
                     :rowData="balances_table"
                     @grid-ready="onGridReadyBalancesTable"
-                    :getRowStyle="getRowStyle">
+                    :getRowStyle="getRowStyle"
+                    @bodyScroll="scrolledbalances"
+                    id="tbalances">
                 </ag-grid-vue>
             </b-col>
             <b-col md="8" sm="12">
@@ -70,7 +72,9 @@
                     :columnDefs="restricciones_fields"
                     :rowData="restricciones_table"
                     @grid-ready="onGridReadyRestriccionesTable"
-                    :getRowStyle="getRowStyle">
+                    :getRowStyle="getRowStyle"
+                    @bodyScroll="scrolledrestricciones"
+                    id="trestricciones">
                 </ag-grid-vue>
             </b-col>
         </b-row>
@@ -212,12 +216,31 @@ export default {
 
     return resp;
     },
-      scrolled(e){
-          console.log("estoy haciendo scroll",e);
-          console.log(this.$refs.restricciones);
+      scrolledbalances(e){
+        //   console.log("estoy haciendo scroll",e);
+        //   console.log("tabla restricciones", this.gridApiRestriccionesTable);
+        const tbl1 = document.getElementById("tbalances");
+        const tbl2 = document.getElementById("trestricciones");
+        // console.log("tabla 2", tbl2);
+        const gridBody1 = tbl1.querySelector(".ag-body-viewport");
+        const gridBody2 = tbl2.querySelector(".ag-body-viewport");
+        // console.log("gridBody2", gridBody2);
 
-          this.$refs.restricciones.scrollHeight = e.target.scrollHeight;
-          this.$refs.restricciones.scrollLeft = e.target.scrollLeft;
+        gridBody2.scrollTop = e.top;
+
+      },
+      scrolledrestricciones(e){
+        //   console.log("estoy haciendo scroll",e);
+        //   console.log("tabla restricciones", this.gridApiRestriccionesTable);
+        // const tbl1 = document.getElementById("tbalances");
+        // const tbl2 = document.getElementById("trestricciones");
+        // // console.log("tabla 2", tbl2);
+        // const gridBody1 = tbl1.querySelector(".ag-body-viewport");
+        // const gridBody2 = tbl2.querySelector(".ag-body-viewport");
+        // console.log("gridBody2", gridBody2);
+
+        gridBody1.scrollTop = e.top;
+
       },
     onRowClicked(event) {
         console.log("se ha hecho click en una fila");
