@@ -13,8 +13,8 @@ export default [
     icon: 'PieChartIcon',
   },
   {
-    title: 'Resultado',
-    route: 'apps-chat',
+    title: 'Wizard',
+    route: 'balances-FormWizardNumber',
     icon: 'CheckSquareIcon',
   },
 //   {

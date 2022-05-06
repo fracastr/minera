@@ -222,7 +222,7 @@ export default {
         const tbl1 = document.getElementById("tbalances");
         const tbl2 = document.getElementById("trestricciones");
         // console.log("tabla 2", tbl2);
-        const gridBody1 = tbl1.querySelector(".ag-body-viewport");
+        // const gridBody1 = tbl1.querySelector(".ag-body-viewport");
         const gridBody2 = tbl2.querySelector(".ag-body-viewport");
         // console.log("gridBody2", gridBody2);
 
@@ -239,7 +239,7 @@ export default {
         // const gridBody2 = tbl2.querySelector(".ag-body-viewport");
         // console.log("gridBody2", gridBody2);
 
-        gridBody1.scrollTop = e.top;
+        // gridBody1.scrollTop = e.top;
 
       },
     onRowClicked(event) {
