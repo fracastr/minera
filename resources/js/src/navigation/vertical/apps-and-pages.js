@@ -17,6 +17,22 @@ export default [
     route: 'balances-FormWizardNumber',
     icon: 'CheckSquareIcon',
   },
+  {
+    title: 'Modulo Balances',
+    icon: 'SlidersIcon',
+    children: [
+      {
+        title: 'Generar Balance',
+        route: 'balances-FormWizardNumber',
+        icon: 'CheckSquareIcon',
+      },
+      {
+        title: 'Listado Balances',
+        route: 'balances-Balances',
+        icon: 'PieChartIcon',
+      },
+    ],
+  },
 //   {
 //     title: 'Chat',
 //     route: 'apps-chat',

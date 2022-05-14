@@ -27,7 +27,7 @@ class AuthController extends Controller
         ]);
 
         $user = new User([
-            'name'  => $request->name,
+            'nombre'  => $request->name,
             'email' => $request->email,
             'password' => bcrypt($request->password),
         ]);
@@ -53,7 +53,7 @@ class AuthController extends Controller
     * @param  [string] password
     * @param  [boolean] remember_me
     */
-    
+
     public function login(Request $request)
     {
         $request->validate([

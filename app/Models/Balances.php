@@ -8,4 +8,6 @@ use Illuminate\Database\Eloquent\Model;
 class Balances extends Model
 {
     use HasFactory;
+
+    public $fillable = ['nombre', 'tipo'];
 }

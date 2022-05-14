@@ -17,9 +17,6 @@ class CreateEmpresasTable extends Migration
             $table->id();
             $table->string('nombre');
             $table->string('rut');
-            $table->unsignedBigInteger('empresa_id');
-
-            $table->foreign('empresa_id')->references('id')->on('empresas');
             $table->timestamps();
         });
     }

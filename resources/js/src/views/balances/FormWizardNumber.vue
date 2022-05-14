@@ -5,15 +5,19 @@
       :title="null"
       :subtitle="null"
       shape="square"
-      finish-button-text="Submit"
-      back-button-text="Previous"
+      finish-button-text="Guardar"
+      back-button-text="Anterior"
+      next-button-text="Siguiente"
       class="mb-3"
       @on-complete="formSubmitted"
+      :disabled="loading"
     >
-
+    <div class="text-center" v-if="loading">
+        <b-spinner label="Spinning"></b-spinner>
+    </div>
       <!-- accoint details tab -->
       <tab-content
-        title="Account Details"
+        title="Selección de valle"
         :before-change="validationForm"
       >
         <validation-observer
@@ -26,102 +30,85 @@
               class="mb-2"
             >
               <h5 class="mb-0">
-                Account Details
+                Sistema de balance CMP
               </h5>
               <small class="text-muted">
-                Enter Your Account Details.
+                Selección de valle
               </small>
             </b-col>
-            <b-col md="6">
-              <b-form-group
-                label="Username"
-                label-for="name"
+            <b-col md="12">
+              <validation-provider
+                #default="{ errors }"
+                name="Valle"
+                rules="required"
               >
-                <validation-provider
-                  #default="{ errors }"
-                  name="username"
-                  rules="required"
+                <b-form-group
+                  label="Valle"
+                  label-for="valle"
+                  :state="errors.length > 0 ? false:null"
                 >
-                  <b-form-input
-                    id="name"
-                    v-model="name"
-                    :state="errors.length > 0 ? false:null"
-                    placeholder="johndoe"
-                  />
-                  <small class="text-danger">{{ errors[0] }}</small>
-                </validation-provider>
-              </b-form-group>
+                    <b-form-select
+                    v-model="valle"
+                    :options="valles"
+                    @change="valles_change"
+                    />
+                  <b-form-invalid-feedback :state="errors.length > 0 ? false:null">
+                    {{ errors[0] }}
+                  </b-form-invalid-feedback>
+                </b-form-group>
+              </validation-provider>
             </b-col>
-            <b-col md="6">
-              <b-form-group
-                label="Email"
-                label-for="email"
-              >
-                <validation-provider
-                  #default="{ errors }"
-                  name="email"
-                  rules="required|email"
-                >
-                  <b-form-input
-                    id="email"
-                    v-model="emailValue"
-                    type="email"
-                    :state="errors.length > 0 ? false:null"
-                    placeholder="john.doe@email.com"
-                  />
-                  <small class="text-danger">{{ errors[0] }}</small>
-                </validation-provider>
-              </b-form-group>
+          </b-row>
+        </validation-observer>
+      </tab-content>
+
+      <tab-content
+        title="Selección de proceso"
+        :before-change="validationForm"
+      >
+        <validation-observer
+          ref="infoRules"
+          tag="form"
+        >
+          <b-row>
+            <b-col
+              cols="12"
+              class="mb-2"
+            >
+              <h5 class="mb-0">
+                Sistema de balance CMP
+              </h5>
+              <small class="text-muted">
+                Selección de proceso
+              </small>
             </b-col>
-            <b-col md="6">
-              <b-form-group
-                label="Password"
-                label-for="password"
+            <b-col md="12">
+              <validation-provider
+                #default="{ errors }"
+                name="Proceso"
+                rules="required"
               >
-                <validation-provider
-                  #default="{ errors }"
-                  name="Password"
-                  vid="Password"
-                  rules="required|password"
+                <b-form-group
+                  label="Proceso"
+                  label-for="proceso"
+                  :state="errors.length > 0 ? false:null"
                 >
-                  <b-form-input
-                    id="password"
-                    v-model="PasswordValue"
-                    type="password"
-                    :state="errors.length > 0 ? false:null"
-                    placeholder="Password"
-                  />
-                  <small class="text-danger">{{ errors[0] }}</small>
-                </validation-provider>
-              </b-form-group>
-            </b-col>
-            <b-col md="6">
-              <b-form-group
-                label="Confirm Password"
-                label-for="c-password"
-              >
-                <validation-provider
-                  #default="{ errors }"
-                  name="Password Confirm"
-                  rules="required|confirmed:Password"
-                >
-                  <b-form-input
-                    id="c-password"
-                    v-model="passwordCon"
-                    type="password"
-                    :state="errors.length > 0 ? false:null"
-                    placeholder="Re-type Password"
-                  />
-                  <small class="text-danger">{{ errors[0] }}</small>
-                </validation-provider>
-              </b-form-group>
+                    <b-form-select
+                    v-model="proceso"
+                    :options="procesos"
+                    />
+                  <b-form-invalid-feedback :state="errors.length > 0 ? false:null">
+                    {{ errors[0] }}
+                  </b-form-invalid-feedback>
+                </b-form-group>
+              </validation-provider>
             </b-col>
           </b-row>
         </validation-observer>
       </tab-content>
 
       <!-- personal details tab -->
-      <tab-content
+      <!-- <tab-content
         title="Personal Info"
         :before-change="validationFormInfo"
       >
@@ -231,114 +218,68 @@
             </b-col>
           </b-row>
         </validation-observer>
-      </tab-content>
+      </tab-content> -->
 
       <!-- address  -->
       <tab-content
-        title="Address"
-        :before-change="validationFormAddress"
+        title="Balances"
       >
-        <validation-observer
+        <!-- <validation-observer
           ref="addressRules"
           tag="form"
-        >
+        > -->
           <b-row>
             <b-col
               cols="12"
               class="mb-2"
             >
               <h5 class="mb-0">
-                Address
+                Sistema de balance CMP
               </h5>
-              <small class="text-muted">Enter Your Address.</small>
+              <small class="text-muted">
+                Seleccione una opción
+              </small>
             </b-col>
-            <b-col md="6">
-              <b-form-group
-                label="Address"
-                label-for="address"
-              >
-                <validation-provider
-                  #default="{ errors }"
-                  name="Address"
-                  rules="required"
-                >
-                  <b-form-input
-                    id="address"
-                    v-model="address"
-                    :state="errors.length > 0 ? false:null"
-                    placeholder="98 Borough bridge Road, Birmingham"
-                  />
-                  <small class="text-danger">{{ errors[0] }}</small>
-                </validation-provider>
-              </b-form-group>
+            <b-col offset-md="4">
+            <b-button
+                v-ripple.400="'rgba(255, 255, 255, 0.15)'"
+                type="button"
+                variant="primary"
+                class="mr-1"
+                @click="create_new_balance"
+            >
+                Balance Nuevo
+            </b-button>
+            <b-button
+                v-ripple.400="'rgba(186, 191, 199, 0.15)'"
+                type="button"
+                variant="warning"
+                class="mr-1"
+                @click="correr_tables"
+            >
+                Balances Ejecutados
+            </b-button>
             </b-col>
-            <b-col md="6">
-              <b-form-group
-                label="Landmark"
-                label-for="landmark"
-              >
-                <validation-provider
-                  #default="{ errors }"
-                  name="Landmark"
-                  rules="required"
-                >
-                  <b-form-input
-                    id="landmark"
-                    v-model="landMark"
-                    :state="errors.length > 0 ? false:null"
-                    placeholder="Borough bridge"
-                  />
-                  <small class="text-danger">{{ errors[0] }}</small>
-                </validation-provider>
-              </b-form-group>
-            </b-col>
-            <b-col md="6">
-              <b-form-group
-                label="Pincode"
-                label-for="pincode"
-              >
-                <validation-provider
-                  #default="{ errors }"
-                  name="Pincode"
-                  rules="required"
-                >
-                  <b-form-input
-                    id="pincode"
-                    v-model="pincode"
-                    :state="errors.length > 0 ? false:null"
-                    type="number"
-                    placeholder="658921"
-                  />
-                  <small class="text-danger">{{ errors[0] }}</small>
-                </validation-provider>
-              </b-form-group>
-            </b-col>
-            <b-col md="6">
-              <b-form-group
-                label="City"
-                label-for="city"
-              >
-                <validation-provider
-                  #default="{ errors }"
-                  name="City"
-                  rules="required"
-                >
-                  <b-form-input
-                    id="city"
-                    v-model="city"
-                    :state="errors.length > 0 ? false:null"
-                    placeholder="Birmingham"
-                  />
-                  <small class="text-danger">{{ errors[0] }}</small>
-                </validation-provider>
-              </b-form-group>
+            <!-- <b-button
+                v-ripple.400="'rgba(255, 255, 255, 0.15)'"
+                type="button"
+                variant="warning"
+                @click="correr_tables"
+                v-show="correr_button"
+            >
+                Correr
+            </b-button> -->
+          </b-row>
+          <br>
+          <b-row>
+            <b-col>
+                <balance v-if="new_balance" ref="balances_ref"/>
             </b-col>
           </b-row>
-        </validation-observer>
       </tab-content>
 
       <!-- social link -->
-      <tab-content
+      <!-- <tab-content
         title="Social Links"
         :before-change="validationFormSocial"
       >
@@ -438,8 +379,34 @@
             </b-col>
           </b-row>
         </validation-observer>
-      </tab-content>
+      </tab-content> -->
     </form-wizard>
+
+    <!-- modal login-->
+    <b-modal
+      id="modal_guardar_balance"
+      ref="my-modal"
+      title="Guardar Balance"
+      @show="resetModal"
+      @hidden="resetModal"
+      @ok="handleOk"
+    >
+      <form ref="form" @submit.stop.prevent="handleSubmit">
+        <b-form-group
+          label="Nombre Balance"
+          label-for="nombre_balance"
+          invalid-feedback="Nombre es requerido"
+          :state="nameState"
+        >
+          <b-form-input
+            id="nombre_balance"
+            v-model="nombre_balance"
+            :state="nameState"
+            required
+          ></b-form-input>
+        </b-form-group>
+      </form>
+    </b-modal>
 
   </div>
 </template>
@@ -453,19 +420,28 @@ import vSelect from 'vue-select'
 import { ValidationProvider, ValidationObserver } from 'vee-validate'
 import ToastificationContent from '@core/components/toastification/ToastificationContent.vue'
 import 'vue-form-wizard/dist/vue-form-wizard.min.css'
+import axios from "axios";
+import Balance from "./Balances.vue"
 // import 'vue-wizard.scss'
 import {
   BRow,
   BCol,
   BFormGroup,
   BFormInput,
+  BFormSelect,
   BFormInvalidFeedback,
+  BSpinner,
+  BButton,
+  BModal,
 } from 'bootstrap-vue'
 import { required, email } from '@validations'
 import { codeIcon } from './code'
+import Ripple from 'vue-ripple-directive'
 
 export default {
   components: {
+    BModal,
+    Balance,
     ValidationProvider,
     ValidationObserver,
     FormWizard,
@@ -475,12 +451,20 @@ export default {
     BFormGroup,
     BFormInput,
     vSelect,
+    BFormSelect,
     BFormInvalidFeedback,
     // eslint-disable-next-line vue/no-unused-components
     ToastificationContent,
+    BSpinner,
+    BButton,
+  },
+  directives: {
+    Ripple,
   },
   data() {
     return {
+      nombre_balance: '',
+      nameState: null,
       selectedContry: '',
       selectedLanguage: '',
       name: '',
@@ -500,38 +484,119 @@ export default {
       required,
       email,
       codeIcon,
-      countryName: [
-        { value: 'select_value', text: 'Select Value' },
-        { value: 'Russia', text: 'Russia' },
-        { value: 'Canada', text: 'Canada' },
-        { value: 'China', text: 'China' },
-        { value: 'United States', text: 'United States' },
-        { value: 'Brazil', text: 'Brazil' },
-        { value: 'Australia', text: 'Australia' },
-        { value: 'India', text: 'India' },
-      ],
-      languageName: [
-        { value: 'nothing_selected', text: 'Nothing Selected' },
-        { value: 'English', text: 'English' },
-        { value: 'Chinese', text: 'Mandarin Chinese' },
-        { value: 'Hindi', text: 'Hindi' },
-        { value: 'Spanish', text: 'Spanish' },
-        { value: 'Arabic', text: 'Arabic' },
-        { value: 'Malay', text: 'Malay' },
-        { value: 'Russian', text: 'Russian' },
-      ],
+      valle: '',
+      proceso: '',
+      valles: [],
+      procesos: [],
+      loading: false,
+      new_balance: false,
     }
   },
+  mounted(){
+      console.log("mounted");
+      console.log(this.valles);
+        this.loading = true;
+      axios
+        .get("getValles/1")
+        .then((response) => {
+            console.log("response", response);
+            this.valles = response.data.valles;
+
+            console.log("valles", this.valles);
+        })
+        .catch(function (e) {
+          console.log("FAILURE!!", e);
+        }).finally(() => {
+                        this.loading =  false
+                    });
+  },
   methods: {
+      checkFormValidity() {
+        const valid = this.$refs.form.checkValidity()
+        this.nameState = valid
+        return valid
+      },
+      resetModal() {
+        this.nombre_balance = ''
+        this.nameState = null
+      },
+      handleOk(bvModalEvent) {
+        // Prevent modal from closing
+        bvModalEvent.preventDefault()
+        // Trigger submit handler
+        this.handleSubmit()
+      },
+      handleSubmit() {
+        // Exit when the form isn't valid
+        if (!this.checkFormValidity()) {
+          return
+        }
+        console.log("aqui se sube le nombre del balance", this.$refs.balances_ref.datos_entrada );
+        axios
+        .post("save_balance", {
+            "datos_entrada": this.$refs.balances_ref.datos_entrada ,
+            "nombre_balance": this.nombre_balance,
+            }, {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        })
+        .then((response) => {
+            this.$toast({
+            component: ToastificationContent,
+            props: {
+            title: 'Se ha guardado el balance con exito',
+            icon: 'EditIcon',
+            variant: 'success',
+            },
+        })
+        this.$refs['my-modal'].hide()
+        })
+        .catch(function (e) {
+          console.log("FAILURE!! correr_balance", e);
+          this.$toast({
+            component: ToastificationContent,
+            props: {
+            title: 'Ocurrio un problema al intentar guardar el balance',
+            icon: 'EditIcon',
+            variant: 'danger',
+            },
+        })
+        this.$refs['my-modal'].hide()
+        });
+
+        // Push the name to submitted names
+        // this.submittedNames.push(this.nombre_balance)
+        // Hide the modal manually
+        this.$nextTick(() => {
+          this.$bvModal.hide('modal-prevent-closing')
+        })
+      },
+
+
+      create_new_balance(){
+          this.new_balance = true;
+      },
+    valles_change(value){
+        console.log("cambio en valles", value, this.valle);
+        this.loading = true;
+        axios
+        .get("getProcesos/"+ this.valle)
+        .then((response) => {
+            console.log("response", response);
+            this.procesos = response.data.procesos;
+            console.log("los procesos", this.procesos);
+        })
+        .catch(function (e) {
+          console.log("FAILURE!!", e);
+        }).finally(() => {
+                        this.loading =  false
+                    });
+    },
     formSubmitted() {
-      this.$toast({
-        component: ToastificationContent,
-        props: {
-          title: 'Form Submitted',
-          icon: 'EditIcon',
-          variant: 'success',
-        },
-      })
+        this.$refs['my-modal'].show()
+        //$bvModal.show('modal_guardar_balance');
+
     },
     validationForm() {
       return new Promise((resolve, reject) => {

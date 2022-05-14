@@ -22,7 +22,7 @@ class BalancesController extends Controller
      */
     public function index()
     {
-        //
+        dd("testea");
     }
 
     /**
@@ -534,5 +534,14 @@ class BalancesController extends Controller
             //throw $th;
             return "ERROR";
         }
+    }
+
+    public function save_balance(Request $request){
+        $balance = new Balances();
+        $balance->nombre = $request->nombre_balance;
+        $balance->tipo = "quincenal";
+        $balance->save();
+
+        return ["se ha guardado con exito"];
     }
 }

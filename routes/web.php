@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ApplicationController;
 use App\Http\Controllers\BalancesController;
+use App\Http\Controllers\UtilsController;
 
 /*
 |--------------------------------------------------------------------------
@@ -15,7 +16,11 @@ use App\Http\Controllers\BalancesController;
 |
 */
 
-Route::get('/{any}', [ApplicationController::class, 'index'])->where('any', '.*');
+
 Route::post('balances/import', [BalancesController::class, 'import']);
 Route::post('balances/correr_balance', [BalancesController::class, 'correr_balance']);
 Route::post('balances/paint_tables', [BalancesController::class, 'paint_tables']);
+Route::post('balances/save_balance', [BalancesController::class, 'save_balance']);
+Route::get('balances/getValles/{user_id}', [UtilsController::class, 'getValles']);
+Route::get('balances/getProcesos/{valle_id}', [UtilsController::class, 'getProcesos']);
+Route::get('/{any}', [ApplicationController::class, 'index'])->where('any', '.*');
