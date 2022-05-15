@@ -24,6 +24,9 @@ class CreateBalancesTable extends Migration
             $table->json('descripciones_nodos')->nullable();
             $table->json('tags')->nullable();
             $table->json('indices_delta_stock')->nullable();
+            $table->unsignedBigInteger('user_id');
+
+            $table->foreign('user_id')->references('id')->on('users');
             $table->timestamps();
         });
     }

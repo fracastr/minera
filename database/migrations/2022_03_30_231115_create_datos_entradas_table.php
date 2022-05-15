@@ -16,6 +16,12 @@ class CreateDatosEntradasTable extends Migration
         Schema::create('datos_entradas', function (Blueprint $table) {
             $table->id();
             $table->json('datos_entrada');
+            $table->json('restricciones')->nullable();
+            $table->json('jerarquia')->nullable();
+            $table->json('maximos')->nullable();
+            $table->unsignedBigInteger('balance_id')->nullable();
+
+            $table->foreign('balance_id')->references('id')->on('balances');
             $table->timestamps();
         });
     }

@@ -95,4 +95,9 @@ class UtilsController extends Controller
         $procesos = Procesos::select('id as value', 'nombre as text')->where('valle_id', $valle_id)->get()->toArray();
         return ['procesos' => $procesos];
     }
+
+    public function BalancesController($balance_id){
+        // funcion que descarga el excel asociado a un balance
+        
+    }
 }

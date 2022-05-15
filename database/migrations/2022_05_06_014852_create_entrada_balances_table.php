@@ -13,17 +13,17 @@ class CreateEntradaBalancesTable extends Migration
      */
     public function up()
     {
-        Schema::create('entrada_balances', function (Blueprint $table) {
-            $table->id();
-            $table->json('datos_entrada');
-            $table->json('restricciones')->nullable();
-            $table->json('jerarquia')->nullable();
-            $table->json('maximos')->nullable();
-            $table->unsignedBigInteger('balance_id');
+        // Schema::create('entrada_balances', function (Blueprint $table) {
+        //     $table->id();
+        //     $table->json('datos_entrada');
+        //     $table->json('restricciones')->nullable();
+        //     $table->json('jerarquia')->nullable();
+        //     $table->json('maximos')->nullable();
+        //     $table->unsignedBigInteger('balance_id');
 
-            $table->foreign('balance_id')->references('id')->on('balances');
-            $table->timestamps();
-        });
+        //     $table->foreign('balance_id')->references('id')->on('balances');
+        //     $table->timestamps();
+        // });
     }
 
     /**
@@ -33,6 +33,6 @@ class CreateEntradaBalancesTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('entrada_balances');
+        // Schema::dropIfExists('entrada_balances');
     }
 }

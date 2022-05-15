@@ -97,18 +97,18 @@ class BalancesController extends Controller
             if(sizeof($value_mediciones) == 4){
                 $tabla_mediciones_fields[0] = (object) ['field' => 'Flujos', 'resizable' => true, 'editable' => false];
                 $tabla_mediciones_fields[1] = (object) ['field' => 'TMS medido', 'resizable' => true, 'editable' => true];
-                $tabla_mediciones_fields[2] = (object) ['field' => 'TMS balance', 'resizable' => true, 'editable' => false];
+                $tabla_mediciones_fields[2] = (object) ['field' => 'TMS balance', 'resizable' => true, 'editable' => false, 'cellClass' => 'balance'];
                 $tabla_mediciones_fields[3] = (object) ['field' => 'Fet [%] Medido', 'resizable' => true, 'editable' => true];
-                $tabla_mediciones_fields[4] = (object) ['field' => 'Fet [%] Balance', 'resizable' => true, 'editable' => false];
+                $tabla_mediciones_fields[4] = (object) ['field' => 'Fet [%] Balance', 'resizable' => true, 'editable' => false, 'cellClass' => 'balance'];
             }
             else if(sizeof($value_mediciones) == 6){
                 $tabla_mediciones_fields[0] = (object) ['field' => 'Flujos', 'resizable' => true, 'editable' => false];
                 $tabla_mediciones_fields[1] = (object) ['field' => 'TMS medido', 'resizable' => true, 'editable' => true];
-                $tabla_mediciones_fields[2] = (object) ['field' => 'TMS balance', 'resizable' => true, 'editable' => false];
+                $tabla_mediciones_fields[2] = (object) ['field' => 'TMS balance', 'resizable' => true, 'editable' => false, 'cellClass' => 'balance'];
                 $tabla_mediciones_fields[3] = (object) ['field' => 'Fet [%] Medido', 'resizable' => true, 'editable' => true];
-                $tabla_mediciones_fields[4] = (object) ['field' => 'Fet [%] Balance', 'resizable' => true, 'editable' => false];
+                $tabla_mediciones_fields[4] = (object) ['field' => 'Fet [%] Balance', 'resizable' => true, 'editable' => false, 'cellClass' => 'balance'];
                 $tabla_mediciones_fields[5] = (object) ['field' => 'FeMag [%] Medido', 'resizable' => true, 'editable' => true];
-                $tabla_mediciones_fields[6] = (object) ['field' => 'FeMag [%] Balance', 'resizable' => true, 'editable' => false];
+                $tabla_mediciones_fields[6] = (object) ['field' => 'FeMag [%] Balance', 'resizable' => true, 'editable' => false, 'cellClass' => 'balance'];
             }
         }
 
@@ -171,26 +171,26 @@ class BalancesController extends Controller
         $tabla_restricciones_fields = array();
         if(sizeof($restricciones[0]) == 4){
             $tabla_restricciones_fields[0] = (object) ['field' => 'TMS inf[%]', 'resizable' => true, 'editable' => true];
-            $tabla_restricciones_fields[1] = (object) ['field' => 'TMS inf[%] ', 'resizable' => true];
+            $tabla_restricciones_fields[1] = (object) ['field' => 'TMS inf[%] ', 'resizable' => true, 'cellClass' => 'calculated'];
             $tabla_restricciones_fields[2] = (object) ['field' => 'TMS sup[%]', 'resizable' => true, 'editable' => true];
-            $tabla_restricciones_fields[3] = (object) ['field' => 'TMS sup[%] ', 'resizable' => true];
+            $tabla_restricciones_fields[3] = (object) ['field' => 'TMS sup[%] ', 'resizable' => true, 'cellClass' => 'calculated'];
             $tabla_restricciones_fields[4] = (object) ['field' => 'Fet [%] inf', 'resizable' => true, 'editable' => true];
-            $tabla_restricciones_fields[5] = (object) ['field' => 'Fet [%] inf ', 'resizable' => true];
+            $tabla_restricciones_fields[5] = (object) ['field' => 'Fet [%] inf ', 'resizable' => true, 'cellClass' => 'calculated'];
             $tabla_restricciones_fields[6] = (object) ['field' => 'Fet [%] sup', 'resizable' => true, 'editable' => true];
-            $tabla_restricciones_fields[7] = (object) ['field' => 'Fet [%] sup ', 'resizable' => true];
+            $tabla_restricciones_fields[7] = (object) ['field' => 'Fet [%] sup ', 'resizable' => true, 'cellClass' => 'calculated'];
             $tabla_restricciones_fields[8] = (object) ['field' => 'Jerarquia', 'resizable' => true];
         }
         else if(sizeof($restricciones[0]) == 6){
             $tabla_restricciones_fields[0] = (object) ['field' => 'TMS inf[%]', 'resizable' => true, 'editable' => true];
-            $tabla_restricciones_fields[1] = (object) ['field' => 'TMS inf[%] ', 'resizable' => true];
+            $tabla_restricciones_fields[1] = (object) ['field' => 'TMS inf[%] ', 'resizable' => true, 'cellClass' => 'calculated'];
             $tabla_restricciones_fields[2] = (object) ['field' => 'TMS sup[%]', 'resizable' => true, 'editable' => true];
-            $tabla_restricciones_fields[3] = (object) ['field' => 'TMS sup[%] ', 'resizable' => true];
+            $tabla_restricciones_fields[3] = (object) ['field' => 'TMS sup[%] ', 'resizable' => true, 'cellClass' => 'calculated'];
             $tabla_restricciones_fields[4] = (object) ['field' => 'Fet [%] inf', 'resizable' => true, 'editable' => true];
-            $tabla_restricciones_fields[5] = (object) ['field' => 'Fet [%] inf ', 'resizable' => true];
+            $tabla_restricciones_fields[5] = (object) ['field' => 'Fet [%] inf ', 'resizable' => true, 'cellClass' => 'calculated'];
             $tabla_restricciones_fields[6] = (object) ['field' => 'Fet [%] sup', 'resizable' => true, 'editable' => true];
-            $tabla_restricciones_fields[7] = (object) ['field' => 'Fet [%] sup ', 'resizable' => true];
+            $tabla_restricciones_fields[7] = (object) ['field' => 'Fet [%] sup ', 'resizable' => true, 'cellClass' => 'calculated'];
             $tabla_restricciones_fields[8] = (object) ['field' => 'FeMag [%] Inf', 'resizable' => true, 'editable' => true];
-            $tabla_restricciones_fields[9] = (object) ['field' => 'FeMag [%] Inf ', 'resizable' => true];
+            $tabla_restricciones_fields[9] = (object) ['field' => 'FeMag [%] Inf ', 'resizable' => true, 'cellClass' => 'calculated'];
             $tabla_restricciones_fields[10] = (object) ['field' => 'FeMag [%] sup', 'resizable' => true, 'editable' => true];
             $tabla_restricciones_fields[11] = (object) ['field' => 'FeMag [%] sup ', 'resizable' => true];
             $tabla_restricciones_fields[12] = (object) ['field' => 'Jerarquia', 'resizable' => true];

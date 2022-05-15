@@ -47,13 +47,29 @@
           >
             Correr
           </b-button>
+          <b-button
+            type="button"
+            variant="success"
+            @click="exportar_excel"
+            v-show="exportar_button"
+          >
+            Exportar Excel
+          </b-button>
         </b-col>
       </b-row>
     </b-form>
+    <br>
+    <div class="text-center" v-if="loadingTable">
+        <b-spinner label="Cargando..."></b-spinner>
+    </div>
     <hr>
-    <b-container>
+    <b-container v-if="show_tables">
         <b-row cols="4">
             <b-col md="4" sm="12">
+                <b-button v-ripple.400="'rgba(113, 102, 240, 0.15)'" variant="outline-primary" class="btn-icon rounded-circle"
+                @click="tbl_expand(1)">
+                    <feather-icon icon="SearchIcon" />
+                </b-button>
                 <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet" />
                 <ag-grid-vue style="width: auto; height: 500px;"
                     class="ag-theme-alpine"
@@ -66,6 +82,10 @@
                 </ag-grid-vue>
             </b-col>
             <b-col md="8" sm="12">
+                <b-button v-ripple.400="'rgba(113, 102, 240, 0.15)'" variant="outline-primary" class="btn-icon rounded-circle"
+                @click="tbl_expand(2)">
+                    <feather-icon icon="SearchIcon" />
+                </b-button>
                 <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet" />
                 <ag-grid-vue style="width: auto; height: 500px;"
                     class="ag-theme-alpine"
@@ -81,6 +101,10 @@
         <br>
         <b-row cols="4">
             <b-col md="8" sm="12" offset-md="2">
+                <b-button v-ripple.400="'rgba(113, 102, 240, 0.15)'" variant="outline-primary" class="btn-icon rounded-circle"
+                @click="tbl_expand(3)">
+                    <feather-icon icon="SearchIcon" />
+                </b-button>
                 <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet" />
                 <ag-grid-vue style="width: auto; height: 500px;"
                     class="ag-theme-alpine"
@@ -90,6 +114,19 @@
                 </ag-grid-vue>
             </b-col>
         </b-row>
+        <b-modal
+        id="modal_tables"
+        ref="my-modal"
+        title="Detalle Tabla"
+        size="xl"
+        >
+        <ag-grid-vue style="width: auto; height: 500px;"
+                    class="ag-theme-alpine"
+                    :columnDefs="modal_fields"
+                    :rowData="modal_data"
+                    id="tmodal">
+        </ag-grid-vue>
+        </b-modal>
     </b-container>
   </div>
 </template>
@@ -105,7 +142,9 @@ import {
   BButton,
   BFormFile,
   BTable,
-  BTableLite
+  BTableLite,
+  BModal,
+  BSpinner
 } from "bootstrap-vue";
 import Ripple from "vue-ripple-directive";
 import axios from "axios";
@@ -157,6 +196,12 @@ export default {
       gridColumnApiBalancesTable: null,
       gridApiRestriccionesTable: null,
       columnApiRestriccionesTable: null,
+      modal_var: 0,
+      modal_fields: [],
+      modal_data: [],
+      exportar_button: false,
+      show_tables: false,
+      loadingTable: false,
     };
   },
   mounted(){
@@ -177,6 +222,26 @@ export default {
     ];
   },
   methods: {
+    tbl_expand(table){
+        this.modal_var = table;
+        switch (table) {
+            case 1:
+                this.modal_fields = this.balances_fields;
+                this.modal_data = this.balances_table;
+                break;
+            case 2:
+                this.modal_fields = this.restricciones_fields;
+                this.modal_data = this.restricciones_table;
+                break;
+            case 3:
+                this.modal_fields = this.balance_nodos_fields;
+                this.modal_data = this.balance_nodos;
+                break;
+            default:
+                break;
+        }
+        this.$refs['my-modal'].show();
+    },
     onGridReadyBalancesTable(params) {
       this.gridApiBalancesTable = params.api;
       this.gridColumnApiBalancesTable = params.columnApi;
@@ -268,6 +333,7 @@ export default {
 
     },
     correr_tables(event) {
+        this.loadingTable = true;
         console.log(this.datos_entrada);
       axios
         .post("correr_balance", {
@@ -316,13 +382,18 @@ export default {
             value.cellStyle = nodosCellStyle;
 
           })
+          this.exportar_button = true;
+          this.loadingTable = false;
+          this.show_tables = true;
         })
         .catch(function (e) {
-          console.log("FAILURE!! correr_balance", e);
+            this.loadingTable = false;
+            console.log("FAILURE!! correr_balance", e);
         });
-      this.show_tables = true;
+
     },
     onSubmit(event) {
+      this.loadingTable = true;
       event.preventDefault();
       let formData = new FormData();
       formData.append("file", this.file_1);
@@ -371,13 +442,18 @@ export default {
             value.cellStyle = nodosCellStyle;
 
           })
+
+          this.show_tables = true;
+          this.loadingTable = false;
         })
         .catch(function (e) {
-          console.log("FAILURE!!", e);
+            this.loadingTable = false;
+            console.log("FAILURE!!", e);
         });
     },
   },
   components: {
+    BModal,
     BRow,
     BCol,
     BFormGroup,
@@ -389,6 +465,7 @@ export default {
     BTable,
     BTableLite,
     AgGridVue,
+    BSpinner
   },
   directives: {
     Ripple,
@@ -400,4 +477,11 @@ export default {
   @import "~ag-grid-community/dist/styles/ag-grid.css";
   @import "~ag-grid-community/dist/styles/ag-theme-material.css";
   @import "~ag-grid-community/dist/styles/ag-theme-alpine.css";
+
+  .balance {
+      background-color: rgb(71, 209, 255);
+  }
+  .calculated {
+      background-color: rgb(71, 209, 255);
+  }
 </style>
