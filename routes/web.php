@@ -18,6 +18,7 @@ use App\Http\Controllers\UtilsController;
 
 
 Route::post('balances/import', [BalancesController::class, 'import']);
+Route::get('balances/get_listado', [BalancesController::class, 'get_listado']);
 Route::post('balances/correr_balance', [BalancesController::class, 'correr_balance']);
 Route::post('balances/paint_tables', [BalancesController::class, 'paint_tables']);
 Route::post('balances/save_balance', [BalancesController::class, 'save_balance']);

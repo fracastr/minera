@@ -350,6 +350,14 @@ class BalancesController extends Controller
         return response()->json(['message' => 'uploaded successfully'], 200);
     }
 
+    public function get_listado()
+    {
+        $listado = Balances::all();
+
+        return ['listado' => $listado];
+
+    }
+
     public function correr_balance(Request $request)
     {
         try {

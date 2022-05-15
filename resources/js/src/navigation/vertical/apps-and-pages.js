@@ -2,21 +2,21 @@ export default [
   {
     header: 'Menú de aplicaciones',
   },
-  {
-    title: 'Inventario',
-    route: 'apps-email',
-    icon: 'FileTextIcon',
-  },
-  {
-    title: 'Balance',
-    route: 'balances-Balances',
-    icon: 'PieChartIcon',
-  },
-  {
-    title: 'Wizard',
-    route: 'balances-FormWizardNumber',
-    icon: 'CheckSquareIcon',
-  },
+//   {
+//     title: 'Inventario',
+//     route: 'apps-email',
+//     icon: 'FileTextIcon',
+//   },
+//   {
+//     title: 'Balance',
+//     route: 'balances-Balances',
+//     icon: 'PieChartIcon',
+//   },
+//   {
+//     title: 'Wizard',
+//     route: 'balances-FormWizardNumber',
+//     icon: 'CheckSquareIcon',
+//   },
   {
     title: 'Modulo Balances',
     icon: 'SlidersIcon',
@@ -28,7 +28,7 @@ export default [
       },
       {
         title: 'Listado Balances',
-        route: 'balances-Balances',
+        route: 'balances-Listado',
         icon: 'PieChartIcon',
       },
     ],

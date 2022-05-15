@@ -8,5 +8,10 @@ export default [
         path: '/balances/FormWizardNumber',
         name: 'balances-FormWizardNumber',
         component: () => import('@/views/balances/FormWizardNumber.vue'),
-      },
+    },
+    {
+        path: '/balances/Listado',
+        name: 'balances-Listado',
+        component: () => import('@/views/balances/Listado.vue'),
+    },
   ]
