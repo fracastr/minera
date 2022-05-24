@@ -17,6 +17,7 @@ class CreateProcesosTable extends Migration
             $table->id();
             $table->string('nombre');
             $table->string('tipo');
+            $table->json('componentes')->nullable();
             $table->unsignedBigInteger('valle_id');
 
             $table->foreign('valle_id')->references('id')->on('valles');

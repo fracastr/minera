@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Imports\BalancesImport;
 use App\Models\Balances;
 use App\Models\Datos_entrada;
+use App\Models\Procesos;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Maatwebsite\Excel\Facades\Excel;
@@ -257,14 +258,57 @@ class BalancesController extends Controller
         return $array_balance_nodos;
     }
 
+    public function createTableInventariosFields(){
+        $tabla_inventarios_fields = array();
+
+        $tabla_inventarios_fields[0] = (object) ['field' => 'TMH INI', 'resizable' => true, 'editable' => true];
+        $tabla_inventarios_fields[1] = (object) ['field' => 'TMH FIN', 'resizable' => true, 'cellClass' => ''];
+        $tabla_inventarios_fields[2] = (object) ['field' => 'TMH Delta', 'resizable' => true, 'editable' => true, 'cellClass' => 'calculated'];
+        $tabla_inventarios_fields[3] = (object) ['field' => 'Humedad', 'resizable' => true, 'cellClass' => ''];
+        $tabla_inventarios_fields[4] = (object) ['field' => 'TMS INI', 'resizable' => true, 'editable' => true];
+        $tabla_inventarios_fields[5] = (object) ['field' => 'TMS FIN', 'resizable' => true, 'cellClass' => ''];
+        $tabla_inventarios_fields[6] = (object) ['field' => 'TMS Delta', 'resizable' => true, 'editable' => true, 'cellClass' => 'calculated'];
+        // Aqui falta la que viene desde la base de datos
+
+
+        return $tabla_inventarios_fields;
+    }
+
+    public function createTableInventariosData($data){
+        $inventarios = $data->datos_entrada['inventarios'];
+        $tmh_ini = $data->datos_entrada['tmh_ini'];
+        $tmh_fin = $data->datos_entrada['tmh_fin'];
+        $tmh_delta = $data->datos_entrada['tmh_delta'];
+        $humedad_inventario = $data->datos_entrada['humedad_inventario'];
+        $tms_ini = $data->datos_entrada['tms_ini'];
+        $tms_fin = $data->datos_entrada['tms_fin'];
+        $tms_delta = $data->datos_entrada['tms_delta'];
+        $tabla_inventarios_data = array();
+        foreach ($inventarios as $key_inventarios => $value_inventarios) {
+            $object_inventarios = array();
+
+            $object_inventarios['TMH INI'] = $tmh_ini[$key_inventarios];
+            $object_inventarios['TMH FIN'] = $tmh_fin[$key_inventarios];
+            $object_inventarios['TMH Delta'] = $tmh_delta[$key_inventarios];
+            $object_inventarios['Humedad'] = $humedad_inventario[$key_inventarios];
+            $object_inventarios['TMS INI'] = $tms_ini[$key_inventarios];
+            $object_inventarios['TMS FIN'] = $tms_fin[$key_inventarios];
+            $object_inventarios['TMS Delta'] = $tms_delta[$key_inventarios];
+
+            array_push($tabla_inventarios_data, (object)$object_inventarios);
+        }
+
+        return $tabla_inventarios_data;
+    }
+
     public function import(Request $request)
     {
         try {
-            // $path = $request->file('file')->store('public');
-            // $path = '/home/ubuntu/minera/storage/app/'. $path;
-            $path = '/home/ubuntu/minera/storage/app/public/b8tn1uKCL2o5Qg3ImeGGWJZYV5VrBrg7YNahFiWH.xlsx';
+            $path = $request->file('file')->store('public');
+            $path = '/home/ubuntu/minera/storage/app/'. $path;
+            // $path = '/home/ubuntu/minera/storage/app/public/b8tn1uKCL2o5Qg3ImeGGWJZYV5VrBrg7YNahFiWH.xlsx';
 
-
+        $proceso_id = $request->proceso_id;
         $url = 'http://34.229.82.49:8080/flaskapi/get_balance';
         $myBody['path_name'] = $path;
         // $response = Http::acceptJson()->post($url, array($myBody));
@@ -322,7 +366,13 @@ class BalancesController extends Controller
         $balance_nodos_fields = $this->createTableBalanceNodosFields();
         $array_balance_nodos = $this->createTableBalanceNodos($balance_nodos, $nodos_data, $nodos);
 
+        // logica tabla inventarios
+        $proceso = Procesos::find($proceso_id);
+        $componentes = json_decode($proceso->componentes);
+        $componentes = $componentes->data;
 
+        $inventarios_fields = $this->createTableInventariosFields();
+        $inventarios_data = $this->createTableInventariosData($data);
 
         $data_entrada = $balance_nodos = $data->datos_entrada;
         $datos_entrada_model = new Datos_entrada();
@@ -340,6 +390,8 @@ class BalancesController extends Controller
         'balance_nodos' => $array_balance_nodos,
         'restricciones_fields' => $tabla_restricciones_fields,
         'balance_nodos_fields' => $balance_nodos_fields,
+        'inventarios_fields' => $inventarios_fields,
+        'inventarios_data' => $inventarios_data,
         'path' => $path,
         'datos_entrada_id' => $datos_entrada_id];
         } catch (\GuzzleHttp\Exception\BadResponseException $e) {
@@ -476,7 +528,19 @@ class BalancesController extends Controller
         $balance_nodos_fields = $this->createTableBalanceNodosFields();
         $array_balance_nodos = $this->createTableBalanceNodos($balance_nodos, $nodos_data, $nodos);
 
+        // logica tabla inventarios
+        // $inventarios = $data->datos_entrada['inventarios'];
+        // $tmh_ini = $data->datos_entrada['tmh_ini'];
+        // $tmh_fin = $data->datos_entrada['tmh_fin'];
+        // $tmh_delta = $data->datos_entrada['tmh_delta'];
+        // $humedad_inventario = $data->datos_entrada['humedad_inventario'];
+        // $tms_ini = $data->datos_entrada['tms_ini'];
+        // $tms_fin = $data->datos_entrada['tms_fin'];
+        // $tms_delta = $data->datos_entrada['tms_delta'];
+        //$componentes_inventario = Procesos::find($proceso_id);
 
+        $inventarios_fields = $this->createTableInventariosFields();
+        $inventarios_data = $this->createTableInventariosData($data);
 
         // $data_entrada = $balance_nodos = $data->datos_entrada;
         // $datos_entrada_model = new Datos_entrada();
@@ -492,6 +556,8 @@ class BalancesController extends Controller
         'balance_nodos' => $array_balance_nodos,
         'restricciones_fields' => $tabla_restricciones_fields,
         'balance_nodos_fields' => $balance_nodos_fields,
+        'inventarios_fields' => $inventarios_fields,
+        'inventarios_data' => $inventarios_data,
         'path' => "",
         'datos_entrada_id' => $datos_entrada_id];
         } catch (\GuzzleHttp\Exception\BadResponseException $e) {
@@ -548,8 +614,14 @@ class BalancesController extends Controller
         $balance = new Balances();
         $balance->nombre = $request->nombre_balance;
         $balance->tipo = "quincenal";
+        $balance->proceso_id = $request->proceso_id;
+        $balance->user_id = 1;
         $balance->save();
 
-        return ["se ha guardado con exito"];
+        $datos_entrada = Datos_entrada::find($request->datos_entrada_id);
+        $datos_entrada->balance_id = $balance->id;
+        $datos_entrada->save();
+
+        return ["balance_id" => $balance->id];
     }
 }

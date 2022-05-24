@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Datos_entrada;
 use App\Models\Procesos;
 use App\Models\Valles;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Http;
 
 class UtilsController extends Controller
 {
@@ -96,8 +98,20 @@ class UtilsController extends Controller
         return ['procesos' => $procesos];
     }
 
-    public function BalancesController($balance_id){
+    public function BalancesController($datos_entrada_id){
         // funcion que descarga el excel asociado a un balance
-        
+        $url = 'http://34.229.82.49:8080/flaskapi/get_excel';
+        $response = Http::acceptJson()->post($url, [
+            'datos_entrada_id' => $datos_entrada_id,
+        ]);
+
+        $data = json_decode($response->getBody()->getContents());
+        //dd($data);
+        foreach ($data as $key => &$value) {
+            // $value = json_decode( preg_replace('/[\x00-\x1F\x80-\xFF]/', '', $value), true );
+            $value = json_decode($value, true);
+        }
+
+
     }
 }

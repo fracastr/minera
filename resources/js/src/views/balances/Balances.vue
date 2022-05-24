@@ -53,7 +53,7 @@
             @click="exportar_excel"
             v-show="exportar_button"
           >
-            Exportar Excel
+            Generar Excel Resultados
           </b-button>
         </b-col>
       </b-row>
@@ -100,7 +100,7 @@
         </b-row>
         <br>
         <b-row cols="4">
-            <b-col md="8" sm="12" offset-md="2">
+            <b-col md="5" sm="12" offset-md="0">
                 <b-button v-ripple.400="'rgba(113, 102, 240, 0.15)'" variant="outline-primary" class="btn-icon rounded-circle"
                 @click="tbl_expand(3)">
                     <feather-icon icon="SearchIcon" />
@@ -112,6 +112,23 @@
                     :rowData="balance_nodos"
                     @row-clicked="onRowClicked">
                 </ag-grid-vue>
+            </b-col>
+            <b-col md="7" sm="12" offset-md="0">
+                <b-button v-ripple.400="'rgba(113, 102, 240, 0.15)'" variant="outline-primary" class="btn-icon rounded-circle"
+                @click="tbl_expand(4)">
+                    <feather-icon icon="SearchIcon" />
+                </b-button>
+                <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet" />
+                <ag-grid-vue style="width: auto; height: 500px;"
+                    class="ag-theme-alpine"
+                    :columnDefs="inventarios_fields"
+                    :rowData="inventarios_data">
+                </ag-grid-vue>
+                <!-- <b-img
+                :src="require('@/assets/images/avatars/image.jpeg')"
+                alt="logo"
+                width="800%"
+                /> -->
             </b-col>
         </b-row>
         <b-modal
@@ -144,7 +161,8 @@ import {
   BTable,
   BTableLite,
   BModal,
-  BSpinner
+  BSpinner,
+  BImg,
 } from "bootstrap-vue";
 import Ripple from "vue-ripple-directive";
 import axios from "axios";
@@ -173,6 +191,7 @@ function nodosCellStyle(params) {
 };
 
 export default {
+    props: ['proceso'],
   data() {
     return {
       file_1: null,
@@ -202,6 +221,9 @@ export default {
       exportar_button: false,
       show_tables: false,
       loadingTable: false,
+      inventarios_fields: [],
+      inventarios_data: [],
+      proceso_id: '',
     };
   },
   mounted(){
@@ -236,6 +258,10 @@ export default {
             case 3:
                 this.modal_fields = this.balance_nodos_fields;
                 this.modal_data = this.balance_nodos;
+                break;
+            case 4:
+                this.modal_fields = this.inventarios_fields;
+                this.modal_data = this.inventarios_data;
                 break;
             default:
                 break;
@@ -357,6 +383,8 @@ export default {
           this.balances_fields = response.data.balances_fields;
           this.datos_entrada = response.data.data.datos_entrada;
           this.datos_entrada_id = response.data.datos_entrada_id;
+          this.inventarios_fields = response.data.inventarios_fields;
+          this.inventarios_data = response.data.inventarios_data;
             //console.log("response", response);
           // armar formateo dinamico de numeros
           this.balances_fields.map(function(value, index){
@@ -397,6 +425,7 @@ export default {
       event.preventDefault();
       let formData = new FormData();
       formData.append("file", this.file_1);
+      formData.append("proceso_id", this.proceso);
 
       axios
         .post("import", formData, {
@@ -414,6 +443,8 @@ export default {
           this.balances_fields = response.data.balances_fields;
           this.datos_entrada = response.data.data.datos_entrada;
           this.datos_entrada_id = response.data.datos_entrada_id;
+          this.inventarios_fields = response.data.inventarios_fields;
+          this.inventarios_data = response.data.inventarios_data;
           this.correr_button = true;
           //console.log("items after call");
           console.log(this.datos_entrada);
@@ -465,7 +496,8 @@ export default {
     BTable,
     BTableLite,
     AgGridVue,
-    BSpinner
+    BSpinner,
+    BImg
   },
   directives: {
     Ripple,

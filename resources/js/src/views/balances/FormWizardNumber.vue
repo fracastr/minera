@@ -273,7 +273,7 @@
           <br>
           <b-row>
             <b-col>
-                <balance v-if="new_balance" ref="balances_ref"/>
+                <balance v-if="new_balance" ref="balances_ref" :proceso="proceso"/>
             </b-col>
           </b-row>
       </tab-content>
@@ -490,6 +490,7 @@ export default {
       procesos: [],
       loading: false,
       new_balance: false,
+      balance_id: null,
     }
   },
   mounted(){
@@ -536,12 +537,15 @@ export default {
         .post("save_balance", {
             "datos_entrada": this.$refs.balances_ref.datos_entrada ,
             "nombre_balance": this.nombre_balance,
+            "datos_entrada_id": this.$refs.balances_ref.datos_entrada_id,
+            "proceso_id": this.proceso
             }, {
           headers: {
             "Content-Type": "application/json",
           },
         })
         .then((response) => {
+            this.balance_id = response.data.balance_id;
             this.$toast({
             component: ToastificationContent,
             props: {
