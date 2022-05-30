@@ -98,15 +98,19 @@ class UtilsController extends Controller
         return ['procesos' => $procesos];
     }
 
-    public function BalancesController($datos_entrada_id){
+    public function getExcel($datos_entrada_id, $proceso_id){
         // funcion que descarga el excel asociado a un balance
+        $proceso = Procesos::find($proceso_id);
+        $proceso = json_decode($proceso->componentes);
+        $componentes = $proceso->data;
         $url = 'http://34.229.82.49:8080/flaskapi/get_excel';
         $response = Http::acceptJson()->post($url, [
             'datos_entrada_id' => $datos_entrada_id,
+            'componentes' => $componentes
         ]);
 
         $data = json_decode($response->getBody()->getContents());
-        //dd($data);
+        dd($data);
         foreach ($data as $key => &$value) {
             // $value = json_decode( preg_replace('/[\x00-\x1F\x80-\xFF]/', '', $value), true );
             $value = json_decode($value, true);

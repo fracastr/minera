@@ -4,10 +4,12 @@
 
       <!-- Brand logo-->
       <b-link class="brand-logo">
-        <vuexy-logo />
-        <h2 class="brand-text text-primary ml-1">
-          Sondek
-        </h2>
+        <span class="brand-logo">
+            <b-img
+              :src="appLogoImage"
+              alt="logo"
+            />
+          </span>
       </b-link>
       <!-- /Brand logo-->
 
@@ -237,7 +239,7 @@ import store from '@/store/index'
 import { getHomeRouteForLoggedInUser } from '@/auth/utils'
 
 import ToastificationContent from '@core/components/toastification/ToastificationContent.vue'
-
+import { $themeConfig } from '@themeConfig'
 export default {
   directives: {
     'b-tooltip': VBTooltip,
@@ -260,6 +262,14 @@ export default {
     VuexyLogo,
     ValidationProvider,
     ValidationObserver,
+  },
+  setup() {
+    // App Name
+    const { appName, appLogoImage } = $themeConfig.app
+    return {
+      appName,
+      appLogoImage,
+    }
   },
   mixins: [togglePasswordVisibility],
   data() {

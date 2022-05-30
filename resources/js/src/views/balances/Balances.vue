@@ -66,10 +66,15 @@
     <b-container v-if="show_tables">
         <b-row cols="4">
             <b-col md="4" sm="12">
-                <b-button v-ripple.400="'rgba(113, 102, 240, 0.15)'" variant="outline-primary" class="btn-icon rounded-circle"
-                @click="tbl_expand(1)">
-                    <feather-icon icon="SearchIcon" />
-                </b-button>
+                <b-row align-v="center">
+                    <h5 class="ml-1">
+                        Tabla Balances
+                    </h5>
+                    <b-button v-ripple.400="'rgba(113, 102, 240, 0.15)'" variant="outline-primary" class="btn-icon rounded-circle ml-auto mr-1"
+                    @click="tbl_expand(1)">
+                        <feather-icon icon="SearchIcon" />
+                    </b-button>
+                </b-row>
                 <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet" />
                 <ag-grid-vue style="width: auto; height: 500px;"
                     class="ag-theme-alpine"
@@ -82,10 +87,15 @@
                 </ag-grid-vue>
             </b-col>
             <b-col md="8" sm="12">
-                <b-button v-ripple.400="'rgba(113, 102, 240, 0.15)'" variant="outline-primary" class="btn-icon rounded-circle"
-                @click="tbl_expand(2)">
-                    <feather-icon icon="SearchIcon" />
-                </b-button>
+                <b-row align-v="center">
+                    <h5 class="ml-1">
+                        Tabla Restricciones
+                    </h5>
+                    <b-button v-ripple.400="'rgba(113, 102, 240, 0.15)'" variant="outline-primary" class="btn-icon rounded-circle ml-auto mr-1"
+                    @click="tbl_expand(2)">
+                        <feather-icon icon="SearchIcon" />
+                    </b-button>
+                </b-row>
                 <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet" />
                 <ag-grid-vue style="width: auto; height: 500px;"
                     class="ag-theme-alpine"
@@ -101,10 +111,15 @@
         <br>
         <b-row cols="4">
             <b-col md="5" sm="12" offset-md="0">
-                <b-button v-ripple.400="'rgba(113, 102, 240, 0.15)'" variant="outline-primary" class="btn-icon rounded-circle"
-                @click="tbl_expand(3)">
-                    <feather-icon icon="SearchIcon" />
-                </b-button>
+                <b-row align-v="center">
+                    <h5 class="ml-1">
+                        Tabla Ajuste Nodos
+                    </h5>
+                    <b-button v-ripple.400="'rgba(113, 102, 240, 0.15)'" variant="outline-primary" class="btn-icon rounded-circle ml-auto mr-1"
+                    @click="tbl_expand(3)">
+                        <feather-icon icon="SearchIcon" />
+                    </b-button>
+                </b-row>
                 <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet" />
                 <ag-grid-vue style="width: auto; height: 500px;"
                     class="ag-theme-alpine"
@@ -114,10 +129,15 @@
                 </ag-grid-vue>
             </b-col>
             <b-col md="7" sm="12" offset-md="0">
-                <b-button v-ripple.400="'rgba(113, 102, 240, 0.15)'" variant="outline-primary" class="btn-icon rounded-circle"
-                @click="tbl_expand(4)">
-                    <feather-icon icon="SearchIcon" />
-                </b-button>
+                <b-row align-v="center">
+                    <h5 class="ml-1">
+                        Tabla Variaciones Inventario
+                    </h5>
+                    <b-button v-ripple.400="'rgba(113, 102, 240, 0.15)'" variant="outline-primary" class="btn-icon rounded-circle ml-auto mr-1"
+                    @click="tbl_expand(4)">
+                        <feather-icon icon="SearchIcon" />
+                    </b-button>
+                </b-row>
                 <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet" />
                 <ag-grid-vue style="width: auto; height: 500px;"
                     class="ag-theme-alpine"
@@ -134,10 +154,17 @@
         <b-modal
         id="modal_tables"
         ref="my-modal"
-        title="Detalle Tabla"
+        v-bind:title="modalTitle"
         size="xl"
         >
-        <ag-grid-vue style="width: auto; height: 500px;"
+        <ag-grid-vue v-if="this.modal_var == 1 || this.modal_var == 2" style="width: auto; height: 500px;"
+                    class="ag-theme-alpine"
+                    :columnDefs="modal_fields"
+                    :rowData="modal_data"
+                    id="tmodal"
+                    :getRowStyle="getRowStyle">
+        </ag-grid-vue>
+        <ag-grid-vue v-else style="width: auto; height: 500px;"
                     class="ag-theme-alpine"
                     :columnDefs="modal_fields"
                     :rowData="modal_data"
@@ -224,6 +251,7 @@ export default {
       inventarios_fields: [],
       inventarios_data: [],
       proceso_id: '',
+      modalTitle: '' ,
     };
   },
   mounted(){
@@ -244,22 +272,51 @@ export default {
     ];
   },
   methods: {
+    exportar_excel(){
+        axios
+        .get("getExcel/"+ this.datos_entrada_id+"/"+this.proceso)
+        .then((response) => {
+            console.log("response excel", response);
+        })
+        .catch(function (e) {
+          console.log("FAILURE!!", e);
+        }).finally(() => {
+        });
+    },
     tbl_expand(table){
         this.modal_var = table;
         switch (table) {
             case 1:
                 this.modal_fields = this.balances_fields;
                 this.modal_data = this.balances_table;
+                this.modalTitle = 'Detalle Tabla Balances'
                 break;
             case 2:
-                this.modal_fields = this.restricciones_fields;
-                this.modal_data = this.restricciones_table;
+                this.modalTitle = 'Detalle Tabla Restricciones'
+                let field = {field: 'Flujo', editable: false, resizable: true};
+                let restricciones = this.restricciones_fields;
+                var myData = Object.keys(restricciones).map(key => {
+                    return restricciones[key];
+                })
+                console.log("restricciones",restricciones, myData);
+                restricciones = myData.unshift(field);
+                console.log("new restricciones", restricciones);
+                this.modal_fields = restricciones;
+                let flujos = this.datos_entrada.flujos;
+                let data = this.restricciones_table
+                // console.log("la data", data);
+                // data.forEach((element, index) => {
+                //     element.Flujo = flujos[index];
+                // });
+                this.modal_data = data;
                 break;
             case 3:
+                this.modalTitle = 'Detalle Tabla Ajuste Nodos'
                 this.modal_fields = this.balance_nodos_fields;
                 this.modal_data = this.balance_nodos;
                 break;
             case 4:
+                this.modalTitle = 'Detalle Tabla Variaciones Inventario'
                 this.modal_fields = this.inventarios_fields;
                 this.modal_data = this.inventarios_data;
                 break;
@@ -307,32 +364,32 @@ export default {
 
     return resp;
     },
-      scrolledbalances(e){
-        //   console.log("estoy haciendo scroll",e);
-        //   console.log("tabla restricciones", this.gridApiRestriccionesTable);
-        const tbl1 = document.getElementById("tbalances");
-        const tbl2 = document.getElementById("trestricciones");
-        // console.log("tabla 2", tbl2);
-        // const gridBody1 = tbl1.querySelector(".ag-body-viewport");
-        const gridBody2 = tbl2.querySelector(".ag-body-viewport");
-        // console.log("gridBody2", gridBody2);
+    scrolledbalances(e){
+    //   console.log("estoy haciendo scroll",e);
+    //   console.log("tabla restricciones", this.gridApiRestriccionesTable);
+    const tbl1 = document.getElementById("tbalances");
+    const tbl2 = document.getElementById("trestricciones");
+    // console.log("tabla 2", tbl2);
+    // const gridBody1 = tbl1.querySelector(".ag-body-viewport");
+    const gridBody2 = tbl2.querySelector(".ag-body-viewport");
+    // console.log("gridBody2", gridBody2);
 
-        gridBody2.scrollTop = e.top;
+    gridBody2.scrollTop = e.top;
 
-      },
-      scrolledrestricciones(e){
-        //   console.log("estoy haciendo scroll",e);
-        //   console.log("tabla restricciones", this.gridApiRestriccionesTable);
-        // const tbl1 = document.getElementById("tbalances");
-        // const tbl2 = document.getElementById("trestricciones");
-        // // console.log("tabla 2", tbl2);
-        // const gridBody1 = tbl1.querySelector(".ag-body-viewport");
-        // const gridBody2 = tbl2.querySelector(".ag-body-viewport");
-        // console.log("gridBody2", gridBody2);
+    },
+    scrolledrestricciones(e){
+    //   console.log("estoy haciendo scroll",e);
+    //   console.log("tabla restricciones", this.gridApiRestriccionesTable);
+    // const tbl1 = document.getElementById("tbalances");
+    // const tbl2 = document.getElementById("trestricciones");
+    // // console.log("tabla 2", tbl2);
+    // const gridBody1 = tbl1.querySelector(".ag-body-viewport");
+    // const gridBody2 = tbl2.querySelector(".ag-body-viewport");
+    // console.log("gridBody2", gridBody2);
 
-        // gridBody1.scrollTop = e.top;
+    // gridBody1.scrollTop = e.top;
 
-      },
+    },
     onRowClicked(event) {
         console.log("se ha hecho click en una fila");
         console.log(event);
@@ -367,7 +424,9 @@ export default {
             "datos_entrada_id": this.datos_entrada_id,
             "balances_table": this.balances_table,
             "restricciones_table": this.restricciones_table,
-            "balance_nodos": this.balance_nodos
+            "balance_nodos": this.balance_nodos,
+            "proceso_id": this.proceso,
+            "inventarios_table": this.inventarios_data
             }, {
           headers: {
             "Content-Type": "application/json",

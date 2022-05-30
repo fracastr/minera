@@ -24,5 +24,5 @@ Route::post('balances/paint_tables', [BalancesController::class, 'paint_tables']
 Route::post('balances/save_balance', [BalancesController::class, 'save_balance']);
 Route::get('balances/getValles/{user_id}', [UtilsController::class, 'getValles']);
 Route::get('balances/getProcesos/{valle_id}', [UtilsController::class, 'getProcesos']);
-Route::get('balances/getExcel/{datos_entrada_id}', [UtilsController::class, 'getExcel']);
+Route::get('balances/getExcel/{datos_entrada_id}/{proceso_id}', [UtilsController::class, 'getExcel']);
 Route::get('/{any}', [ApplicationController::class, 'index'])->where('any', '.*');

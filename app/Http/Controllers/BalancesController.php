@@ -258,23 +258,25 @@ class BalancesController extends Controller
         return $array_balance_nodos;
     }
 
-    public function createTableInventariosFields(){
+    public function createTableInventariosFields($componentes){
         $tabla_inventarios_fields = array();
 
         $tabla_inventarios_fields[0] = (object) ['field' => 'TMH INI', 'resizable' => true, 'editable' => true];
-        $tabla_inventarios_fields[1] = (object) ['field' => 'TMH FIN', 'resizable' => true, 'cellClass' => ''];
-        $tabla_inventarios_fields[2] = (object) ['field' => 'TMH Delta', 'resizable' => true, 'editable' => true, 'cellClass' => 'calculated'];
-        $tabla_inventarios_fields[3] = (object) ['field' => 'Humedad', 'resizable' => true, 'cellClass' => ''];
+        $tabla_inventarios_fields[1] = (object) ['field' => 'TMH FIN', 'resizable' => true, 'editable' => true];
+        $tabla_inventarios_fields[2] = (object) ['field' => 'TMH Delta', 'resizable' => true, 'cellClass' => 'calculated'];
+        $tabla_inventarios_fields[3] = (object) ['field' => 'Humedad', 'resizable' => true, 'editable' => true];
         $tabla_inventarios_fields[4] = (object) ['field' => 'TMS INI', 'resizable' => true, 'editable' => true];
-        $tabla_inventarios_fields[5] = (object) ['field' => 'TMS FIN', 'resizable' => true, 'cellClass' => ''];
-        $tabla_inventarios_fields[6] = (object) ['field' => 'TMS Delta', 'resizable' => true, 'editable' => true, 'cellClass' => 'calculated'];
+        $tabla_inventarios_fields[5] = (object) ['field' => 'TMS FIN', 'resizable' => true, 'editable' => true];
+        $tabla_inventarios_fields[6] = (object) ['field' => 'TMS Delta', 'resizable' => true, 'cellClass' => 'calculated'];
         // Aqui falta la que viene desde la base de datos
-
+        foreach ($componentes as $key => $value) {
+            $tabla_inventarios_fields[sizeof($tabla_inventarios_fields)] = (object) ['field' => $value, 'resizable' => true, 'editable'=> true];
+        }
 
         return $tabla_inventarios_fields;
     }
 
-    public function createTableInventariosData($data){
+    public function createTableInventariosData($data, $componentes){
         $inventarios = $data->datos_entrada['inventarios'];
         $tmh_ini = $data->datos_entrada['tmh_ini'];
         $tmh_fin = $data->datos_entrada['tmh_fin'];
@@ -283,6 +285,8 @@ class BalancesController extends Controller
         $tms_ini = $data->datos_entrada['tms_ini'];
         $tms_fin = $data->datos_entrada['tms_fin'];
         $tms_delta = $data->datos_entrada['tms_delta'];
+        $componentes_inventario = $data->datos_entrada['componentes_inventario'];
+
         $tabla_inventarios_data = array();
         foreach ($inventarios as $key_inventarios => $value_inventarios) {
             $object_inventarios = array();
@@ -294,6 +298,9 @@ class BalancesController extends Controller
             $object_inventarios['TMS INI'] = $tms_ini[$key_inventarios];
             $object_inventarios['TMS FIN'] = $tms_fin[$key_inventarios];
             $object_inventarios['TMS Delta'] = $tms_delta[$key_inventarios];
+            foreach ($componentes as $key => $value) {
+                $object_inventarios[$value] = $componentes_inventario[$key_inventarios][$key];
+            }
 
             array_push($tabla_inventarios_data, (object)$object_inventarios);
         }
@@ -304,16 +311,19 @@ class BalancesController extends Controller
     public function import(Request $request)
     {
         try {
-            $path = $request->file('file')->store('public');
-            $path = '/home/ubuntu/minera/storage/app/'. $path;
-            // $path = '/home/ubuntu/minera/storage/app/public/b8tn1uKCL2o5Qg3ImeGGWJZYV5VrBrg7YNahFiWH.xlsx';
+            // $path = $request->file('file')->store('public');
+            // $path = '/home/ubuntu/minera/storage/app/'. $path;
+            $path = '/home/ubuntu/minera/storage/app/public/b8tn1uKCL2o5Qg3ImeGGWJZYV5VrBrg7YNahFiWH.xlsx';
 
         $proceso_id = $request->proceso_id;
+        $proceso = Procesos::find($proceso_id);
+        $nombre_proceso = $proceso->nombre;
         $url = 'http://34.229.82.49:8080/flaskapi/get_balance';
         $myBody['path_name'] = $path;
         // $response = Http::acceptJson()->post($url, array($myBody));
         $response = Http::acceptJson()->post($url, [
             'path_name' => $path,
+            'nombre_proceso' => $nombre_proceso
         ]);
         //dd($response);
         //dd(json_decode($response->getBody()->getContents()));
@@ -367,12 +377,12 @@ class BalancesController extends Controller
         $array_balance_nodos = $this->createTableBalanceNodos($balance_nodos, $nodos_data, $nodos);
 
         // logica tabla inventarios
-        $proceso = Procesos::find($proceso_id);
+
         $componentes = json_decode($proceso->componentes);
         $componentes = $componentes->data;
 
-        $inventarios_fields = $this->createTableInventariosFields();
-        $inventarios_data = $this->createTableInventariosData($data);
+        $inventarios_fields = $this->createTableInventariosFields($componentes);
+        $inventarios_data = $this->createTableInventariosData($data, $componentes);
 
         $data_entrada = $balance_nodos = $data->datos_entrada;
         $datos_entrada_model = new Datos_entrada();
@@ -420,11 +430,42 @@ class BalancesController extends Controller
         $datos_entrada = $request->datos_entrada;
         $balances_table = $request->balances_table;
         $restricciones_table = $request->restricciones_table;
+        $proceso_id = $request->proceso_id;
+        $inventarios_table = $request->inventarios_table;
         //dd($request->all());
         //dd($request->balances_table);
         //$size_mediciones = sizeof($request->datos_entrada["mediciones"][0]);
 
         //dd($size_mediciones);
+        $tmh_ini = array();
+        $tmh_fin = array();
+        $tms_ini = array();
+        $tms_fin = array();
+        $humedad = array();
+        foreach ($inventarios_table as $key_inventarios_table => $value_inventarios_table) {
+            switch ($key_inventarios_table) {
+                case 'TMH INI':
+                    array_push($tmh_ini, $value_inventarios_table);
+                    break;
+                case 'TMH FIN':
+                    array_push($tmh_fin, $value_inventarios_table);
+                    break;
+                case 'TMS INI':
+                    array_push($tms_ini, $value_inventarios_table);
+                    break;
+                case 'TMS FIN':
+                    array_push($tms_fin, $value_inventarios_table);
+                    break;
+                case 'Humedad':
+                    array_push($humedad, $value_inventarios_table);
+                    break;
+
+                default:
+                    # code...
+                    break;
+            }
+        }
+
         $new_mediciones = array();
 
         foreach($balances_table as $key => $value){
@@ -432,7 +473,6 @@ class BalancesController extends Controller
             foreach($value as $key2 => $value2){
                 if($key2 != "Flujos"){
                     array_push($new_mediciones_array, floatval(str_replace(",","",$value2)));
-                    // array_push($new_mediciones_array, intval(str_replace(".","",$value2)));
                 }
             }
             array_push($new_mediciones, $new_mediciones_array);
@@ -442,14 +482,11 @@ class BalancesController extends Controller
         $datos_entrada['mediciones'] = $new_mediciones;
         $new_restricciones = array();
         foreach($restricciones_table as $key_restricciones => $value_restricciones){
-            //dd($value_restricciones);
             $contador = 0;
             $new_restricciones_array = array();
             foreach($value_restricciones as $key_value_restricciones => $value_restricciones_data){
                 if($contador % 2 == 0 && $key_value_restricciones != "Jerarquia"){
-                    //dd($key_value_restricciones, $value_restricciones_data);
                     array_push($new_restricciones_array, floatval(str_replace(",","",$value_restricciones_data)));
-                    //dd($new_restricciones_array);
                 }
                 $contador++;
             }
@@ -457,7 +494,6 @@ class BalancesController extends Controller
             array_push($new_restricciones, $new_restricciones_array);
         }
 
-        //dd($new_restricciones);
         // actualiza las restricciones
         $datos_entrada['restricciones'] = $new_restricciones;
 
@@ -529,18 +565,12 @@ class BalancesController extends Controller
         $array_balance_nodos = $this->createTableBalanceNodos($balance_nodos, $nodos_data, $nodos);
 
         // logica tabla inventarios
-        // $inventarios = $data->datos_entrada['inventarios'];
-        // $tmh_ini = $data->datos_entrada['tmh_ini'];
-        // $tmh_fin = $data->datos_entrada['tmh_fin'];
-        // $tmh_delta = $data->datos_entrada['tmh_delta'];
-        // $humedad_inventario = $data->datos_entrada['humedad_inventario'];
-        // $tms_ini = $data->datos_entrada['tms_ini'];
-        // $tms_fin = $data->datos_entrada['tms_fin'];
-        // $tms_delta = $data->datos_entrada['tms_delta'];
-        //$componentes_inventario = Procesos::find($proceso_id);
+        $proceso = Procesos::find($proceso_id);
+        $componentes = json_decode($proceso->componentes);
+        $componentes = $componentes->data;
 
-        $inventarios_fields = $this->createTableInventariosFields();
-        $inventarios_data = $this->createTableInventariosData($data);
+        $inventarios_fields = $this->createTableInventariosFields($componentes);
+        $inventarios_data = $this->createTableInventariosData($data, $componentes);
 
         // $data_entrada = $balance_nodos = $data->datos_entrada;
         // $datos_entrada_model = new Datos_entrada();
