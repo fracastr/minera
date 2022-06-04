@@ -112,7 +112,7 @@ class UtilsController extends Controller
 
         $data = json_decode($response->getBody()->getContents());
 
-        $filename = $data->filename;
+        $filename = "/".$data->filename;
         return Storage::download($filename);
 
     }
