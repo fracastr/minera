@@ -117,7 +117,7 @@ class UtilsController extends Controller
             $value = json_decode($value, true);
         }
         $filename = $data->filename;
-        return Storage::download($datos_entrada_id.'.xlsx');
+        return Storage::download($filename);
 
     }
 }
