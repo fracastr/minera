@@ -274,9 +274,15 @@ export default {
   methods: {
     exportar_excel(){
         axios
-        .get("getExcel/"+ this.datos_entrada_id+"/"+this.proceso)
+        .get("getExcel/"+ this.datos_entrada_id+"/"+this.proceso, {responseType: 'blob'})
         .then((response) => {
             console.log("response excel", response);
+            const fileURL = window.URL.createObjectURL(new Blob([response.data]))
+            var filelink = document.createElement('a')
+            filelink.href = fileURL
+            filelink.setAttribute('download', this.data.name)
+            document.body.appendChild(filelink)
+            filelink.click()
         })
         .catch(function (e) {
           console.log("FAILURE!!", e);
