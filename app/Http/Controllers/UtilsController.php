@@ -115,8 +115,7 @@ class UtilsController extends Controller
         $filename = $data->filename;
         $filename = explode("/", $filename);
         $filename = end($filename);
-        dd($filename);
-        $file = Storage::path($filename);
+        $file = Storage::path("public/".$filename);
         return response()->file($file);
         // return response()->download($filename);
         // return Storage::download($filename);
