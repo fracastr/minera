@@ -280,7 +280,7 @@ export default {
             const fileURL = window.URL.createObjectURL(new Blob([response.data]))
             var filelink = document.createElement('a')
             filelink.href = fileURL
-            filelink.setAttribute('download', this.data.name)
+            filelink.setAttribute('download', "Resultados.xlsx")
             document.body.appendChild(filelink)
             filelink.click()
         })
