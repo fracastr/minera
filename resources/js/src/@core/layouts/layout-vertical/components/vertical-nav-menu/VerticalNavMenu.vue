@@ -19,20 +19,21 @@
         <ul class="nav navbar-nav flex-row">
 
           <!-- Logo & Text -->
-          <li class="nav-item mr-auto">
+          <li class="nav-item mx-auto">
             <b-link
               class="navbar-brand"
               to="/"
             >
-              <span class="brand-logo">
+              <span class="">
                 <b-img
                   :src="appLogoImage"
                   alt="logo"
+                  style="height: 40px; width: auto;"
                 />
               </span>
-              <h2 class="brand-text">
+              <!-- <h2 class="brand-text">
                 {{ appName }}
-              </h2>
+              </h2> -->
             </b-link>
           </li>
 

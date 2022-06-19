@@ -8,6 +8,7 @@
             <b-img
               :src="appLogoImage"
               alt="logo"
+              style="height: 80px; width: auto;"
             />
           </span>
       </b-link>
@@ -16,9 +17,9 @@
       <!-- Left Text-->
       <b-col
         lg="8"
-        class="d-none d-lg-flex align-items-center p-5"
+        class="d-none d-lg-flex align-items-center"
       >
-        <div class="w-100 d-lg-flex align-items-center justify-content-center px-5">
+        <div class="w-100 d-lg-flex align-items-center justify-content-center">
           <b-img
             fluid
             :src="imgUrl"
@@ -106,7 +107,7 @@
                 <div class="d-flex justify-content-between">
                   <label for="login-password">Password</label>
                   <b-link :to="{name:'auth-forgot-password'}">
-                    <small>Forgot Password?</small>
+                    <small>¿Olvidó su contraseña?</small>
                   </b-link>
                 </div>
                 <validation-provider
@@ -171,14 +172,14 @@
           </b-card-text>
 
           <!-- divider -->
-          <div class="divider my-2">
+          <!-- <div class="divider my-2">
             <div class="divider-text">
               o
             </div>
-          </div>
+          </div> -->
 
           <!-- social buttons -->
-          <div class="auth-footer-btn d-flex justify-content-center">
+          <!-- <div class="auth-footer-btn d-flex justify-content-center">
             <b-button
               variant="facebook"
               href="javascript:void(0)"
@@ -203,7 +204,7 @@
             >
               <feather-icon icon="GithubIcon" />
             </b-button>
-          </div>
+          </div> -->
         </b-col>
       </b-col>
     <!-- /Login-->
@@ -277,7 +278,7 @@ export default {
       status: '',
       password: 'admin',
       userEmail: 'admin@demo.com',
-      sideImg: require('@/assets/images/pages/login-v2.svg'),
+      sideImg: require('@/assets/images/pages/cmp/cmp1.jpg'),
 
       // validation rules
       required,
@@ -291,7 +292,7 @@ export default {
     imgUrl() {
       if (store.state.appConfig.layout.skin === 'dark') {
         // eslint-disable-next-line vue/no-side-effects-in-computed-properties
-        this.sideImg = require('@/assets/images/pages/login-v2-dark.svg')
+        this.sideImg = require('@/assets/images/pages/cmp/cmp1.jpg')
         return this.sideImg
       }
       return this.sideImg
