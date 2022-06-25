@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Storage;
 use Maatwebsite\Excel\Facades\Excel;
 use GuzzleHttp\Client;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
 use stdClass;
 
@@ -311,6 +312,13 @@ class BalancesController extends Controller
     public function import(Request $request)
     {
         try {
+            // $file = $request->file('file');
+            // $path = $request->file('file')->storeAs(
+            //     null,
+            //     $file->getClientOriginalName(),
+            //     'google'
+            // );
+            // dd($path, Auth::id());
             $path = $request->file('file')->store('public');
             $path = '/home/ubuntu/minera/storage/app/'. $path;
             // $path = '/home/ubuntu/minera/storage/app/public/UG63bAZW37WzfEbAeDdK6jONL1by1beasIEQ0Zaj.xlsx';
