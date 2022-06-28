@@ -299,22 +299,22 @@ export default {
                 break;
             case 2:
                 this.modalTitle = 'Detalle Tabla Restricciones'
-                let field = {field: 'Flujo', editable: false, resizable: true};
-                let restricciones = this.restricciones_fields;
-                var myData = Object.keys(restricciones).map(key => {
-                    return restricciones[key];
-                })
-                console.log("restricciones",restricciones, myData);
-                restricciones = myData.unshift(field);
-                console.log("new restricciones", restricciones);
-                this.modal_fields = restricciones;
-                let flujos = this.datos_entrada.flujos;
-                let data = this.restricciones_table
+                // let field = {field: 'Flujo', editable: false, resizable: true};
+                // let restricciones = this.restricciones_fields;
+                // var myData = Object.keys(restricciones).map(key => {
+                //     return restricciones[key];
+                // })
+                // console.log("restricciones",restricciones, myData);
+                // restricciones = myData.unshift(field);
+                // console.log("new restricciones", restricciones);
+                this.modal_fields = this.restricciones_fields;
+                // let flujos = this.datos_entrada.flujos;
+                // let data = this.restricciones_table
                 // console.log("la data", data);
                 // data.forEach((element, index) => {
                 //     element.Flujo = flujos[index];
                 // });
-                this.modal_data = data;
+                this.modal_data = this.restricciones_table;
                 break;
             case 3:
                 this.modalTitle = 'Detalle Tabla Ajuste Nodos'
