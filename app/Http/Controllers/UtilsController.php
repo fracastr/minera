@@ -5,9 +5,12 @@ namespace App\Http\Controllers;
 use App\Models\Datos_entrada;
 use App\Models\Procesos;
 use App\Models\Valles;
+use Google_Client;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
+use Symfony\Component\Process\Exception\ProcessFailedException;
+use Symfony\Component\Process\Process;
 
 class UtilsController extends Controller
 {
@@ -100,6 +103,20 @@ class UtilsController extends Controller
     }
 
     public function getExcel($datos_entrada_id, $proceso_id){
+
+        //$files = Storage::disk('google')->allFiles();
+        $filename = $datos_entrada_id . '.xlsx';
+
+        // $contents = Storage::path('out.xlsx');
+        // dd($contents);
+        // $path = $request->file('file')->storeAs(
+            //     null,
+            //     $file->getClientOriginalName(),
+            //     'google'
+            // );
+        //$move = Storage::move(Storage::path('out.xlsx'), Storage::disk('google'));
+
+        // dd($move);
         // funcion que descarga el excel asociado a un balance
         $proceso = Procesos::find($proceso_id);
         $proceso = json_decode($proceso->componentes);
@@ -111,11 +128,51 @@ class UtilsController extends Controller
         ]);
 
         $data = json_decode($response->getBody()->getContents());
-        $filename = $data->filename;
-        $filename = explode("/", $filename);
-        $filename = end($filename);
-        $file = Storage::path("public/".$filename);
-        return response()->file($file);
+        //dd($data->matriz);
+        $public = storage_path('app/public');
+        //$data = implode(',',$data->matriz);
+        $data = json_encode($data->matriz);
+        $command = $public . '/excelnode.js';
+        $process = new Process(['/usr/local/bin/node', $command, $data, $datos_entrada_id, $public]);
+        $process->run();
+
+        // executes after the command finishes
+        if (!$process->isSuccessful()) {
+            throw new ProcessFailedException($process);
+        }
+        else{
+            // dd($process->getOutput());
+            //$contents = Storage::disk('local')->get('out.xlsx');
+            $contents = Storage::get('public/'. $datos_entrada_id.'.xlsx');
+            $move = Storage::disk('google')->put($datos_entrada_id.'.xlsx', $contents);
+
+
+            $client = new Google_Client();
+            $client->setClientId(env('GOOGLE_DRIVE_CLIENT_ID'));
+            $client->setClientSecret(env('GOOGLE_DRIVE_CLIENT_SECRET'));
+            $client->refreshToken(env('GOOGLE_DRIVE_REFRESH_TOKEN'));
+            $service = new \Google_Service_Drive($client);
+
+            $qry = "name='".$datos_entrada_id.".xlsx'";
+
+            $files = $service->files->listFiles([
+                'q' => $qry,
+                'fields' => 'files(webViewLink)'
+            ]);
+            // dd($files[0]->webViewLink);
+
+            $return = $files[0]->webViewLink;
+            return $return;
+            // $contents = Storage::allFiles();
+            // dd($contents);
+        }
+
+        // echo $process->getOutput();
+        // $filename = $data->filename;
+        // $filename = explode("/", $filename);
+        // $filename = end($filename);
+        // $file = Storage::path("public/".$filename);
+        // return response()->file($file);
         // return response()->download($filename);
         // return Storage::download($filename);
 

@@ -6,6 +6,7 @@ use App\Imports\BalancesImport;
 use App\Models\Balances;
 use App\Models\Datos_entrada;
 use App\Models\Procesos;
+use Google_Client;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Maatwebsite\Excel\Facades\Excel;
@@ -319,9 +320,9 @@ class BalancesController extends Controller
             //     'google'
             // );
             // dd($path, Auth::id());
-            $path = $request->file('file')->store('public');
-            $path = '/home/ubuntu/minera/storage/app/'. $path;
-            // $path = '/home/ubuntu/minera/storage/app/public/UG63bAZW37WzfEbAeDdK6jONL1by1beasIEQ0Zaj.xlsx';
+            // $path = $request->file('file')->store('public');
+            // $path = '/home/ubuntu/minera/storage/app/'. $path;
+            $path = '/home/ubuntu/minera/storage/app/public/UG63bAZW37WzfEbAeDdK6jONL1by1beasIEQ0Zaj.xlsx';
 
         $proceso_id = $request->proceso_id;
         $proceso = Procesos::find($proceso_id);
