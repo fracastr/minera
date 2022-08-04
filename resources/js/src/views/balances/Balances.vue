@@ -199,17 +199,28 @@ function decimalFormatter(params) {
     // console.log(parseFloat(params.value));
     return (parseFloat(params.value) * 100).toFixed(2);
 }
+function decimalFormatter2(params) {
+    // console.log("params decimal", params.value);
+    // console.log(parseFloat(params.value));
+    return (parseFloat(params.value)).toFixed(2);
+}
 function intFormatter(params) {
     // console.log("params int", params.value);
     // console.log(parseInt(params.value));
     return parseInt(params.value.replace(/,/g, ''), 10)
     // return (parseFloat(params.value) * 100).toFixed(2);
 }
+function intFormatter2(params) {
+    // console.log("params int", params.value);
+    // console.log(parseInt(params.value));
+    return parseInt(params.value, 10)
+    // return (parseFloat(params.value) * 100).toFixed(2);
+}
 
 function nodosCellStyle(params) {
-    console.log("nodosStyle", params);
-    console.log(!isNaN(params.value));
-    console.log(parseFloat(params.value));
+    // console.log("nodosStyle", params);
+    // console.log(!isNaN(params.value));
+    // console.log(parseFloat(params.value));
     if(!isNaN(params.value) && parseFloat(params.value) > 0.001){
         return {
             backgroundColor: "red",
@@ -467,7 +478,7 @@ export default {
           // armar formateo dinamico de numeros tabla 2
           this.restricciones_fields.map(function(value, index){
               console.log("index y value", index, value, data_restricciones.length);
-              if(index != data_restricciones.length - 1){
+              if(index != data_restricciones.length - 1 && index != 0){
                   console.log(index);
                   value.valueFormatter = decimalFormatter;
               }
@@ -485,6 +496,8 @@ export default {
             this.loadingTable = false;
             console.log("FAILURE!! correr_balance", e);
         });
+
+        this.loadingTable = false;
 
     },
     onSubmit(event) {
@@ -514,7 +527,7 @@ export default {
           this.inventarios_data = response.data.inventarios_data;
           this.correr_button = true;
           //console.log("items after call");
-          console.log(this.datos_entrada);
+        //   console.log(this.datos_entrada);
 
           // armar formateo dinamico de numeros
           this.balances_fields.map(function(value, index){
@@ -530,9 +543,19 @@ export default {
           // armar formateo dinamico de numeros tabla 2
           this.restricciones_fields.map(function(value, index){
               //console.log("index y value", index, value, data_restricciones.length);
-              if(index != data_restricciones.length - 1){
-                  console.log(index);
+              if(index != data_restricciones.length - 1 && index != 0){
+                //   console.log(index);
                   value.valueFormatter = decimalFormatter;
+              }
+          })
+
+          this.inventarios_fields.map(function(value, index){
+              //console.log("index y value", index, value, data_restricciones.length);
+              if(index != 0 && index != 4){
+                  value.valueFormatter = intFormatter2;
+              }
+              else if(index == 4){
+                  value.valueFormatter = decimalFormatter2;
               }
           })
 

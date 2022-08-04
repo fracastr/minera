@@ -173,40 +173,43 @@ class BalancesController extends Controller
     public function createTableRestriccionesFields($restricciones, $jerarquia){
         $tabla_restricciones_fields = array();
         if(sizeof($restricciones[0]) == 4){
-            $tabla_restricciones_fields[0] = (object) ['field' => 'TMS inf[%]', 'resizable' => true, 'editable' => true];
-            $tabla_restricciones_fields[1] = (object) ['field' => 'TMS inf[%] ', 'resizable' => true, 'cellClass' => 'calculated'];
-            $tabla_restricciones_fields[2] = (object) ['field' => 'TMS sup[%]', 'resizable' => true, 'editable' => true];
-            $tabla_restricciones_fields[3] = (object) ['field' => 'TMS sup[%] ', 'resizable' => true, 'cellClass' => 'calculated'];
-            $tabla_restricciones_fields[4] = (object) ['field' => 'Fet [%] inf', 'resizable' => true, 'editable' => true];
-            $tabla_restricciones_fields[5] = (object) ['field' => 'Fet [%] inf ', 'resizable' => true, 'cellClass' => 'calculated'];
-            $tabla_restricciones_fields[6] = (object) ['field' => 'Fet [%] sup', 'resizable' => true, 'editable' => true];
-            $tabla_restricciones_fields[7] = (object) ['field' => 'Fet [%] sup ', 'resizable' => true, 'cellClass' => 'calculated'];
-            $tabla_restricciones_fields[8] = (object) ['field' => 'Jerarquia', 'resizable' => true];
+            $tabla_restricciones_fields[0] = (object) ['field' => 'Flujos', 'resizable' => true, 'editable' => false];
+            $tabla_restricciones_fields[1] = (object) ['field' => 'TMS inf[%]', 'resizable' => true, 'editable' => true];
+            $tabla_restricciones_fields[2] = (object) ['field' => 'TMS inf[%] ', 'resizable' => true, 'cellClass' => 'calculated'];
+            $tabla_restricciones_fields[3] = (object) ['field' => 'TMS sup[%]', 'resizable' => true, 'editable' => true];
+            $tabla_restricciones_fields[4] = (object) ['field' => 'TMS sup[%] ', 'resizable' => true, 'cellClass' => 'calculated'];
+            $tabla_restricciones_fields[5] = (object) ['field' => 'Fet [%] inf', 'resizable' => true, 'editable' => true];
+            $tabla_restricciones_fields[6] = (object) ['field' => 'Fet [%] inf ', 'resizable' => true, 'cellClass' => 'calculated'];
+            $tabla_restricciones_fields[7] = (object) ['field' => 'Fet [%] sup', 'resizable' => true, 'editable' => true];
+            $tabla_restricciones_fields[8] = (object) ['field' => 'Fet [%] sup ', 'resizable' => true, 'cellClass' => 'calculated'];
+            $tabla_restricciones_fields[9] = (object) ['field' => 'Jerarquia', 'resizable' => true, 'editable' => true];
         }
         else if(sizeof($restricciones[0]) == 6){
-            $tabla_restricciones_fields[0] = (object) ['field' => 'TMS inf[%]', 'resizable' => true, 'editable' => true];
-            $tabla_restricciones_fields[1] = (object) ['field' => 'TMS inf[%] ', 'resizable' => true, 'cellClass' => 'calculated'];
-            $tabla_restricciones_fields[2] = (object) ['field' => 'TMS sup[%]', 'resizable' => true, 'editable' => true];
-            $tabla_restricciones_fields[3] = (object) ['field' => 'TMS sup[%] ', 'resizable' => true, 'cellClass' => 'calculated'];
-            $tabla_restricciones_fields[4] = (object) ['field' => 'Fet [%] inf', 'resizable' => true, 'editable' => true];
-            $tabla_restricciones_fields[5] = (object) ['field' => 'Fet [%] inf ', 'resizable' => true, 'cellClass' => 'calculated'];
-            $tabla_restricciones_fields[6] = (object) ['field' => 'Fet [%] sup', 'resizable' => true, 'editable' => true];
-            $tabla_restricciones_fields[7] = (object) ['field' => 'Fet [%] sup ', 'resizable' => true, 'cellClass' => 'calculated'];
-            $tabla_restricciones_fields[8] = (object) ['field' => 'FeMag [%] Inf', 'resizable' => true, 'editable' => true];
-            $tabla_restricciones_fields[9] = (object) ['field' => 'FeMag [%] Inf ', 'resizable' => true, 'cellClass' => 'calculated'];
-            $tabla_restricciones_fields[10] = (object) ['field' => 'FeMag [%] sup', 'resizable' => true, 'editable' => true];
-            $tabla_restricciones_fields[11] = (object) ['field' => 'FeMag [%] sup ', 'resizable' => true];
-            $tabla_restricciones_fields[12] = (object) ['field' => 'Jerarquia', 'resizable' => true];
+            $tabla_restricciones_fields[0] = (object) ['field' => 'Flujos', 'resizable' => true, 'editable' => false];
+            $tabla_restricciones_fields[1] = (object) ['field' => 'TMS inf[%]', 'resizable' => true, 'editable' => true];
+            $tabla_restricciones_fields[2] = (object) ['field' => 'TMS inf[%] ', 'resizable' => true, 'cellClass' => 'calculated'];
+            $tabla_restricciones_fields[3] = (object) ['field' => 'TMS sup[%]', 'resizable' => true, 'editable' => true];
+            $tabla_restricciones_fields[4] = (object) ['field' => 'TMS sup[%] ', 'resizable' => true, 'cellClass' => 'calculated'];
+            $tabla_restricciones_fields[5] = (object) ['field' => 'Fet [%] inf', 'resizable' => true, 'editable' => true];
+            $tabla_restricciones_fields[6] = (object) ['field' => 'Fet [%] inf ', 'resizable' => true, 'cellClass' => 'calculated'];
+            $tabla_restricciones_fields[7] = (object) ['field' => 'Fet [%] sup', 'resizable' => true, 'editable' => true];
+            $tabla_restricciones_fields[8] = (object) ['field' => 'Fet [%] sup ', 'resizable' => true, 'cellClass' => 'calculated'];
+            $tabla_restricciones_fields[9] = (object) ['field' => 'FeMag [%] Inf', 'resizable' => true, 'editable' => true];
+            $tabla_restricciones_fields[10] = (object) ['field' => 'FeMag [%] Inf ', 'resizable' => true, 'cellClass' => 'calculated'];
+            $tabla_restricciones_fields[11] = (object) ['field' => 'FeMag [%] sup', 'resizable' => true, 'editable' => true];
+            $tabla_restricciones_fields[12] = (object) ['field' => 'FeMag [%] sup ', 'resizable' => true];
+            $tabla_restricciones_fields[13] = (object) ['field' => 'Jerarquia', 'resizable' => true, 'editable' => true];
         }
 
         return $tabla_restricciones_fields;
     }
 
-    public function createTableRestriccionesData($restricciones, $jerarquia, $desviaciones){
+    public function createTableRestriccionesData($restricciones, $jerarquia, $desviaciones, $flujos){
         $tabla_restricciones = array();
         foreach ($restricciones as $key_restricciones => $value_restricciones) {
             $object_restricciones = array();
             if(sizeof($value_restricciones) == 4){
+                $object_restricciones['Flujos'] = $flujos[$key_restricciones];
                 $object_restricciones['TMS inf[%]'] = $value_restricciones[0];
                 $object_restricciones['TMS inf[%] '] = $desviaciones[$key_restricciones][0];
                 $object_restricciones['TMS sup[%]'] = $value_restricciones[1];
@@ -218,6 +221,7 @@ class BalancesController extends Controller
                 $object_restricciones['Jerarquia'] = $jerarquia[$key_restricciones];
             }
             else if(sizeof($value_restricciones) == 6){
+                $object_restricciones['Flujos'] = $flujos[$key_restricciones];
                 $object_restricciones['TMS inf[%]'] = $value_restricciones[0];
                 $object_restricciones['TMS inf[%] '] = $desviaciones[$key_restricciones][0];
                 $object_restricciones['TMS sup[%]'] = $value_restricciones[1];
@@ -263,13 +267,14 @@ class BalancesController extends Controller
     public function createTableInventariosFields($componentes){
         $tabla_inventarios_fields = array();
 
-        $tabla_inventarios_fields[0] = (object) ['field' => 'TMH INI', 'resizable' => true, 'editable' => true];
-        $tabla_inventarios_fields[1] = (object) ['field' => 'TMH FIN', 'resizable' => true, 'editable' => true];
-        $tabla_inventarios_fields[2] = (object) ['field' => 'TMH Delta', 'resizable' => true, 'cellClass' => 'calculated'];
-        $tabla_inventarios_fields[3] = (object) ['field' => 'Humedad', 'resizable' => true, 'editable' => true];
-        $tabla_inventarios_fields[4] = (object) ['field' => 'TMS INI', 'resizable' => true, 'editable' => true];
-        $tabla_inventarios_fields[5] = (object) ['field' => 'TMS FIN', 'resizable' => true, 'editable' => true];
-        $tabla_inventarios_fields[6] = (object) ['field' => 'TMS Delta', 'resizable' => true, 'cellClass' => 'calculated'];
+        $tabla_inventarios_fields[0] = (object) ['field' => 'Inventario', 'resizable' => true, 'editable' => false];
+        $tabla_inventarios_fields[1] = (object) ['field' => 'TMH INI', 'resizable' => true, 'editable' => false];
+        $tabla_inventarios_fields[2] = (object) ['field' => 'TMH FIN', 'resizable' => true, 'editable' => false];
+        $tabla_inventarios_fields[3] = (object) ['field' => 'TMH Delta', 'resizable' => true, 'cellClass' => 'calculated'];
+        $tabla_inventarios_fields[4] = (object) ['field' => 'Humedad', 'resizable' => true, 'editable' => true];
+        $tabla_inventarios_fields[5] = (object) ['field' => 'TMS INI', 'resizable' => true, 'editable' => true];
+        $tabla_inventarios_fields[6] = (object) ['field' => 'TMS FIN', 'resizable' => true, 'editable' => true];
+        $tabla_inventarios_fields[7] = (object) ['field' => 'TMS Delta', 'resizable' => true, 'cellClass' => 'calculated'];
         // Aqui falta la que viene desde la base de datos
         foreach ($componentes as $key => $value) {
             $tabla_inventarios_fields[sizeof($tabla_inventarios_fields)] = (object) ['field' => $value, 'resizable' => true, 'editable'=> true];
@@ -293,6 +298,7 @@ class BalancesController extends Controller
         foreach ($inventarios as $key_inventarios => $value_inventarios) {
             $object_inventarios = array();
 
+            $object_inventarios['Inventario'] = $value_inventarios;
             $object_inventarios['TMH INI'] = $tmh_ini[$key_inventarios];
             $object_inventarios['TMH FIN'] = $tmh_fin[$key_inventarios];
             $object_inventarios['TMH Delta'] = $tmh_delta[$key_inventarios];
@@ -320,9 +326,9 @@ class BalancesController extends Controller
             //     'google'
             // );
             // dd($path, Auth::id());
-            // $path = $request->file('file')->store('public');
-            // $path = '/home/ubuntu/minera/storage/app/'. $path;
-            $path = '/home/ubuntu/minera/storage/app/public/UG63bAZW37WzfEbAeDdK6jONL1by1beasIEQ0Zaj.xlsx';
+            $path = $request->file('file')->store('public');
+            $path = '/home/ubuntu/minera/storage/app/'. $path;
+            // $path = '/home/ubuntu/minera/storage/app/public/UG63bAZW37WzfEbAeDdK6jONL1by1beasIEQ0Zaj.xlsx';
 
         $proceso_id = $request->proceso_id;
         $proceso = Procesos::find($proceso_id);
@@ -366,7 +372,7 @@ class BalancesController extends Controller
         // logica tabla restricciones fields
         $tabla_restricciones_fields = $this->createTableRestriccionesFields($restricciones, $jerarquia);
         // logica tabla restricciones data
-        $tabla_restricciones = $this->createTableRestriccionesData($restricciones, $jerarquia, $desviaciones);
+        $tabla_restricciones = $this->createTableRestriccionesData($restricciones, $jerarquia, $desviaciones, $flujos);
 
         // logica tabla nodos
         $nodos_data = $data->nodos_data;
@@ -448,8 +454,10 @@ class BalancesController extends Controller
         //dd($size_mediciones);
         $tmh_ini = array();
         $tmh_fin = array();
+        $tmh_delta = array();
         $tms_ini = array();
         $tms_fin = array();
+        $tms_delta = array();
         $humedad = array();
         foreach ($inventarios_table as $key_inventarios_table => $value_inventarios_table) {
             switch ($key_inventarios_table) {
@@ -459,10 +467,16 @@ class BalancesController extends Controller
                 case 'TMH FIN':
                     array_push($tmh_fin, $value_inventarios_table);
                     break;
+                case 'TMH Delta':
+                    array_push($tmh_fin, $value_inventarios_table);
+                    break;
                 case 'TMS INI':
                     array_push($tms_ini, $value_inventarios_table);
                     break;
                 case 'TMS FIN':
+                    array_push($tms_fin, $value_inventarios_table);
+                    break;
+                case 'TMS Delta':
                     array_push($tms_fin, $value_inventarios_table);
                     break;
                 case 'Humedad':
@@ -490,21 +504,27 @@ class BalancesController extends Controller
         //actualizo las mediciones
         $datos_entrada['mediciones'] = $new_mediciones;
         $new_restricciones = array();
+        $new_jerarquia = array();
+
+
         foreach($restricciones_table as $key_restricciones => $value_restricciones){
             $contador = 0;
             $new_restricciones_array = array();
             foreach($value_restricciones as $key_value_restricciones => $value_restricciones_data){
-                if($contador % 2 == 0 && $key_value_restricciones != "Jerarquia"){
+                if($contador % 2 != 0 && $key_value_restricciones != "Jerarquia" && $key_value_restricciones != "Flujos"){
                     array_push($new_restricciones_array, floatval(str_replace(",","",$value_restricciones_data)));
+                }
+                else if($key_value_restricciones == "Jerarquia"){
+                    array_push($new_jerarquia, intval($value_restricciones_data));
                 }
                 $contador++;
             }
 
             array_push($new_restricciones, $new_restricciones_array);
         }
-
         // actualiza las restricciones
         $datos_entrada['restricciones'] = $new_restricciones;
+        $datos_entrada['jerarquia'] = $new_jerarquia;
 
         //update el json en la tabla de la base de datos
         $datos_entrada_data = Datos_entrada::find($datos_entrada_id);
@@ -554,7 +574,7 @@ class BalancesController extends Controller
         // logica tabla restricciones fields
         $tabla_restricciones_fields = $this->createTableRestriccionesFields($restricciones, $jerarquia);
         // logica tabla restricciones data
-        $tabla_restricciones = $this->createTableRestriccionesData($restricciones, $jerarquia, $desviaciones);
+        $tabla_restricciones = $this->createTableRestriccionesData($restricciones, $jerarquia, $desviaciones, $flujos);
 
         // logica tabla nodos
         $nodos_data = $data->nodos_data;
