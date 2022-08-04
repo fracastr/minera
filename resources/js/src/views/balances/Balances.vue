@@ -484,6 +484,16 @@ export default {
               }
           })
 
+          this.inventarios_fields.map(function(value, index){
+              //console.log("index y value", index, value, data_restricciones.length);
+              if(index != 0 && index != 4){
+                  value.valueFormatter = intFormatter2;
+              }
+              else if(index == 4){
+                  value.valueFormatter = decimalFormatter2;
+              }
+          })
+
           this.balance_nodos_fields.map(function(value, index){
             value.cellStyle = nodosCellStyle;
 
