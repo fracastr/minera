@@ -76,14 +76,13 @@
                     </b-button>
                 </b-row>
                 <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet" />
-                <ag-grid-vue style="width: 100%; height: 500px;"
+                <ag-grid-vue style="width: auto; height: 500px;"
                     class="ag-theme-alpine"
                     :columnDefs="balances_fields"
                     :rowData="balances_table"
                     @grid-ready="onGridReadyBalancesTable"
                     :getRowStyle="getRowStyle"
                     @bodyScroll="scrolledbalances"
-                    :enableBrowserTooltips="true"
                     id="tbalances">
                 </ag-grid-vue>
             </b-col>
@@ -126,7 +125,6 @@
                     class="ag-theme-alpine"
                     :columnDefs="balance_nodos_fields"
                     :rowData="balance_nodos"
-                    @grid-ready="onGridReadyNodosTable"
                     @row-clicked="onRowClicked">
                 </ag-grid-vue>
             </b-col>
@@ -144,7 +142,6 @@
                 <ag-grid-vue style="width: auto; height: 500px;"
                     class="ag-theme-alpine"
                     :columnDefs="inventarios_fields"
-                    @grid-ready="onGridReadyInventariosTable"
                     :rowData="inventarios_data">
                 </ag-grid-vue>
                 <!-- <b-img
@@ -200,7 +197,7 @@ import { AgGridVue } from "ag-grid-vue";
 function decimalFormatter(params) {
     // console.log("params decimal", params.value);
     // console.log(parseFloat(params.value));
-    return (parseFloat(params.value) ).toFixed(2);
+    return (parseFloat(params.value) * 100).toFixed(2);
 }
 function decimalFormatter2(params) {
     // console.log("params decimal", params.value);
@@ -256,10 +253,6 @@ export default {
       gridColumnApiBalancesTable: null,
       gridApiRestriccionesTable: null,
       columnApiRestriccionesTable: null,
-      gridApiNodosTable: null,
-      columnApiNodosTable: null,
-      gridApiInventariosTable: null,
-      columnApiInventariosTable: null,
       modal_var: 0,
       modal_fields: [],
       modal_data: [],
@@ -361,16 +354,6 @@ export default {
       this.gridApiRestriccionesTable = params.api;
       this.columnApiRestriccionesTable = params.columnApi;
       this.gridApiRestriccionesTable.sizeColumnsToFit();
-    },
-    onGridReadyNodosTable(params) {
-      this.gridApiNodosTable = params.api;
-      this.columnApiNodosTable = params.columnApi;
-      this.gridApiNodosTable.sizeColumnsToFit();
-    },
-    onGridReadyInventariosTable(params) {
-      this.gridApiInventariosTable = params.api;
-      this.columnApiInventariosTable = params.columnApi;
-      this.gridApiInventariosTable.sizeColumnsToFit();
     },
     getRowStyle(params){
     //console.log("rowstyle", params);
@@ -626,8 +609,9 @@ export default {
 </script>
 
 <style lang="scss">
-  @import "~ag-grid-community/styles/ag-grid.css";
-  @import "~ag-grid-community/styles/ag-theme-alpine.css";
+  @import "~ag-grid-community/dist/styles/ag-grid.css";
+  @import "~ag-grid-community/dist/styles/ag-theme-material.css";
+  @import "~ag-grid-community/dist/styles/ag-theme-alpine.css";
 
   .balance {
       background-color: rgb(71, 209, 255);
@@ -635,9 +619,4 @@ export default {
   .calculated {
       background-color: rgb(71, 209, 255);
   }
-
-  .ag-theme-alpine {
-  --ag-grid-size: 3px;
-  --ag-list-item-height: 20px;
-}
 </style>
