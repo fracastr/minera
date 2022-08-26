@@ -84,7 +84,8 @@
                     :getRowStyle="getRowStyle"
                     @bodyScroll="scrolledbalances"
                     :enableBrowserTooltips="true"
-                    id="tbalances">
+                    id="tbalances"
+                    :defaultColDef="defaultColDef">
                 </ag-grid-vue>
             </b-col>
             <b-col md="8" sm="12">
@@ -105,7 +106,8 @@
                     @grid-ready="onGridReadyRestriccionesTable"
                     :getRowStyle="getRowStyle"
                     @bodyScroll="scrolledrestricciones"
-                    id="trestricciones">
+                    id="trestricciones"
+                    :defaultColDef="defaultColDef">
                 </ag-grid-vue>
             </b-col>
         </b-row>
@@ -127,7 +129,8 @@
                     :columnDefs="balance_nodos_fields"
                     :rowData="balance_nodos"
                     @grid-ready="onGridReadyNodosTable"
-                    @row-clicked="onRowClicked">
+                    @row-clicked="onRowClicked"
+                    :defaultColDef="defaultColDef">
                 </ag-grid-vue>
             </b-col>
             <b-col md="7" sm="12" offset-md="0">
@@ -145,7 +148,8 @@
                     class="ag-theme-alpine"
                     :columnDefs="inventarios_fields"
                     @grid-ready="onGridReadyInventariosTable"
-                    :rowData="inventarios_data">
+                    :rowData="inventarios_data"
+                    :defaultColDef="defaultColDef">
                 </ag-grid-vue>
                 <!-- <b-img
                 :src="require('@/assets/images/avatars/image.jpeg')"
@@ -270,6 +274,7 @@ export default {
       inventarios_data: [],
       proceso_id: '',
       modalTitle: '' ,
+      defaultColDef: null,
     };
   },
   mounted(){
@@ -277,17 +282,25 @@ export default {
       console.log(this.$refs);
   },
   beforeMount() {
-    this.columnDefs = [
-    { field: 'make', editable: true },
-    { field: 'model', editable: true },
-    { field: 'price', editable: true }
-];
+//     this.columnDefs = [
+//     { field: 'make', editable: true },
+//     { field: 'model', editable: true },
+//     { field: 'price', editable: true }
+// ];
 
-    this.rowData = [
-      { make: "Toyota", model: "Celica", price: 35000 },
-      { make: "Ford", model: "Mondeo", price: 32000 },
-      { make: "Porsche", model: "Boxter", price: 72000 },
-    ];
+//     this.rowData = [
+//       { make: "Toyota", model: "Celica", price: 35000 },
+//       { make: "Ford", model: "Mondeo", price: 32000 },
+//       { make: "Porsche", model: "Boxter", price: 72000 },
+//     ];
+this.defaultColDef = {
+      flex: 1,
+      resizable: true,
+      wrapText: true,
+      autoHeight: true,
+      wrapHeaderText: true,
+      autoHeaderHeight: true,
+  }
   },
   methods: {
     exportar_excel(){
