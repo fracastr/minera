@@ -296,8 +296,8 @@ export default {
 this.defaultColDef = {
       flex: 1,
       resizable: true,
-      wrapText: true,
-      autoHeight: true,
+      wrapText: false,
+      autoHeight: false,
       wrapHeaderText: true,
       autoHeaderHeight: true,
   }
