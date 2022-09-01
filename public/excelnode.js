@@ -21,7 +21,7 @@ function write_excel (array){
     console.log("hola mundo")
     const XlsxPopulate = require('xlsx-populate');
     // fileName ='/Users/pc-mac/Desktop/Exportar_Pellet_3.xlsx'
-    const fileName = path + '/Exportar.xlsx'
+    const fileName = path + '/Exportar2.xlsx'
     console.log(process.cwd())
     // Load an existing workbook
     XlsxPopulate.fromFileAsync(fileName)
