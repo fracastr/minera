@@ -97,7 +97,7 @@ class BalancesController extends Controller
     public function createTableMedicionesFields($mediciones, $flujos){
         $tabla_mediciones_fields = array();
         foreach($mediciones as $key_mediciones => $value_mediciones){
-            if(sizeof($value_mediciones) == 4){
+            if(sizeof($value_mediciones) == 4){// { field: 'athlete', minWidth: 170, cellStyle: { "white-space": "normal" }, autoHeight: true },
                 $tabla_mediciones_fields[0] = (object) ['field' => 'Flujos', 'resizable' => true, 'editable' => false];
                 $tabla_mediciones_fields[1] = (object) ['field' => 'TMS medido', 'resizable' => true, 'editable' => true];
                 $tabla_mediciones_fields[2] = (object) ['field' => 'TMS balance', 'resizable' => true, 'editable' => false, 'cellClass' => 'balance'];
@@ -242,22 +242,28 @@ class BalancesController extends Controller
         return $tabla_restricciones;
     }
 
-    public function createTableBalanceNodosFields(){
+    public function createTableBalanceNodosFields($componentes){
         $array_nodos_fields = array();
         $array_nodos_fields[0] = (object) ['field' => 'Nodos', 'resizable' => true, 'editable' => false];
         $array_nodos_fields[1] = (object) ['field' => 'TMS', 'resizable' => true, 'editable' => false];
         $array_nodos_fields[2] = (object) ['field' => 'Finos FeT', 'resizable' => true, 'editable' => false];
+        if(sizeof($componentes) == 2){
+            $array_nodos_fields[3] = (object) ['field' => 'Finos FeMag', 'resizable' => true, 'editable' => false];
+        }
 
         return $array_nodos_fields;
     }
 
-    public function createTableBalanceNodos($balance_nodos, $nodos_data, $nodos){
+    public function createTableBalanceNodos($balance_nodos, $nodos_data, $nodos, $componentes){
         $array_balance_nodos = array();
         foreach ($balance_nodos as $key_balance_nodos => $value_balance_nodos) {
             $object_balance_nodos = array();
             $object_balance_nodos['Nodos'] = $nodos[$key_balance_nodos];
             $object_balance_nodos['TMS'] = str_replace(",",".",str_replace(".","",$nodos_data[$key_balance_nodos][0]));
             $object_balance_nodos['Finos FeT'] = str_replace(",",".",str_replace(".","",$nodos_data[$key_balance_nodos][1]));
+            if(sizeof($componentes) == 2){
+                $object_balance_nodos['Finos FeMag'] = str_replace(",",".",str_replace(".","",$nodos_data[$key_balance_nodos][2]));
+            }
             array_push($array_balance_nodos, (object)$object_balance_nodos);
         }
 
@@ -307,6 +313,7 @@ class BalancesController extends Controller
             $object_inventarios['TMS FIN'] = $tms_fin[$key_inventarios];
             $object_inventarios['TMS Delta'] = $tms_delta[$key_inventarios];
             foreach ($componentes as $key => $value) {
+                dd($componentes_inventario, $componentes);
                 $object_inventarios[$value] = $componentes_inventario[$key_inventarios][$key];
             }
 
@@ -328,7 +335,7 @@ class BalancesController extends Controller
             // dd($path, Auth::id());
             $path = $request->file('file')->store('public');
             $path = '/home/ubuntu/minera/storage/app/'. $path;
-            // $path = '/home/ubuntu/minera/storage/app/public/UG63bAZW37WzfEbAeDdK6jONL1by1beasIEQ0Zaj.xlsx';
+            // $path = '/home/ubuntu/minera/storage/app/public/UGhkYjREl5IFhIpVp5k78L0croiKtYf703N9Nl7Q.xlsx';
 
         $proceso_id = $request->proceso_id;
         $proceso = Procesos::find($proceso_id);
@@ -387,14 +394,15 @@ class BalancesController extends Controller
         $jerarquia = $data->datos_entrada['jerarquia'];
         $nodos = $data->datos_entrada['nodos'];
 
+        $componentes = json_decode($proceso->componentes);
+        $componentes = $componentes->data;
 
-        $balance_nodos_fields = $this->createTableBalanceNodosFields();
-        $array_balance_nodos = $this->createTableBalanceNodos($balance_nodos, $nodos_data, $nodos);
+        $balance_nodos_fields = $this->createTableBalanceNodosFields($componentes);
+        $array_balance_nodos = $this->createTableBalanceNodos($balance_nodos, $nodos_data, $nodos, $componentes);
 
         // logica tabla inventarios
 
-        $componentes = json_decode($proceso->componentes);
-        $componentes = $componentes->data;
+
 
         $inventarios_fields = $this->createTableInventariosFields($componentes);
         $inventarios_data = $this->createTableInventariosData($data, $componentes);
@@ -590,13 +598,16 @@ class BalancesController extends Controller
         $nodos = $data->datos_entrada['nodos'];
 
 
-        $balance_nodos_fields = $this->createTableBalanceNodosFields();
-        $array_balance_nodos = $this->createTableBalanceNodos($balance_nodos, $nodos_data, $nodos);
 
-        // logica tabla inventarios
         $proceso = Procesos::find($proceso_id);
         $componentes = json_decode($proceso->componentes);
         $componentes = $componentes->data;
+
+        $balance_nodos_fields = $this->createTableBalanceNodosFields($componentes);
+        $array_balance_nodos = $this->createTableBalanceNodos($balance_nodos, $nodos_data, $nodos, $componentes);
+
+        // logica tabla inventarios
+
 
         $inventarios_fields = $this->createTableInventariosFields($componentes);
         $inventarios_data = $this->createTableInventariosData($data, $componentes);
