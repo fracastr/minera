@@ -313,7 +313,6 @@ class BalancesController extends Controller
             $object_inventarios['TMS FIN'] = $tms_fin[$key_inventarios];
             $object_inventarios['TMS Delta'] = $tms_delta[$key_inventarios];
             foreach ($componentes as $key => $value) {
-                dd($componentes_inventario, $componentes);
                 $object_inventarios[$value] = $componentes_inventario[$key_inventarios][$key];
             }
 
