@@ -1,6 +1,6 @@
 export default [
   {
-    header: 'Apps',
+    header: 'Modulos',
     icon: 'PackageIcon',
     children: [
         {
