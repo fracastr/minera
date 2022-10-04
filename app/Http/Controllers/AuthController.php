@@ -42,7 +42,7 @@ class AuthController extends Controller
             ],201);
         }
         else{
-            return response()->json(['error'=>'Provide proper details']);
+            return response()->json(['error'=>'Ocurrio un error al registrar un usuario']);
         }
     }
 

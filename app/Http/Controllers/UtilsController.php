@@ -126,15 +126,36 @@ class UtilsController extends Controller
             'datos_entrada_id' => $datos_entrada_id,
             'componentes' => $componentes
         ]);
+        /*
+        Lista de procesos por id
+        #   valle, proceso, valle_id, proceso_id
+            Copiapo, Puerto, 1, 1
+            Copiapo, CNN, 1, 2
+            Copiapo, Planta Magnetita, 1, 3
+            Huasco, Los Colorados, 2, 4
+            Huasco, Pellet, 2, 5
+            Elqui, Elqui, 3, 6
+            Elqui, Pleito, 3, 7
+        */
+        $arr_files = array();
+        $arr_files[1] = 'Exportar_Copiapo_Puerto.xlsx';
+        $arr_files[2] = 'Exportar_Copiapo_CNN.xlsx';
+        $arr_files[3] = 'Exportar_Copiapo_PM.xlsx';
+        $arr_files[4] = 'Exportar_Huasco_Colorados.xlsx';
+        $arr_files[5] = 'Exportar_Huasco_Pellet.xlsx';
+        $arr_files[6] = 'Exportar_Elqui.xlsx';
+        $arr_files[7] = 'Exportar_Elqui_Pleito.xlsx';
 
         $data = json_decode($response->getBody()->getContents());
         //dd($data->matriz);
-        $public = storage_path('app/public');
+        $public = public_path('Export');
+        //$public = storage_path('app/public');
         //$data = implode(',',$data->matriz);
         $data = json_encode($data->matriz);
         $command = $public . '/excelnode.js';
+        $filename = '';
         // $process = new Process(['/usr/local/bin/node', $command, $data, $datos_entrada_id, $public]);
-        $process = new Process(['/usr/bin/node', $command, $data, $datos_entrada_id, $public]);
+        $process = new Process(['/usr/bin/node', $command, $data, $datos_entrada_id, $public, $public . '/' . $arr_files[$proceso_id]]);
         $process->run();
 
         // executes after the command finishes
