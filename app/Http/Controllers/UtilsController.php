@@ -149,13 +149,13 @@ class UtilsController extends Controller
         $data = json_decode($response->getBody()->getContents());
         //dd($data->matriz);
         $public = public_path('Export');
-        //$public = storage_path('app/public');
+        $storage = storage_path('app/public');
         //$data = implode(',',$data->matriz);
         $data = json_encode($data->matriz);
         $command = $public . '/excelnode.js';
         $filename = '';
         // $process = new Process(['/usr/local/bin/node', $command, $data, $datos_entrada_id, $public]);
-        $process = new Process(['/usr/bin/node', $command, $data, $datos_entrada_id, $public, $public . '/' . $arr_files[$proceso_id]]);
+        $process = new Process(['/usr/local/bin/node', $command, $data, $datos_entrada_id, $public, $public . '/' . $arr_files[$proceso_id], $storage]);
         $process->run();
 
         // executes after the command finishes

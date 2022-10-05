@@ -11,6 +11,7 @@ myArgs2 = JSON.parse(myArgs[0])
 file = myArgs[1] + '.xlsx'
 path = myArgs[2]
 fileName = myArgs[3]
+storage = myArgs[4]
 console.log(typeof(myArgs2))
 console.log(myArgs2)
 write_excel(myArgs2);
@@ -33,8 +34,8 @@ function write_excel (array){
         const value = workbook.sheet("Utilidad").range("A1:F80");
         value.value(array)
         // value.value((cell, ri, ci, range) => array);
-        console.log(path + "/" + file);
-        return workbook.toFileAsync(path + "/" + file)
+        console.log(storage + "/" + file);
+        return workbook.toFileAsync(storage + "/" + file)
     }).catch(function (e) {
         console.log("FAILURE!!", e);
       })
