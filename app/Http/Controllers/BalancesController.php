@@ -332,10 +332,10 @@ class BalancesController extends Controller
             //     'google'
             // );
             // dd($path, Auth::id());
-            // $path = $request->file('file')->store('public');
-            // $path = '/home/ubuntu/minera/storage/app/'. $path;
+            $path = $request->file('file')->store('public');
+            $path = '/home/ubuntu/minera/storage/app/'. $path;
 
-            $path = '/home/ubuntu/minera/storage/app/public/euJdhu6Bv4WMOBFFixwpyhnq3YPJ6Bn49Xto2nW5.xlsx';
+            // $path = '/home/ubuntu/minera/storage/app/public/euJdhu6Bv4WMOBFFixwpyhnq3YPJ6Bn49Xto2nW5.xlsx';
 
         $proceso_id = $request->proceso_id;
         $proceso = Procesos::find($proceso_id);
