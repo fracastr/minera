@@ -558,12 +558,7 @@ class BalancesController extends Controller
             $value = json_decode($value, true);
         }
 
-        //update el json en la tabla de la base de datos
-        $datos_entrada_data = Datos_entrada::find($datos_entrada_id);
-        $datos_entrada_data->datos_entrada = json_encode($data->datos_entrada);
-        $datos_entrada_data->save();
 
-        dd($datos_entrada_id, $data->datos_entrada, $data);
 
         // logica para tabla mediciones
         $mediciones = $data->datos_entrada['mediciones'];
@@ -571,6 +566,12 @@ class BalancesController extends Controller
         $desviaciones = $data->desviaciones;
         $balances_finales = $data->balances_finales;
         $mediciones = $balances_finales;
+
+        //update el json en la tabla de la base de datos
+        $datos_entrada_data = Datos_entrada::find($datos_entrada_id);
+        $data->datos_entrada['mediciones'] = $data->balances_finales;
+        $datos_entrada_data->datos_entrada = json_encode($data->datos_entrada);
+        $datos_entrada_data->save();
 
         // foreach ($desviaciones as $key_desviaciones => &$value_desviaciones) {
         //     foreach($value_desviaciones as $key_value_desviaciones => &$value_desviaciones_item){
