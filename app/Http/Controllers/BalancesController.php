@@ -563,6 +563,8 @@ class BalancesController extends Controller
         $datos_entrada_data->datos_entrada = json_encode($data->datos_entrada);
         $datos_entrada_data->save();
 
+        dd($datos_entrada_id, $data->datos_entrada, $data);
+
         // logica para tabla mediciones
         $mediciones = $data->datos_entrada['mediciones'];
         $flujos = $data->datos_entrada['flujos'];
