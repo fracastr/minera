@@ -558,6 +558,11 @@ class BalancesController extends Controller
             $value = json_decode($value, true);
         }
 
+        //update el json en la tabla de la base de datos
+        $datos_entrada_data = Datos_entrada::find($datos_entrada_id);
+        $datos_entrada_data->datos_entrada = json_encode($data->datos_entrada);
+        $datos_entrada_data->save();
+
         // logica para tabla mediciones
         $mediciones = $data->datos_entrada['mediciones'];
         $flujos = $data->datos_entrada['flujos'];
