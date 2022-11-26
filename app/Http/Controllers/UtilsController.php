@@ -146,16 +146,17 @@ class UtilsController extends Controller
         $arr_files[6] = 'Exportar_Elqui.xlsx';
         $arr_files[7] = 'Exportar_Elqui_Pleito.xlsx';
 
-        $data = json_decode($response->getBody()->getContents());
+        $data_response = json_decode($response->getBody()->getContents());
         //dd($data->matriz);
         $public = public_path('Export');
         $storage = storage_path('app/public');
         //$data = implode(',',$data->matriz);
-        $data = json_encode($data->matriz);
+        $data = json_encode($data_response->matriz);
+        $data_extra = json_encode($data_response->data_extra);
         $command = $public . '/excelnode.js';
         $filename = '';
         // $process = new Process(['/usr/local/bin/node', $command, $data, $datos_entrada_id, $public]);
-        $process = new Process(['/usr/bin/node', $command, $data, $datos_entrada_id, $public, $public . '/' . $arr_files[$proceso_id], $storage]);
+        $process = new Process(['/usr/bin/node', $command, $data, $data_extra, $datos_entrada_id, $public, $public . '/' . $arr_files[$proceso_id], $storage]);
         $process->run();
 
         // executes after the command finishes
