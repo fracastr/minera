@@ -143,7 +143,7 @@ class UtilsController extends Controller
         $arr_files[3] = 'Exportar_Copiapo_PM.xlsx';
         $arr_files[4] = 'Exportar_Huasco_Colorados.xlsx';
         $arr_files[5] = 'Exportar_Huasco_Pellet.xlsx';
-        $arr_files[6] = 'Exportar_Elqui.xlsx';
+        $arr_files[6] = 'Exportar_Elqui_Elqui.xlsx';
         $arr_files[7] = 'Exportar_Elqui_Pleito.xlsx';
 
         $data_response = json_decode($response->getBody()->getContents());
