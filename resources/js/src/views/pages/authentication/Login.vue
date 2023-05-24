@@ -241,6 +241,7 @@ import { getHomeRouteForLoggedInUser } from '@/auth/utils'
 
 import ToastificationContent from '@core/components/toastification/ToastificationContent.vue'
 import { $themeConfig } from '@themeConfig'
+import axios from 'axios'
 export default {
   directives: {
     'b-tooltip': VBTooltip,
@@ -299,44 +300,54 @@ export default {
     },
   },
   methods: {
+    // login() {
+    //   this.$refs.loginForm.validate().then(success => {
+    //     if (success) {
+    //       useJwt
+    //         .login({
+    //           email: this.userEmail,
+    //           password: this.password,
+    //         })
+    //         .then(response => {
+    //           const { userData } = response.data
+    //           useJwt.setToken(response.data.accessToken)
+    //           useJwt.setRefreshToken(response.data.refreshToken)
+    //           localStorage.setItem('userData', JSON.stringify(userData))
+    //           this.$ability.update(userData.ability)
+
+    //           // ? This is just for demo purpose as well.
+    //           // ? Because we are showing eCommerce app's cart items count in navbar
+    //           this.$store.commit('app-ecommerce/UPDATE_CART_ITEMS_COUNT', userData.extras.eCommerceCartItemsCount)
+
+    //           // ? This is just for demo purpose. Don't think CASL is role based in this case, we used role in if condition just for ease
+    //           this.$router.replace(getHomeRouteForLoggedInUser(userData.role)).then(() => {
+    //             this.$toast({
+    //               component: ToastificationContent,
+    //               position: 'top-right',
+    //               props: {
+    //                 title: `Welcome ${userData.fullName || userData.username}`,
+    //                 icon: 'CoffeeIcon',
+    //                 variant: 'success',
+    //                 text: `You have successfully logged in as ${userData.role}. Now you can start to explore!`,
+    //               },
+    //             })
+    //           })
+    //         })
+    //         .catch(error => {
+    //           this.$refs.loginForm.setErrors(error.response.data.error)
+    //         })
+    //     }
+    //   })
+    // },
     login() {
-      this.$refs.loginForm.validate().then(success => {
-        if (success) {
-          useJwt
-            .login({
+        axios.get('/sanctum/csrf-cookie').then(response => {
+        axios.post('/api/auth/login', {
               email: this.userEmail,
               password: this.password,
-            })
-            .then(response => {
-              const { userData } = response.data
-              useJwt.setToken(response.data.accessToken)
-              useJwt.setRefreshToken(response.data.refreshToken)
-              localStorage.setItem('userData', JSON.stringify(userData))
-              this.$ability.update(userData.ability)
-
-              // ? This is just for demo purpose as well.
-              // ? Because we are showing eCommerce app's cart items count in navbar
-              this.$store.commit('app-ecommerce/UPDATE_CART_ITEMS_COUNT', userData.extras.eCommerceCartItemsCount)
-
-              // ? This is just for demo purpose. Don't think CASL is role based in this case, we used role in if condition just for ease
-              this.$router.replace(getHomeRouteForLoggedInUser(userData.role)).then(() => {
-                this.$toast({
-                  component: ToastificationContent,
-                  position: 'top-right',
-                  props: {
-                    title: `Welcome ${userData.fullName || userData.username}`,
-                    icon: 'CoffeeIcon',
-                    variant: 'success',
-                    text: `You have successfully logged in as ${userData.role}. Now you can start to explore!`,
-                  },
-                })
-              })
-            })
-            .catch(error => {
-              this.$refs.loginForm.setErrors(error.response.data.error)
-            })
-        }
-      })
+            }).then(response => {
+            console.log('User signed in!');
+        }).catch(error => console.log(error)); // credentials didn't match
+    });
     },
   },
 }
