@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\User;
+use stdClass;
 use Validator;
 
 class AuthController extends Controller
@@ -74,9 +75,44 @@ class AuthController extends Controller
         $tokenResult = $user->createToken('Personal Access Token');
         $token = $tokenResult->plainTextToken;
 
+        $userData = new stdClass();
+        $userData->ability = [
+                  (object)[
+                    'action' => 'manage',
+                    'subject'=> 'all',
+                  ],
+                ];
+        $userData->id = $user->id;
+        $userData->fullName = $user->nombre;
+        $userData->username = $user->email;
+        $userData->email = $user->email;
+        $userData->role = 'admin';
+
+
+        // {
+        //     id: 1,
+        //     fullName: 'John Doe',
+        //     username: 'johndoe',
+        //     password: 'admin',
+        //     // eslint-disable-next-line global-require
+        //     avatar: require('@/assets/images/avatars/13-small.png'),
+        //     email: 'admin@demo.com',
+        //     role: 'admin',
+        //     ability: [
+        //       {
+        //         action: 'manage',
+        //         subject: 'all',
+        //       },
+        //     ],
+        //     extras: {
+        //       eCommerceCartItemsCount: 5,
+        //     },
+        //   }
+
         return response()->json([
         'accessToken' =>$token,
         'token_type' => 'Bearer',
+        'userData' => $userData
         ]);
     }
 

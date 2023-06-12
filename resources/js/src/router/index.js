@@ -39,7 +39,10 @@ const router = new VueRouter({
 })
 
 router.beforeEach((to, _, next) => {
-  const isLoggedIn = isUserLoggedIn()
+    console.log('beforeEach');
+    console.log('to:', to)
+    console.log('next:', next)
+    const isLoggedIn = isUserLoggedIn()
 
   if (!canNavigate(to)) {
     // Redirect to login if not logged in
