@@ -300,10 +300,10 @@ export default {
 //       { make: "Porsche", model: "Boxter", price: 72000 },
 //     ];
 this.defaultColDef = {
-      flex: 1,
-      resizable: true,
-      wrapText: true,
-      autoHeight: true,
+      flex: 0,
+      resizable: false,
+      wrapText: false,
+      autoHeight: false,
       wrapHeaderText: true,
       autoHeaderHeight: true,
   }
@@ -315,12 +315,6 @@ this.defaultColDef = {
         .then((response) => {
             console.log("response excel", response);
             let url = response.data
-            // const fileURL = window.URL.createObjectURL(new Blob([response.data]))
-            // var filelink = document.createElement('a')
-            // filelink.href = fileURL
-            // filelink.setAttribute('download', "Resultados.xlsx")
-            // document.body.appendChild(filelink)
-            // filelink.click()
             window.open(url, '_blank').focus();
         })
         .catch(function (e) {
@@ -360,12 +354,12 @@ this.defaultColDef = {
       this.gridApiBalancesTable = params.api;
       this.gridColumnApiBalancesTable = params.columnApi;
 
-      this.gridApiBalancesTable.sizeColumnsToFit();
+    //   this.gridApiBalancesTable.sizeColumnsToFit();
     },
     onGridReadyRestriccionesTable(params) {
       this.gridApiRestriccionesTable = params.api;
       this.columnApiRestriccionesTable = params.columnApi;
-      this.gridApiRestriccionesTable.sizeColumnsToFit();
+    //   this.gridApiRestriccionesTable.sizeColumnsToFit();
     },
     onGridReadyNodosTable(params) {
       this.gridApiNodosTable = params.api;
