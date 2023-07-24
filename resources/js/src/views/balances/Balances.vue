@@ -169,13 +169,15 @@
                     :columnDefs="modal_fields"
                     :rowData="modal_data"
                     id="tmodal"
-                    :getRowStyle="getRowStyle">
+                    :getRowStyle="getRowStyle"
+                    :defaultColDef="defaultColDef">
         </ag-grid-vue>
         <ag-grid-vue v-else style="width: auto; height: 500px;"
                     class="ag-theme-alpine"
                     :columnDefs="modal_fields"
                     :rowData="modal_data"
-                    id="tmodal">
+                    id="tmodal"
+                    :defaultColDef="defaultColDef">
         </ag-grid-vue>
         </b-modal>
     </b-container>
@@ -236,7 +238,13 @@ function nodosCellStyle(params) {
 };
 
 export default {
-    props: ['proceso'],
+    props: {
+        proceso: Number,
+        show_tables: {
+            type: Boolean,
+            default: false
+        }
+    },
   data() {
     return {
       file_1: null,
@@ -249,7 +257,6 @@ export default {
       restricciones_fields: [],
       balances_fields: [],
       correr_button: false,
-      show_tables: false,
       datos_entrada: {},
       columnDefs: null,
       rowData: null,
@@ -268,7 +275,6 @@ export default {
       modal_fields: [],
       modal_data: [],
       exportar_button: false,
-      show_tables: false,
       loadingTable: false,
       inventarios_fields: [],
       inventarios_data: [],
@@ -296,8 +302,8 @@ export default {
 this.defaultColDef = {
       flex: 1,
       resizable: true,
-      wrapText: false,
-      autoHeight: false,
+      wrapText: true,
+      autoHeight: true,
       wrapHeaderText: true,
       autoHeaderHeight: true,
   }
@@ -332,21 +338,7 @@ this.defaultColDef = {
                 break;
             case 2:
                 this.modalTitle = 'Detalle Tabla Restricciones'
-                // let field = {field: 'Flujo', editable: false, resizable: true};
-                // let restricciones = this.restricciones_fields;
-                // var myData = Object.keys(restricciones).map(key => {
-                //     return restricciones[key];
-                // })
-                // console.log("restricciones",restricciones, myData);
-                // restricciones = myData.unshift(field);
-                // console.log("new restricciones", restricciones);
                 this.modal_fields = this.restricciones_fields;
-                // let flujos = this.datos_entrada.flujos;
-                // let data = this.restricciones_table
-                // console.log("la data", data);
-                // data.forEach((element, index) => {
-                //     element.Flujo = flujos[index];
-                // });
                 this.modal_data = this.restricciones_table;
                 break;
             case 3:
@@ -430,16 +422,6 @@ this.defaultColDef = {
 
     },
     scrolledrestricciones(e){
-    //   console.log("estoy haciendo scroll",e);
-    //   console.log("tabla restricciones", this.gridApiRestriccionesTable);
-    // const tbl1 = document.getElementById("tbalances");
-    // const tbl2 = document.getElementById("trestricciones");
-    // // console.log("tabla 2", tbl2);
-    // const gridBody1 = tbl1.querySelector(".ag-body-viewport");
-    // const gridBody2 = tbl2.querySelector(".ag-body-viewport");
-    // console.log("gridBody2", gridBody2);
-
-    // gridBody1.scrollTop = e.top;
 
     },
     onRowClicked(event) {

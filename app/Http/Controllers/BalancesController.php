@@ -197,7 +197,7 @@ class BalancesController extends Controller
             $tabla_restricciones_fields[9] = (object) ['field' => 'FeMag [%] Inf', 'resizable' => true, 'editable' => true];
             $tabla_restricciones_fields[10] = (object) ['field' => 'FeMag [%] Inf ', 'resizable' => true, 'cellClass' => 'calculated'];
             $tabla_restricciones_fields[11] = (object) ['field' => 'FeMag [%] sup', 'resizable' => true, 'editable' => true];
-            $tabla_restricciones_fields[12] = (object) ['field' => 'FeMag [%] sup ', 'resizable' => true];
+            $tabla_restricciones_fields[12] = (object) ['field' => 'FeMag [%] sup ', 'resizable' => true, 'cellClass' => 'calculated'];
             $tabla_restricciones_fields[13] = (object) ['field' => 'Jerarquia', 'resizable' => true, 'editable' => true];
         }
 
@@ -332,10 +332,10 @@ class BalancesController extends Controller
             //     'google'
             // );
             // dd($path, Auth::id());
-            $path = $request->file('file')->store('public');
-            $path = '/home/ubuntu/minera/storage/app/'. $path;
+            // $path = $request->file('file')->store('public');
+            // $path = '/home/ubuntu/minera/storage/app/'. $path;
 
-            // $path = '/home/ubuntu/minera/storage/app/public/euJdhu6Bv4WMOBFFixwpyhnq3YPJ6Bn49Xto2nW5.xlsx';
+            $path = '/home/ubuntu/minera/storage/app/public/uZebC6Bd1IB7x4Tv0jfAkxUlEC3fiXbwTnyMT8QL.xlsx';
 
         $proceso_id = $request->proceso_id;
         $proceso = Procesos::find($proceso_id);

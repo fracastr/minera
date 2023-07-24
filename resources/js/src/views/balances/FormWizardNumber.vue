@@ -106,280 +106,16 @@
           </b-row>
         </validation-observer>
       </tab-content>
-
-      <!-- personal details tab -->
-      <!-- <tab-content
-        title="Personal Info"
-        :before-change="validationFormInfo"
-      >
-        <validation-observer
-          ref="infoRules"
-          tag="form"
-        >
-          <b-row>
-            <b-col
-              cols="12"
-              class="mb-2"
-            >
-              <h5 class="mb-0">
-                Personal Info
-              </h5>
-              <small class="text-muted">Enter Your Personal Info.</small>
-            </b-col>
-            <b-col md="6">
-              <b-form-group
-                label="First Name"
-                label-for="first-name"
-              >
-                <validation-provider
-                  #default="{ errors }"
-                  name="First Name"
-                  rules="required"
-                >
-                  <b-form-input
-                    id="first-name"
-                    v-model="first_name"
-                    placeholder="John"
-                    :state="errors.length > 0 ? false:null"
-                  />
-                  <small class="text-danger">{{ errors[0] }}</small>
-                </validation-provider>
-              </b-form-group>
-            </b-col>
-            <b-col md="6">
-              <b-form-group
-                label="Last Name"
-                label-for="last-name"
-              >
-                <validation-provider
-                  #default="{ errors }"
-                  name="Last Name"
-                  rules="required"
-                >
-                  <b-form-input
-                    id="last-name"
-                    v-model="last_name"
-                    :state="errors.length > 0 ? false:null"
-                    placeholder="Doe"
-                  />
-                  <small class="text-danger">{{ errors[0] }}</small>
-                </validation-provider>
-              </b-form-group>
-            </b-col>
-            <b-col md="6">
-              <validation-provider
-                #default="{ errors }"
-                name="Country"
-                rules="required"
-              >
-                <b-form-group
-                  label="Country"
-                  label-for="country"
-                  :state="errors.length > 0 ? false:null"
-                >
-                  <v-select
-                    id="country"
-                    v-model="selectedContry"
-                    :dir="$store.state.appConfig.isRTL ? 'rtl' : 'ltr'"
-                    :options="countryName"
-                    :selectable="option => ! option.value.includes('select_value')"
-                    label="text"
-                  />
-                  <b-form-invalid-feedback :state="errors.length > 0 ? false:null">
-                    {{ errors[0] }}
-                  </b-form-invalid-feedback>
-                </b-form-group>
-              </validation-provider>
-            </b-col>
-            <b-col md="6">
-              <validation-provider
-                #default="{ errors }"
-                name="Language"
-                rules="required"
-              >
-                <b-form-group
-                  label="Language"
-                  label-for="language"
-                  :state="errors.length > 0 ? false:null"
-                >
-                  <v-select
-                    id="language"
-                    v-model="selectedLanguage"
-                    :dir="$store.state.appConfig.isRTL ? 'rtl' : 'ltr'"
-                    :options="languageName"
-                    :selectable="option => ! option.value.includes('nothing_selected')"
-                    label="text"
-                  />
-                  <b-form-invalid-feedback :state="errors.length > 0 ? false:null">
-                    {{ errors[0] }}
-                  </b-form-invalid-feedback>
-                </b-form-group>
-              </validation-provider>
-            </b-col>
-          </b-row>
-        </validation-observer>
-      </tab-content> -->
-
-      <!-- address  -->
       <tab-content
         title="Balances"
       >
-        <!-- <validation-observer
-          ref="addressRules"
-          tag="form"
-        > -->
-          <b-row>
-            <b-col
-              cols="12"
-              class="mb-2"
-            >
-              <h5 class="mb-0">
-                Sistema de balance CMP
-              </h5>
-              <small class="text-muted">
-                Seleccione una opción
-              </small>
-            </b-col>
-            <b-col offset-md="4">
-            <b-button
-                v-ripple.400="'rgba(255, 255, 255, 0.15)'"
-                type="button"
-                variant="primary"
-                class="mr-1"
-                @click="create_new_balance"
-            >
-                Balance Nuevo
-            </b-button>
-            <b-button
-                v-ripple.400="'rgba(186, 191, 199, 0.15)'"
-                type="button"
-                variant="warning"
-                class="mr-1"
-                @click="correr_tables"
-            >
-                Balances Ejecutados
-            </b-button>
-            </b-col>
-            <!-- <b-button
-                v-ripple.400="'rgba(255, 255, 255, 0.15)'"
-                type="button"
-                variant="warning"
-                @click="correr_tables"
-                v-show="correr_button"
-            >
-                Correr
-            </b-button> -->
-          </b-row>
           <br>
           <b-row>
             <b-col>
-                <balance v-if="new_balance" ref="balances_ref" :proceso="proceso"/>
+                <balance v-if="true" ref="balances_ref" :proceso="proceso" :show_tables="show_tables"/>
             </b-col>
           </b-row>
       </tab-content>
-
-      <!-- social link -->
-      <!-- <tab-content
-        title="Social Links"
-        :before-change="validationFormSocial"
-      >
-        <validation-observer
-          ref="socialRules"
-          tag="form"
-        >
-          <b-row>
-            <b-col
-              cols="12"
-              class="mb-2"
-            >
-              <h5 class="mb-0">
-                Social Links
-              </h5>
-              <small class="text-muted">Enter Your Social Links</small>
-            </b-col>
-            <b-col md="6">
-              <b-form-group
-                label="Twitter"
-                label-for="twitter"
-              >
-                <validation-provider
-                  #default="{ errors }"
-                  name="Twitter"
-                  rules="required|url"
-                >
-                  <b-form-input
-                    id="twitter"
-                    v-model="twitterUrl"
-                    :state="errors.length > 0 ? false:null"
-                    placeholder="https://twitter.com/abc"
-                  />
-                  <small class="text-danger">{{ errors[0] }}</small>
-                </validation-provider>
-              </b-form-group>
-            </b-col>
-            <b-col md="6">
-              <b-form-group
-                label="Facebook"
-                label-for="facebook"
-              >
-                <validation-provider
-                  #default="{ errors }"
-                  name="Facebook"
-                  rules="required|url"
-                >
-                  <b-form-input
-                    id="facebook"
-                    v-model="facebookUrl"
-                    :state="errors.length > 0 ? false:null"
-                    placeholder="https://facebook.com/abc"
-                  />
-                  <small class="text-danger">{{ errors[0] }}</small>
-                </validation-provider>
-              </b-form-group>
-            </b-col>
-            <b-col md="6">
-              <b-form-group
-                label="Google+"
-                label-for="google-plus"
-              >
-                <validation-provider
-                  #default="{ errors }"
-                  name="Google+"
-                  rules="required|url"
-                >
-                  <b-form-input
-                    id="google-plus"
-                    v-model="googleUrl"
-                    :state="errors.length > 0 ? false:null"
-                    placeholder="https://plus.google.com/abc"
-                  />
-                  <small class="text-danger">{{ errors[0] }}</small>
-                </validation-provider>
-              </b-form-group>
-            </b-col>
-            <b-col md="6">
-              <b-form-group
-                label="LinkedIn"
-                label-for="linked-in"
-              >
-                <validation-provider
-                  #default="{ errors }"
-                  name="LinkedIn"
-                  rules="required|url"
-                >
-                  <b-form-input
-                    id="linked-in"
-                    v-model="linkedinUrl"
-                    :state="errors.length > 0 ? false:null"
-                    placeholder="https://linkedin.com/abc"
-                  />
-                  <small class="text-danger">{{ errors[0] }}</small>
-                </validation-provider>
-              </b-form-group>
-            </b-col>
-          </b-row>
-        </validation-observer>
-      </tab-content> -->
     </form-wizard>
 
     <!-- modal login-->
@@ -485,12 +221,13 @@ export default {
       email,
       codeIcon,
       valle: '',
-      proceso: '',
+      proceso: 0,
       valles: [],
       procesos: [],
       loading: false,
       new_balance: false,
       balance_id: null,
+      show_tables: false,
     }
   },
   mounted(){
@@ -582,6 +319,7 @@ export default {
           this.new_balance = true;
       },
     valles_change(value){
+        this.show_tables = false;
         console.log("cambio en valles", value, this.valle);
         this.loading = true;
         axios
