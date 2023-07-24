@@ -114,7 +114,7 @@ class BalancesController extends Controller
                 $tabla_mediciones_fields[6] = (object) ['field' => 'FeMag [%] Balance', 'resizable' => true, 'width' => 100, 'editable' => false, 'cellClass' => 'balance'];
             }
         }
-
+        array_unshift($tabla_mediciones_fields, (object) ['field' => 'Row', 'resizable' => true, 'width' => 50, 'pinned' => 'left', 'editable' => false, 'valueGetter' => 'node.rowIndex + 1']);
         return $tabla_mediciones_fields;
     }
 
@@ -174,7 +174,7 @@ class BalancesController extends Controller
             $tabla_restricciones_fields[12] = (object) ['field' => 'FeMag [%] sup ', 'resizable' => true, 'width' => 100, 'cellClass' => 'calculated'];
             $tabla_restricciones_fields[13] = (object) ['field' => 'Jerarquia', 'resizable' => true, 'width' => 100, 'editable' => true];
         }
-
+        array_unshift($tabla_restricciones_fields, (object) ['field' => 'Row', 'resizable' => true, 'width' => 50, 'pinned' => 'left', 'editable' => false, 'valueGetter' => 'node.rowIndex + 1']);
         return $tabla_restricciones_fields;
     }
 
