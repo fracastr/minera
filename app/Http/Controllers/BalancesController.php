@@ -97,15 +97,15 @@ class BalancesController extends Controller
     public function createTableMedicionesFields($mediciones, $flujos){
         $tabla_mediciones_fields = array();
         foreach($mediciones as $key_mediciones => $value_mediciones){
-            if(sizeof($value_mediciones) == 4){// { field: 'athlete', minWidth: 170, cellStyle: { "white-space": "normal" }, autoHeight: true },
-                $tabla_mediciones_fields[0] = (object) ['field' => 'Flujos', 'resizable' => true, 'width' => 300, 'pinned' => 'left', 'editable' => false];
+            if(sizeof($value_mediciones) == 4){
+                $tabla_mediciones_fields[0] = (object) ['field' => 'Flujos', 'resizable' => true, 'width' => 200, 'pinned' => 'left', 'editable' => false];
                 $tabla_mediciones_fields[1] = (object) ['field' => 'TMS medido', 'resizable' => true, 'width' => 100, 'editable' => true];
                 $tabla_mediciones_fields[2] = (object) ['field' => 'TMS balance', 'resizable' => true, 'width' => 100, 'editable' => false, 'cellClass' => 'balance'];
                 $tabla_mediciones_fields[3] = (object) ['field' => 'Fet [%] Medido', 'resizable' => true, 'width' => 100, 'editable' => true];
                 $tabla_mediciones_fields[4] = (object) ['field' => 'Fet [%] Balance', 'resizable' => true, 'width' => 100, 'editable' => false, 'cellClass' => 'balance'];
             }
             else if(sizeof($value_mediciones) == 6){
-                $tabla_mediciones_fields[0] = (object) ['field' => 'Flujos', 'resizable' => true, 'width' => 300, 'pinned' => 'left', 'editable' => false];
+                $tabla_mediciones_fields[0] = (object) ['field' => 'Flujos', 'resizable' => true, 'width' => 200, 'pinned' => 'left', 'editable' => false];
                 $tabla_mediciones_fields[1] = (object) ['field' => 'TMS medido', 'resizable' => true, 'width' => 100, 'editable' => true];
                 $tabla_mediciones_fields[2] = (object) ['field' => 'TMS balance', 'resizable' => true, 'width' => 100, 'editable' => false, 'cellClass' => 'balance'];
                 $tabla_mediciones_fields[3] = (object) ['field' => 'Fet [%] Medido', 'resizable' => true, 'width' => 100, 'editable' => true];
@@ -147,7 +147,7 @@ class BalancesController extends Controller
     public function createTableRestriccionesFields($restricciones, $jerarquia){
         $tabla_restricciones_fields = array();
         if(sizeof($restricciones[0]) == 4){
-            $tabla_restricciones_fields[0] = (object) ['field' => 'Flujos', 'resizable' => true, 'width' => 300, 'pinned' => 'left', 'editable' => false];
+            $tabla_restricciones_fields[0] = (object) ['field' => 'Flujos', 'resizable' => true, 'width' => 200, 'pinned' => 'left', 'editable' => false];
             $tabla_restricciones_fields[1] = (object) ['field' => 'TMS inf[%]', 'resizable' => true, 'width' => 100, 'editable' => true];
             $tabla_restricciones_fields[2] = (object) ['field' => 'TMS inf[%] ', 'resizable' => true, 'width' => 100, 'cellClass' => 'calculated'];
             $tabla_restricciones_fields[3] = (object) ['field' => 'TMS sup[%]', 'resizable' => true, 'width' => 100, 'editable' => true];
@@ -159,7 +159,7 @@ class BalancesController extends Controller
             $tabla_restricciones_fields[9] = (object) ['field' => 'Jerarquia', 'resizable' => true, 'width' => 100, 'editable' => true];
         }
         else if(sizeof($restricciones[0]) == 6){
-            $tabla_restricciones_fields[0] = (object) ['field' => 'Flujos', 'resizable' => true, 'width' => 300, 'pinned' => 'left', 'editable' => false];
+            $tabla_restricciones_fields[0] = (object) ['field' => 'Flujos', 'resizable' => true, 'width' => 200, 'pinned' => 'left', 'editable' => false];
             $tabla_restricciones_fields[1] = (object) ['field' => 'TMS inf[%]', 'resizable' => true, 'width' => 100, 'editable' => true];
             $tabla_restricciones_fields[2] = (object) ['field' => 'TMS inf[%] ', 'resizable' => true, 'width' => 100, 'cellClass' => 'calculated'];
             $tabla_restricciones_fields[3] = (object) ['field' => 'TMS sup[%]', 'resizable' => true, 'width' => 100, 'editable' => true];
