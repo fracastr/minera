@@ -260,7 +260,7 @@ class BalancesController extends Controller
         $tabla_inventarios_fields[7] = (object) ['field' => 'TMS Delta', 'resizable' => true, 'cellClass' => 'calculated', 'width' => 100];
         // Aqui falta la que viene desde la base de datos
         foreach ($componentes as $key => $value) {
-            $tabla_inventarios_fields[sizeof($tabla_inventarios_fields)] = (object) ['field' => $value, 'resizable' => true, 'editable'=> true];
+            $tabla_inventarios_fields[sizeof($tabla_inventarios_fields)] = (object) ['field' => $value, 'resizable' => true, 'editable'=> true,'width' => 60];
         }
 
         return $tabla_inventarios_fields;
