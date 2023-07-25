@@ -99,15 +99,15 @@ class BalancesController extends Controller
         foreach($mediciones as $key_mediciones => $value_mediciones){
             if(sizeof($value_mediciones) == 4){
                 $tabla_mediciones_fields[0] = (object) ['field' => 'Flujos', 'resizable' => true, 'width' => 200, 'pinned' => 'left', 'editable' => false];
-                $tabla_mediciones_fields[1] = (object) ['field' => 'TMS medido', 'resizable' => true, 'width' => 100, 'editable' => true];
-                $tabla_mediciones_fields[2] = (object) ['field' => 'TMS balance', 'resizable' => true, 'width' => 100, 'editable' => false, 'cellClass' => 'balance'];
+                $tabla_mediciones_fields[1] = (object) ['field' => 'TMS Medido', 'resizable' => true, 'width' => 100, 'editable' => true];
+                $tabla_mediciones_fields[2] = (object) ['field' => 'TMS Balance', 'resizable' => true, 'width' => 100, 'editable' => false, 'cellClass' => 'balance'];
                 $tabla_mediciones_fields[3] = (object) ['field' => 'Fet [%] Medido', 'resizable' => true, 'width' => 100, 'editable' => true];
                 $tabla_mediciones_fields[4] = (object) ['field' => 'Fet [%] Balance', 'resizable' => true, 'width' => 100, 'editable' => false, 'cellClass' => 'balance'];
             }
             else if(sizeof($value_mediciones) == 6){
                 $tabla_mediciones_fields[0] = (object) ['field' => 'Flujos', 'resizable' => true, 'width' => 200, 'pinned' => 'left', 'editable' => false];
-                $tabla_mediciones_fields[1] = (object) ['field' => 'TMS medido', 'resizable' => true, 'width' => 100, 'editable' => true];
-                $tabla_mediciones_fields[2] = (object) ['field' => 'TMS balance', 'resizable' => true, 'width' => 100, 'editable' => false, 'cellClass' => 'balance'];
+                $tabla_mediciones_fields[1] = (object) ['field' => 'TMS Medido', 'resizable' => true, 'width' => 100, 'editable' => true];
+                $tabla_mediciones_fields[2] = (object) ['field' => 'TMS Balance', 'resizable' => true, 'width' => 100, 'editable' => false, 'cellClass' => 'balance'];
                 $tabla_mediciones_fields[3] = (object) ['field' => 'Fet [%] Medido', 'resizable' => true, 'width' => 100, 'editable' => true];
                 $tabla_mediciones_fields[4] = (object) ['field' => 'Fet [%] Balance', 'resizable' => true, 'width' => 100, 'editable' => false, 'cellClass' => 'balance'];
                 $tabla_mediciones_fields[5] = (object) ['field' => 'FeMag [%] Medido', 'resizable' => true, 'width' => 100, 'editable' => true];
@@ -124,15 +124,15 @@ class BalancesController extends Controller
             $object_mediciones = array();
             if(sizeof($value_mediciones) == 4){
                 $object_mediciones['Flujos'] = $flujos[$key_mediciones];
-                $object_mediciones['TMS medido'] = number_format($value_mediciones[0], 0, '.', '');
-                $object_mediciones['TMS balance'] = number_format($value_mediciones[1], 0, '.', '');
+                $object_mediciones['TMS Medido'] = number_format($value_mediciones[0], 0, '.', '');
+                $object_mediciones['TMS Balance'] = number_format($value_mediciones[1], 0, '.', '');
                 $object_mediciones['Fet [%] Medido'] = number_format($value_mediciones[2], 2);
                 $object_mediciones['Fet [%] Balance'] = number_format($value_mediciones[3], 2);
             }
             else if(sizeof($value_mediciones) == 6){
                 $object_mediciones['Flujos'] = $flujos[$key_mediciones];
-                $object_mediciones['TMS medido'] = number_format($value_mediciones[0], 0, '.', '');
-                $object_mediciones['TMS balance'] = number_format($value_mediciones[1], 0, '.', '');
+                $object_mediciones['TMS Medido'] = number_format($value_mediciones[0], 0, '.', '');
+                $object_mediciones['TMS Balance'] = number_format($value_mediciones[1], 0, '.', '');
                 $object_mediciones['Fet [%] Medido'] = number_format($value_mediciones[2], 2);
                 $object_mediciones['Fet [%] Balance'] = number_format($value_mediciones[3], 2);
                 $object_mediciones['FeMag [%] Medido'] = number_format($value_mediciones[4], 2);
