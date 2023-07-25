@@ -151,13 +151,13 @@ class BalancesController extends Controller
         $tabla_restricciones_fields = array();
         if(sizeof($restricciones[0]) == 4){
             $tabla_restricciones_fields[0] = (object) ['field' => 'Flujos', 'resizable' => true, 'width' => 200, 'pinned' => 'left', 'editable' => false];
-            $tabla_restricciones_fields[1] = (object) ['field' => 'TMS Inf [%]', 'resizable' => true, 'width' => 120, 'editable' => true];
+            $tabla_restricciones_fields[1] = (object) ['field' => 'TMS Inf Ingreso [%]', 'resizable' => true, 'width' => 120, 'editable' => true];
             $tabla_restricciones_fields[2] = (object) ['field' => 'TMS Inf [%]', 'resizable' => true, 'width' => 120, 'cellClass' => 'calculated'];
-            $tabla_restricciones_fields[3] = (object) ['field' => 'TMS Sup [%]', 'resizable' => true, 'width' => 120, 'editable' => true];
+            $tabla_restricciones_fields[3] = (object) ['field' => 'TMS Sup Ingreso [%]', 'resizable' => true, 'width' => 120, 'editable' => true];
             $tabla_restricciones_fields[4] = (object) ['field' => 'TMS Sup [%]', 'resizable' => true, 'width' => 120, 'cellClass' => 'calculated'];
-            $tabla_restricciones_fields[5] = (object) ['field' => 'FeT Inf [%]', 'resizable' => true, 'width' => 120, 'editable' => true];
+            $tabla_restricciones_fields[5] = (object) ['field' => 'FeT Inf Ingreso [%]', 'resizable' => true, 'width' => 120, 'editable' => true];
             $tabla_restricciones_fields[6] = (object) ['field' => 'FeT Inf [%]', 'resizable' => true, 'width' => 120, 'cellClass' => 'calculated'];
-            $tabla_restricciones_fields[7] = (object) ['field' => 'FeT Sup [%]', 'resizable' => true, 'width' => 120, 'editable' => true];
+            $tabla_restricciones_fields[7] = (object) ['field' => 'FeT Sup Ingreso [%]', 'resizable' => true, 'width' => 120, 'editable' => true];
             $tabla_restricciones_fields[8] = (object) ['field' => 'FeT Sup [%]', 'resizable' => true, 'width' => 120, 'cellClass' => 'calculated'];
             $tabla_restricciones_fields[9] = (object) ['field' => 'Jerarquia', 'resizable' => true, 'width' => 100, 'editable' => true];
         }
@@ -189,13 +189,13 @@ class BalancesController extends Controller
             $object_restricciones = array();
             if(sizeof($value_restricciones) == 4){
                 $object_restricciones['Flujos'] = $flujos[$key_restricciones];
-                $object_restricciones['TMS Inf [%]'] = $value_restricciones[0];
+                $object_restricciones['TMS Inf Ingreso [%]'] = $value_restricciones[0];
                 $object_restricciones['TMS Inf [%]'] = $desviaciones[$key_restricciones][0];
-                $object_restricciones['TMS Sup [%]'] = $value_restricciones[1];
+                $object_restricciones['TMS Sup Ingreso [%]'] = $value_restricciones[1];
                 $object_restricciones['TMS Sup [%]'] = $desviaciones[$key_restricciones][1];
-                $object_restricciones['FeT Inf [%]'] = $value_restricciones[2];
+                $object_restricciones['FeT Inf Ingreso [%]'] = $value_restricciones[2];
                 $object_restricciones['FeT Inf [%]'] = $desviaciones[$key_restricciones][2];
-                $object_restricciones['FeT Sup [%]'] = $value_restricciones[3];
+                $object_restricciones['FeT Sup Ingreso [%]'] = $value_restricciones[3];
                 $object_restricciones['FeT Sup [%]'] = $desviaciones[$key_restricciones][3];
                 $object_restricciones['Jerarquia'] = $jerarquia[$key_restricciones];
             }
