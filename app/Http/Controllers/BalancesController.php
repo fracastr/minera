@@ -254,7 +254,7 @@ class BalancesController extends Controller
         $tabla_inventarios_fields[1] = (object) ['field' => 'TMH INI', 'resizable' => true, 'editable' => false, 'width' => 100];
         $tabla_inventarios_fields[2] = (object) ['field' => 'TMH FIN', 'resizable' => true, 'editable' => false, 'width' => 100];
         $tabla_inventarios_fields[3] = (object) ['field' => 'TMH Delta', 'resizable' => true, 'cellClass' => 'calculated', 'width' => 100];
-        $tabla_inventarios_fields[4] = (object) ['field' => 'Humedad', 'resizable' => true, 'editable' => true, 'width' => 100];
+        $tabla_inventarios_fields[4] = (object) ['field' => 'Humedad [%]', 'resizable' => true, 'editable' => true, 'width' => 100];
         $tabla_inventarios_fields[5] = (object) ['field' => 'TMS INI', 'resizable' => true, 'editable' => true, 'width' => 100];
         $tabla_inventarios_fields[6] = (object) ['field' => 'TMS FIN', 'resizable' => true, 'editable' => true, 'width' => 100];
         $tabla_inventarios_fields[7] = (object) ['field' => 'TMS Delta', 'resizable' => true, 'cellClass' => 'calculated', 'width' => 100];
@@ -285,7 +285,7 @@ class BalancesController extends Controller
             $object_inventarios['TMH INI'] = $tmh_ini[$key_inventarios];
             $object_inventarios['TMH FIN'] = $tmh_fin[$key_inventarios];
             $object_inventarios['TMH Delta'] = $tmh_delta[$key_inventarios];
-            $object_inventarios['Humedad [%]'] = $humedad_inventario[$key_inventarios];
+            $object_inventarios['Humedad'] = $humedad_inventario[$key_inventarios];
             $object_inventarios['TMS INI'] = $tms_ini[$key_inventarios];
             $object_inventarios['TMS FIN'] = $tms_fin[$key_inventarios];
             $object_inventarios['TMS Delta'] = $tms_delta[$key_inventarios];
