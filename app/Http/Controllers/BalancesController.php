@@ -218,7 +218,7 @@ class BalancesController extends Controller
 
     public function createTableBalanceNodosFields($componentes){
         $array_nodos_fields = array();
-        $array_nodos_fields[0] = (object) ['field' => 'Nodos', 'resizable' => true, 'editable' => false];
+        $array_nodos_fields[0] = (object) ['field' => 'Nodos', 'resizable' => true, 'editable' => false, 'width' => 200, 'pinned' => 'left'];
         $array_nodos_fields[1] = (object) ['field' => 'TMS', 'resizable' => true, 'editable' => false];
         $array_nodos_fields[2] = (object) ['field' => 'Finos FeT', 'resizable' => true, 'editable' => false];
         if(sizeof($componentes) == 2){
@@ -234,6 +234,7 @@ class BalancesController extends Controller
             $object_balance_nodos = array();
             $object_balance_nodos['Nodos'] = $nodos[$key_balance_nodos];
             $object_balance_nodos['TMS'] = str_replace(",",".",str_replace(".","",$nodos_data[$key_balance_nodos][0]));
+            $object_balance_nodos['TMS'] = number_format($object_balance_nodos['TMS'], 2);
             $object_balance_nodos['Finos FeT'] = str_replace(",",".",str_replace(".","",$nodos_data[$key_balance_nodos][1]));
             if(sizeof($componentes) == 2){
                 $object_balance_nodos['Finos FeMag'] = str_replace(",",".",str_replace(".","",$nodos_data[$key_balance_nodos][2]));
