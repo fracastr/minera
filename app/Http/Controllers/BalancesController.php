@@ -124,15 +124,15 @@ class BalancesController extends Controller
             $object_mediciones = array();
             if(sizeof($value_mediciones) == 4){
                 $object_mediciones['Flujos'] = $flujos[$key_mediciones];
-                $object_mediciones['TMS medido'] = number_format($value_mediciones[0], 0, '.', '');
-                $object_mediciones['TMS balance'] = number_format($value_mediciones[1], 0, '.', '');
+                $object_mediciones['TMS medido'] = number_format($value_mediciones[0], 0);
+                $object_mediciones['TMS balance'] = number_format($value_mediciones[1], 0);
                 $object_mediciones['Fet [%] Medido'] = number_format($value_mediciones[2], 2);
                 $object_mediciones['Fet [%] Balance'] = number_format($value_mediciones[3], 2);
             }
             else if(sizeof($value_mediciones) == 6){
                 $object_mediciones['Flujos'] = $flujos[$key_mediciones];
-                $object_mediciones['TMS medido'] = number_format($value_mediciones[0], 0, '.', '');
-                $object_mediciones['TMS balance'] = number_format($value_mediciones[1], 0, '.', '');
+                $object_mediciones['TMS medido'] = number_format($value_mediciones[0], 0);
+                $object_mediciones['TMS balance'] = number_format($value_mediciones[1], 0);
                 $object_mediciones['Fet [%] Medido'] = number_format($value_mediciones[2], 2);
                 $object_mediciones['Fet [%] Balance'] = number_format($value_mediciones[3], 2);
                 $object_mediciones['FeMag [%] Medido'] = number_format($value_mediciones[4], 2);
@@ -236,8 +236,10 @@ class BalancesController extends Controller
             $object_balance_nodos['TMS'] = str_replace(",",".",str_replace(".","",$nodos_data[$key_balance_nodos][0]));
             $object_balance_nodos['TMS'] = number_format($object_balance_nodos['TMS'], 0);
             $object_balance_nodos['Finos FeT'] = str_replace(",",".",str_replace(".","",$nodos_data[$key_balance_nodos][1]));
+            $object_balance_nodos['Finos FeT'] = number_format($object_balance_nodos['Finos FeT'], 0);
             if(sizeof($componentes) == 2){
                 $object_balance_nodos['Finos FeMag'] = str_replace(",",".",str_replace(".","",$nodos_data[$key_balance_nodos][2]));
+                $object_balance_nodos['Finos FeMag'] = number_format($object_balance_nodos['Finos FeMag'], 0);
             }
             array_push($array_balance_nodos, (object)$object_balance_nodos);
         }
