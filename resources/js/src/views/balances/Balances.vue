@@ -476,10 +476,10 @@ this.defaultColDef = {
           // armar formateo dinamico de numeros
           this.balances_fields.map(function(value, index){
             //   console.log("index y value");
-              if(index === 1 || index === 2){
+              if(index === 2 || index === 3){
                   value.valueFormatter = intFormatter;
               }
-              if(index === 3 || index === 4){
+              if(index === 4 || index === 5){
                   value.valueFormatter = decimalFormatter;
               }
           })
@@ -487,7 +487,7 @@ this.defaultColDef = {
           // armar formateo dinamico de numeros tabla 2
           this.restricciones_fields.map(function(value, index){
               console.log("index y value", index, value, data_restricciones.length);
-              if(index != data_restricciones.length - 1 && index != 0){
+              if(index != data_restricciones.length - 1 && index > 1){
                   console.log(index);
                   value.valueFormatter = decimalFormatter;
               }
