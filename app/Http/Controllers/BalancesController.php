@@ -251,13 +251,13 @@ class BalancesController extends Controller
         $tabla_inventarios_fields = array();
 
         $tabla_inventarios_fields[0] = (object) ['field' => 'Inventario', 'resizable' => true, 'editable' => false, 'width' => 200, 'pinned' => 'left'];
-        $tabla_inventarios_fields[1] = (object) ['field' => 'TMH INI', 'resizable' => true, 'editable' => false, 'width' => 200];
-        $tabla_inventarios_fields[2] = (object) ['field' => 'TMH FIN', 'resizable' => true, 'editable' => false, 'width' => 200];
-        $tabla_inventarios_fields[3] = (object) ['field' => 'TMH Delta', 'resizable' => true, 'cellClass' => 'calculated', 'width' => 200];
-        $tabla_inventarios_fields[4] = (object) ['field' => 'Humedad', 'resizable' => true, 'editable' => true, 'width' => 200];
-        $tabla_inventarios_fields[5] = (object) ['field' => 'TMS INI', 'resizable' => true, 'editable' => true, 'width' => 200];
-        $tabla_inventarios_fields[6] = (object) ['field' => 'TMS FIN', 'resizable' => true, 'editable' => true, 'width' => 200];
-        $tabla_inventarios_fields[7] = (object) ['field' => 'TMS Delta', 'resizable' => true, 'cellClass' => 'calculated', 'width' => 200];
+        $tabla_inventarios_fields[1] = (object) ['field' => 'TMH INI', 'resizable' => true, 'editable' => false, 'width' => 100];
+        $tabla_inventarios_fields[2] = (object) ['field' => 'TMH FIN', 'resizable' => true, 'editable' => false, 'width' => 100];
+        $tabla_inventarios_fields[3] = (object) ['field' => 'TMH Delta', 'resizable' => true, 'cellClass' => 'calculated', 'width' => 100];
+        $tabla_inventarios_fields[4] = (object) ['field' => 'Humedad', 'resizable' => true, 'editable' => true, 'width' => 100];
+        $tabla_inventarios_fields[5] = (object) ['field' => 'TMS INI', 'resizable' => true, 'editable' => true, 'width' => 100];
+        $tabla_inventarios_fields[6] = (object) ['field' => 'TMS FIN', 'resizable' => true, 'editable' => true, 'width' => 100];
+        $tabla_inventarios_fields[7] = (object) ['field' => 'TMS Delta', 'resizable' => true, 'cellClass' => 'calculated', 'width' => 100];
         // Aqui falta la que viene desde la base de datos
         foreach ($componentes as $key => $value) {
             $tabla_inventarios_fields[sizeof($tabla_inventarios_fields)] = (object) ['field' => $value, 'resizable' => true, 'editable'=> true];
