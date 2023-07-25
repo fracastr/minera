@@ -234,7 +234,7 @@ class BalancesController extends Controller
             $object_balance_nodos = array();
             $object_balance_nodos['Nodos'] = $nodos[$key_balance_nodos];
             $object_balance_nodos['TMS'] = str_replace(",",".",str_replace(".","",$nodos_data[$key_balance_nodos][0]));
-            $object_balance_nodos['TMS'] = number_format($object_balance_nodos['TMS'], 2);
+            $object_balance_nodos['TMS'] = number_format($object_balance_nodos['TMS'], 0);
             $object_balance_nodos['Finos FeT'] = str_replace(",",".",str_replace(".","",$nodos_data[$key_balance_nodos][1]));
             if(sizeof($componentes) == 2){
                 $object_balance_nodos['Finos FeMag'] = str_replace(",",".",str_replace(".","",$nodos_data[$key_balance_nodos][2]));
