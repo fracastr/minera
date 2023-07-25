@@ -148,8 +148,8 @@ class BalancesController extends Controller
         $tabla_restricciones_fields = array();
         if(sizeof($restricciones[0]) == 4){
             $tabla_restricciones_fields[0] = (object) ['field' => 'Flujos', 'resizable' => true, 'width' => 200, 'pinned' => 'left', 'editable' => false];
-            $tabla_restricciones_fields[1] = (object) ['field' => 'TMS inf[%]', 'resizable' => true, 'width' => 100, 'editable' => true];
-            $tabla_restricciones_fields[2] = (object) ['field' => 'TMS inf[%] ', 'resizable' => true, 'width' => 100, 'cellClass' => 'calculated'];
+            $tabla_restricciones_fields[1] = (object) ['field' => 'TMS Inf [%]', 'resizable' => true, 'width' => 100, 'editable' => true];
+            $tabla_restricciones_fields[2] = (object) ['field' => 'TMS Inf [%]', 'resizable' => true, 'width' => 100, 'cellClass' => 'calculated'];
             $tabla_restricciones_fields[3] = (object) ['field' => 'TMS sup[%]', 'resizable' => true, 'width' => 100, 'editable' => true];
             $tabla_restricciones_fields[4] = (object) ['field' => 'TMS sup[%] ', 'resizable' => true, 'width' => 100, 'cellClass' => 'calculated'];
             $tabla_restricciones_fields[5] = (object) ['field' => 'Fet [%] inf', 'resizable' => true, 'width' => 100, 'editable' => true];
@@ -184,7 +184,7 @@ class BalancesController extends Controller
             $object_restricciones = array();
             if(sizeof($value_restricciones) == 4){
                 $object_restricciones['Flujos'] = $flujos[$key_restricciones];
-                $object_restricciones['TMS Inf Ingreso [%]'] = $value_restricciones[0];
+                $object_restricciones['TMS Inf [%]'] = $value_restricciones[0];
                 $object_restricciones['TMS Inf [%]'] = $desviaciones[$key_restricciones][0];
                 $object_restricciones['TMS Sup Ingreso [%]'] = $value_restricciones[1];
                 $object_restricciones['TMS Sup [%]'] = $desviaciones[$key_restricciones][1];
