@@ -285,13 +285,12 @@ class BalancesController extends Controller
             $object_inventarios['TMH INI'] = $tmh_ini[$key_inventarios];
             $object_inventarios['TMH FIN'] = $tmh_fin[$key_inventarios];
             $object_inventarios['TMH Delta'] = $tmh_delta[$key_inventarios];
-            $object_inventarios['Humedad'] = $humedad_inventario[$key_inventarios];
+            $object_inventarios['Humedad [%]'] = $humedad_inventario[$key_inventarios];
             $object_inventarios['TMS INI'] = $tms_ini[$key_inventarios];
             $object_inventarios['TMS FIN'] = $tms_fin[$key_inventarios];
             $object_inventarios['TMS Delta'] = $tms_delta[$key_inventarios];
             foreach ($componentes as $key => $value) {
                 $object_inventarios[$value] = $componentes_inventario[$key_inventarios][$key];
-                $object_inventarios[$value] = number_format($object_inventarios[$value], 2);
             }
 
             array_push($tabla_inventarios_data, (object)$object_inventarios);
