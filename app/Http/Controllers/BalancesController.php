@@ -150,8 +150,8 @@ class BalancesController extends Controller
             $tabla_restricciones_fields[0] = (object) ['field' => 'Flujos', 'resizable' => true, 'width' => 200, 'pinned' => 'left', 'editable' => false];
             $tabla_restricciones_fields[1] = (object) ['field' => 'TMS Inf a[%]', 'resizable' => true, 'width' => 100, 'editable' => true];
             $tabla_restricciones_fields[2] = (object) ['field' => 'TMS Inf [%]', 'resizable' => true, 'width' => 100, 'cellClass' => 'calculated'];
-            $tabla_restricciones_fields[3] = (object) ['field' => 'TMS sup a[%]', 'resizable' => true, 'width' => 100, 'editable' => true];
-            $tabla_restricciones_fields[4] = (object) ['field' => 'TMS sup [%]', 'resizable' => true, 'width' => 100, 'cellClass' => 'calculated'];
+            $tabla_restricciones_fields[3] = (object) ['field' => 'TMS Sup a[%]', 'resizable' => true, 'width' => 100, 'editable' => true];
+            $tabla_restricciones_fields[4] = (object) ['field' => 'TMS Sup [%]', 'resizable' => true, 'width' => 100, 'cellClass' => 'calculated'];
             $tabla_restricciones_fields[5] = (object) ['field' => 'Fet [%] aInf', 'resizable' => true, 'width' => 100, 'editable' => true];
             $tabla_restricciones_fields[6] = (object) ['field' => 'Fet [%] Inf', 'resizable' => true, 'width' => 100, 'cellClass' => 'calculated'];
             $tabla_restricciones_fields[7] = (object) ['field' => 'Fet [%] aSup', 'resizable' => true, 'width' => 100, 'editable' => true];
