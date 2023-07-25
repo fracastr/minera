@@ -124,10 +124,10 @@ class BalancesController extends Controller
             $object_mediciones = array();
             if(sizeof($value_mediciones) == 4){
                 $object_mediciones['Flujos'] = $flujos[$key_mediciones];
-                $object_mediciones['TMS medido'] = number_format($value_mediciones[0], 10, '.', '');
-                $object_mediciones['TMS balance'] = number_format($value_mediciones[1], 10, '.', '');
-                $object_mediciones['Fet [%] Medido'] = number_format($value_mediciones[2], 4);
-                $object_mediciones['Fet [%] Balance'] = number_format($value_mediciones[3], 4);
+                $object_mediciones['TMS medido'] = number_format($value_mediciones[0], 0, '.', '');
+                $object_mediciones['TMS balance'] = number_format($value_mediciones[1], 0, '.', '');
+                $object_mediciones['Fet [%] Medido'] = number_format($value_mediciones[2], 2);
+                $object_mediciones['Fet [%] Balance'] = number_format($value_mediciones[3], 2);
             }
             else if(sizeof($value_mediciones) == 6){
                 $object_mediciones['Flujos'] = $flujos[$key_mediciones];
