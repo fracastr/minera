@@ -260,7 +260,7 @@ class BalancesController extends Controller
         $tabla_inventarios_fields[7] = (object) ['field' => 'TMS Delta', 'resizable' => true, 'cellClass' => 'calculated', 'width' => 100];
         // Aqui falta la que viene desde la base de datos
         foreach ($componentes as $key => $value) {
-            $tabla_inventarios_fields[sizeof($tabla_inventarios_fields)] = (object) ['field' => $value, 'resizable' => true, 'editable'=> true,'width' => 70];
+            $tabla_inventarios_fields[sizeof($tabla_inventarios_fields)] = (object) ['field' => $value . ' [%]', 'resizable' => true, 'editable'=> true,'width' => 70];
         }
 
         return $tabla_inventarios_fields;
@@ -290,7 +290,7 @@ class BalancesController extends Controller
             $object_inventarios['TMS FIN'] = $tms_fin[$key_inventarios];
             $object_inventarios['TMS Delta'] = $tms_delta[$key_inventarios];
             foreach ($componentes as $key => $value) {
-                $object_inventarios[$value] = $componentes_inventario[$key_inventarios][$key];
+                $object_inventarios[$value.' [%]'] = $componentes_inventario[$key_inventarios][$key];
             }
 
             array_push($tabla_inventarios_data, (object)$object_inventarios);
@@ -645,7 +645,7 @@ class BalancesController extends Controller
                 $value = json_decode($value, true);
             }
             //dd($data);
-            
+
             $yellow = array();
             $green = array();
             foreach($data->indices as $key => $value){

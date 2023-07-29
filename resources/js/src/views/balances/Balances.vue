@@ -574,10 +574,10 @@ this.defaultColDef = {
 
           this.inventarios_fields.map(function(value, index){
               //console.log("index y value", index, value, data_restricciones.length);
-              if(index != 0 && index != 4){
+              if(![0,4,8,9].includes(index)){
                   value.valueFormatter = intFormatter2;
               }
-              else if(index == 4){
+              else if([4,8,9].includes(index)){
                   value.valueFormatter = decimalFormatter2;
               }
           })
