@@ -203,6 +203,7 @@ import {
 import Ripple from "vue-ripple-directive";
 import axios from "axios";
 import { AgGridVue } from "ag-grid-vue";
+import ToastificationContent from '@core/components/toastification/ToastificationContent.vue'
 function decimalFormatter(params) {
     // console.log("params decimal", params.value);
     // console.log(parseFloat(params.value));
@@ -244,6 +245,9 @@ export default {
             type: Boolean,
             default: false
         }
+    },
+    components: {
+        ToastificationContent,
     },
   data() {
     return {
@@ -288,17 +292,6 @@ export default {
       console.log(this.$refs);
   },
   beforeMount() {
-//     this.columnDefs = [
-//     { field: 'make', editable: true },
-//     { field: 'model', editable: true },
-//     { field: 'price', editable: true }
-// ];
-
-//     this.rowData = [
-//       { make: "Toyota", model: "Celica", price: 35000 },
-//       { make: "Ford", model: "Mondeo", price: 32000 },
-//       { make: "Porsche", model: "Boxter", price: 72000 },
-//     ];
 this.defaultColDef = {
       flex: 0,
       resizable: false,
@@ -438,8 +431,17 @@ this.defaultColDef = {
             this.gridApiBalancesTable.redrawRows();
             this.gridApiRestriccionesTable.redrawRows();
         })
-        .catch(function (e) {
-          console.log("FAILURE!! correr_balance", e);
+        .catch((e) => {
+            this.loadingTable = false;
+            console.log("FAILURE!!", e);
+            this.$toast({
+            component: ToastificationContent,
+            props: {
+            title: 'Ocurrio un error al correr el balance',
+            icon: 'AlertTriangleIcon',
+            variant: 'danger',
+            },
+        })
         });
 
     },
@@ -495,10 +497,10 @@ this.defaultColDef = {
 
           this.inventarios_fields.map(function(value, index){
               //console.log("index y value", index, value, data_restricciones.length);
-              if(index != 0 && index != 4){
+              if(![0,4,8,9].includes(index)){
                   value.valueFormatter = intFormatter2;
               }
-              else if(index == 4){
+              else if([4,8,9].includes(index)){
                   value.valueFormatter = decimalFormatter2;
               }
           })
@@ -574,10 +576,10 @@ this.defaultColDef = {
 
           this.inventarios_fields.map(function(value, index){
               //console.log("index y value", index, value, data_restricciones.length);
-              if(index != 0 && index != 4){
+              if(![0,4,8,9].includes(index)){
                   value.valueFormatter = intFormatter2;
               }
-              else if(index == 4){
+              else if([4,8,9].includes(index)){
                   value.valueFormatter = decimalFormatter2;
               }
           })
@@ -590,9 +592,17 @@ this.defaultColDef = {
           this.show_tables = true;
           this.loadingTable = false;
         })
-        .catch(function (e) {
+        .catch((e) => {
             this.loadingTable = false;
             console.log("FAILURE!!", e);
+            this.$toast({
+            component: ToastificationContent,
+            props: {
+            title: 'Ocurrio un error al importar el archivo',
+            icon: 'AlertTriangleIcon',
+            variant: 'danger',
+            },
+        })
         });
     },
   },
