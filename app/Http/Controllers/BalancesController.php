@@ -302,33 +302,21 @@ class BalancesController extends Controller
     public function import(Request $request)
     {
         try {
-            // $file = $request->file('file');
-            // $path = $request->file('file')->storeAs(
-            //     null,
-            //     $file->getClientOriginalName(),
-            //     'google'
-            // );
-            // dd($path, Auth::id());
             $path = $request->file('file')->store('public');
             $path = '/home/ubuntu/minera/storage/app/'. $path;
-
-            // $path = '/home/ubuntu/minera/storage/app/public/uZebC6Bd1IB7x4Tv0jfAkxUlEC3fiXbwTnyMT8QL.xlsx';
 
         $proceso_id = $request->proceso_id;
         $proceso = Procesos::find($proceso_id);
         $nombre_proceso = $proceso->nombre;
         $url = 'http://34.229.82.49:8080/flaskapi/get_balance';
         $myBody['path_name'] = $path;
-        // $response = Http::acceptJson()->post($url, array($myBody));
         $response = Http::acceptJson()->post($url, [
             'path_name' => $path,
             'nombre_proceso' => $nombre_proceso
         ]);
-        //dd($response);
-        //dd(json_decode($response->getBody()->getContents()));
+
         $data = json_decode($response->getBody()->getContents());
         foreach ($data as $key => &$value) {
-            // $value = json_decode( preg_replace('/[\x00-\x1F\x80-\xFF]/', '', $value), true );
             $value = json_decode($value, true);
         }
 
@@ -337,13 +325,7 @@ class BalancesController extends Controller
         $flujos = $data->datos_entrada['flujos'];
         $desviaciones = $data->desviaciones;
         $balances_finales = $data->balances_finales;
-        //$mediciones = $balances_finales;
 
-        // foreach ($desviaciones as $key_desviaciones => &$value_desviaciones) {
-        //     foreach($value_desviaciones as $key_value_desviaciones => &$value_desviaciones_item){
-        //         $value_desviaciones_item = number_format($value_desviaciones_item * 100, 2);
-        //     }
-        // }
 
         $table_mediciones_fields = $this->createTableMedicionesFields($mediciones, $flujos);
         $array_mediciones = $this->createTableMediciones($mediciones, $flujos);
@@ -351,7 +333,6 @@ class BalancesController extends Controller
         // logica tabla restricciones
         $restricciones = $data->datos_entrada['restricciones'];
         $jerarquia = $data->datos_entrada['jerarquia'];
-        //$array_restricciones = $this->createTableRestricciones($restricciones, $jerarquia);
 
         // logica tabla restricciones fields
         $tabla_restricciones_fields = $this->createTableRestriccionesFields($restricciones, $jerarquia);
@@ -378,8 +359,6 @@ class BalancesController extends Controller
         $array_balance_nodos = $this->createTableBalanceNodos($balance_nodos, $nodos_data, $nodos, $componentes);
 
         // logica tabla inventarios
-
-
 
         $inventarios_fields = $this->createTableInventariosFields($componentes);
         $inventarios_data = $this->createTableInventariosData($data, $componentes);
@@ -423,20 +402,14 @@ class BalancesController extends Controller
     public function correr_balance(Request $request)
     {
         try {
-        //     $datos_entrada = $request->datos_entrada;
-        //     $datos_entrada = json_encode($datos_entrada);
-        //dd($request->datos_entrada["mediciones"]);
+
         $datos_entrada_id = $request->datos_entrada_id;
         $datos_entrada = $request->datos_entrada;
         $balances_table = $request->balances_table;
         $restricciones_table = $request->restricciones_table;
         $proceso_id = $request->proceso_id;
         $inventarios_table = $request->inventarios_table;
-        //dd($request->all());
-        //dd($request->balances_table);
-        //$size_mediciones = sizeof($request->datos_entrada["mediciones"][0]);
 
-        //dd($size_mediciones);
         $tmh_ini = array();
         $tmh_fin = array();
         $tmh_delta = array();
@@ -516,22 +489,15 @@ class BalancesController extends Controller
         $datos_entrada_data->datos_entrada = json_encode($datos_entrada);
         $datos_entrada_data->save();
 
-        //dd($datos_entrada_data->mediciones);
-
-
         $url = 'http://34.229.82.49:8080/flaskapi/correr_balance';
         $myBody['datos_entrada_id'] = $datos_entrada_id;
-        //$response = Http::acceptJson()->post($url, array($myBody));
         $response = Http::acceptJson()->post($url, [
             'datos_entrada_id' => $datos_entrada_id,
         ]);
-        //$response = Http::acceptJson()->get($url);
-        //dd($response);
-        //dd(json_decode($response->getBody()->getContents()));
+
         $data = json_decode($response->getBody()->getContents());
-        //dd($data);
+
         foreach ($data as $key => &$value) {
-            // $value = json_decode( preg_replace('/[\x00-\x1F\x80-\xFF]/', '', $value), true );
             $value = json_decode($value, true);
         }
 
@@ -550,19 +516,12 @@ class BalancesController extends Controller
         $datos_entrada_data->datos_entrada = json_encode($data->datos_entrada);
         $datos_entrada_data->save();
 
-        // foreach ($desviaciones as $key_desviaciones => &$value_desviaciones) {
-        //     foreach($value_desviaciones as $key_value_desviaciones => &$value_desviaciones_item){
-        //         $value_desviaciones_item = number_format($value_desviaciones_item * 100, 2);
-        //     }
-        // }
-
         $table_mediciones_fields = $this->createTableMedicionesFields($mediciones, $flujos);
         $array_mediciones = $this->createTableMediciones($mediciones, $flujos);
 
         // logica tabla restricciones
         $restricciones = $data->datos_entrada['restricciones'];
         $jerarquia = $data->datos_entrada['jerarquia'];
-        //$array_restricciones = $this->createTableRestricciones($restricciones, $jerarquia);
 
         // logica tabla restricciones fields
         $tabla_restricciones_fields = $this->createTableRestriccionesFields($restricciones, $jerarquia);
@@ -597,11 +556,6 @@ class BalancesController extends Controller
         $inventarios_fields = $this->createTableInventariosFields($componentes);
         $inventarios_data = $this->createTableInventariosData($data, $componentes);
 
-        // $data_entrada = $balance_nodos = $data->datos_entrada;
-        // $datos_entrada_model = new Datos_entrada();
-        // $datos_entrada_model->datos_entrada = json_encode($data_entrada);
-        // $datos_entrada_model->save();
-
         return [
         'data' => $data,
         'balances_table' => $array_mediciones,
@@ -631,20 +585,16 @@ class BalancesController extends Controller
 
             $url = 'http://34.229.82.49:8080/flaskapi/paint_tables';
 
-            //$response = Http::acceptJson()->post($url, array($myBody));
             $response = Http::acceptJson()->post($url, [
                 'datos_entrada_id' => $datos_entrada_id,
                 'rowIndex' => $rowIndex
             ]);
-            //$response = Http::acceptJson()->get($url);
-            //dd($response);
-            //dd(json_decode($response->getBody()->getContents()));
+
             $data = json_decode($response->getBody()->getContents());
             foreach ($data as $key => &$value) {
-                // $value = json_decode( preg_replace('/[\x00-\x1F\x80-\xFF]/', '', $value), true );
                 $value = json_decode($value, true);
             }
-            //dd($data);
+       
 
             $yellow = array();
             $green = array();
@@ -661,7 +611,6 @@ class BalancesController extends Controller
                 "green" => $green
             ];
         } catch (\Throwable $th) {
-            //throw $th;
             return "ERROR";
         }
     }

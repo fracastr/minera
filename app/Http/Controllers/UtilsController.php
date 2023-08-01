@@ -104,19 +104,7 @@ class UtilsController extends Controller
 
     public function getExcel($datos_entrada_id, $proceso_id){
 
-        //$files = Storage::disk('google')->allFiles();
         $filename = $datos_entrada_id . '.xlsx';
-
-        // $contents = Storage::path('out.xlsx');
-        // dd($contents);
-        // $path = $request->file('file')->storeAs(
-            //     null,
-            //     $file->getClientOriginalName(),
-            //     'google'
-            // );
-        //$move = Storage::move(Storage::path('out.xlsx'), Storage::disk('google'));
-
-        // dd($move);
         // funcion que descarga el excel asociado a un balance
         $proceso = Procesos::find($proceso_id);
         $proceso = json_decode($proceso->componentes);
@@ -147,15 +135,12 @@ class UtilsController extends Controller
         $arr_files[7] = 'Exportar_Elqui_Pleito.xlsx';
 
         $data_response = json_decode($response->getBody()->getContents());
-        //dd($data->matriz);
         $public = public_path('Export');
         $storage = storage_path('app/public');
-        //$data = implode(',',$data->matriz);
         $data = json_encode($data_response->matriz);
         $data_extra = json_encode($data_response->data_extra);
         $command = $public . '/excelnode.js';
         $filename = '';
-        // $process = new Process(['/usr/local/bin/node', $command, $data, $datos_entrada_id, $public]);
         $process = new Process(['/usr/bin/node', $command, $data, $data_extra, $datos_entrada_id, $public, $public . '/' . $arr_files[$proceso_id], $storage]);
         $process->run();
 
@@ -164,8 +149,6 @@ class UtilsController extends Controller
             throw new ProcessFailedException($process);
         }
         else{
-            // dd($process->getOutput());
-            //$contents = Storage::disk('local')->get('out.xlsx');
             $contents = Storage::get('public/'. $datos_entrada_id.'.xlsx');
             $move = Storage::disk('google')->put($datos_entrada_id.'.xlsx', $contents);
 
@@ -182,22 +165,12 @@ class UtilsController extends Controller
                 'q' => $qry,
                 'fields' => 'files(webViewLink)'
             ]);
-            // dd($files[0]->webViewLink);
 
             $return = $files[0]->webViewLink;
             return $return;
-            // $contents = Storage::allFiles();
-            // dd($contents);
+
         }
 
-        // echo $process->getOutput();
-        // $filename = $data->filename;
-        // $filename = explode("/", $filename);
-        // $filename = end($filename);
-        // $file = Storage::path("public/".$filename);
-        // return response()->file($file);
-        // return response()->download($filename);
-        // return Storage::download($filename);
 
     }
 }
