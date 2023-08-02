@@ -1,6 +1,0 @@
-projectKey=laravel-minera
-serverUrl=http://localhost:9000
-serverVersion=9.9.1.69595
-dashboardUrl=http://localhost:9000/dashboard?id=laravel-minera
-ceTaskId=AYm0cyt1Ol_aT1_ZMP2Y
-ceTaskUrl=http://localhost:9000/api/ce/task?id=AYm0cyt1Ol_aT1_ZMP2Y
