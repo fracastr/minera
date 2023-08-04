@@ -109,7 +109,7 @@ class UtilsController extends Controller
         $proceso = Procesos::find($proceso_id);
         $proceso = json_decode($proceso->componentes);
         $componentes = $proceso->data;
-        $url = 'http://34.229.82.49:8080/flaskapi/get_excel';
+        $url = env('APP_URL') . '/flaskapi/get_excel';
         $response = Http::acceptJson()->post($url, [
             'datos_entrada_id' => $datos_entrada_id,
             'componentes' => $componentes

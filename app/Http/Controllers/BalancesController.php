@@ -308,7 +308,7 @@ class BalancesController extends Controller
         $proceso_id = $request->proceso_id;
         $proceso = Procesos::find($proceso_id);
         $nombre_proceso = $proceso->nombre;
-        $url = 'http://34.229.82.49:8080/flaskapi/get_balance';
+        $url = env('APP_URL') . '/flaskapi/get_balance';
         $myBody['path_name'] = $path;
         $response = Http::acceptJson()->post($url, [
             'path_name' => $path,
@@ -319,6 +319,7 @@ class BalancesController extends Controller
         foreach ($data as $key => &$value) {
             $value = json_decode($value, true);
         }
+        unset($value);
 
         // logica para tabla mediciones
         $mediciones = $data->datos_entrada['mediciones'];
@@ -385,7 +386,6 @@ class BalancesController extends Controller
         'datos_entrada_id' => $datos_entrada_id];
         } catch (\GuzzleHttp\Exception\BadResponseException $e) {
             return "ERROR";
-            return $e->getResponse()->getBody()->getContents();
         }
 
         return response()->json(['message' => 'uploaded successfully'], 200);
@@ -489,7 +489,7 @@ class BalancesController extends Controller
         $datos_entrada_data->datos_entrada = json_encode($datos_entrada);
         $datos_entrada_data->save();
 
-        $url = 'http://34.229.82.49:8080/flaskapi/correr_balance';
+        $url = env('APP_URL') . '/flaskapi/correr_balance';
         $myBody['datos_entrada_id'] = $datos_entrada_id;
         $response = Http::acceptJson()->post($url, [
             'datos_entrada_id' => $datos_entrada_id,
@@ -500,6 +500,7 @@ class BalancesController extends Controller
         foreach ($data as $key => &$value) {
             $value = json_decode($value, true);
         }
+        unset($value);
 
 
 
@@ -571,7 +572,6 @@ class BalancesController extends Controller
         'datos_entrada_id' => $datos_entrada_id];
         } catch (\GuzzleHttp\Exception\BadResponseException $e) {
             return "ERROR";
-            return $e->getResponse()->getBody()->getContents();
         }
 
         return response()->json(['message' => 'uploaded successfully'], 200);
@@ -583,7 +583,7 @@ class BalancesController extends Controller
             $datos_entrada_id = $request->datos_entrada_id;
             $rowIndex = $request->rowIndex;
 
-            $url = 'http://34.229.82.49:8080/flaskapi/paint_tables';
+            $url = env('APP_URL') . '/flaskapi/paint_tables';
 
             $response = Http::acceptJson()->post($url, [
                 'datos_entrada_id' => $datos_entrada_id,
@@ -594,6 +594,7 @@ class BalancesController extends Controller
             foreach ($data as $key => &$value) {
                 $value = json_decode($value, true);
             }
+            unset($value);
        
 
             $yellow = array();
