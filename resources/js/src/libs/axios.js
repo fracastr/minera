@@ -6,8 +6,7 @@ import axios from 'axios'
 const axiosIns = axios.create({
   // You can add your headers here
   // ================================
-//   baseURL: 'http://localhost:8888/',
-  baseURL: 'http://34.229.82.49:80/',
+  baseURL: env('APP_URL'),
   withCredentials: true,
   headers: {'Accept': 'application/json'}
   // timeout: 1000,

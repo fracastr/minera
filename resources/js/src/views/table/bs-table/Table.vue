@@ -5,7 +5,6 @@
       <table-style-options />
       <table-row-col-style />
       <table-responsive />
-      <table-formatter-callback />
       <table-custom-render />
       <table-sticky-columns-headers />
       <table-rowdetails-support />
@@ -23,7 +22,6 @@ import TableBasic from './TableBasic.vue'
 import TableStyleOptions from './TableStyleOptions.vue'
 import TableRowColStyle from './TableRowColStyle.vue'
 import TableResponsive from './TableResponsive.vue'
-import TableFormatterCallback from './TableFormatterCallback.vue'
 import TableCustomRender from './TableCustomRender.vue'
 import TableStickyColumnsHeaders from './TableStickyColumnsHeaders.vue'
 import TableRowdetailsSupport from './TableRowdetailsSupport.vue'
@@ -41,7 +39,6 @@ export default {
     TableStyleOptions,
     TableRowColStyle,
     TableResponsive,
-    TableFormatterCallback,
     TableCustomRender,
     TableStickyColumnsHeaders,
     TableRowdetailsSupport,
