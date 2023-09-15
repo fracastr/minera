@@ -2,7 +2,50 @@ import mock from '@/@fake-db/mock'
 import jwt from 'jsonwebtoken'
 
 const data = {
-  users: [],
+  users: [
+    {
+      id: 1,
+      fullName: 'John Doe',
+      username: 'johndoe',
+      password: 'admin',
+      // eslint-disable-next-line global-require
+      avatar: require('@/assets/images/avatars/13-small.png'),
+      email: 'admin@demo.com',
+      role: 'admin',
+      ability: [
+        {
+          action: 'manage',
+          subject: 'all',
+        },
+      ],
+      extras: {
+        eCommerceCartItemsCount: 5,
+      },
+    },
+    {
+      id: 2,
+      fullName: 'Jane Doe',
+      username: 'janedoe',
+      password: 'client',
+      // eslint-disable-next-line global-require
+      avatar: require('@/assets/images/avatars/1-small.png'),
+      email: 'client@demo.com',
+      role: 'client',
+      ability: [
+        {
+          action: 'read',
+          subject: 'ACL',
+        },
+        {
+          action: 'read',
+          subject: 'Auth',
+        },
+      ],
+      extras: {
+        eCommerceCartItemsCount: 5,
+      },
+    },
+  ],
 }
 
 // ! These two secrets shall be in .env file and not in any other file
