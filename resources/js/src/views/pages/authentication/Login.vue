@@ -54,21 +54,6 @@
             variant="primary"
             show
           >
-            <div class="alert-body font-small-2">
-              <p>
-                <small class="mr-50"><span class="font-weight-bold">Admin:</span> admin@demo.com | admin</small>
-              </p>
-              <p>
-                <small class="mr-50"><span class="font-weight-bold">Client:</span> client@demo.com | client</small>
-              </p>
-            </div>
-            <feather-icon
-              v-b-tooltip.hover.left="'This is just for ACL demo purpose'"
-              icon="HelpCircleIcon"
-              size="18"
-              class="position-absolute"
-              style="top: 10; right: 10;"
-            />
           </b-alert>
 
           <!-- form -->
@@ -104,12 +89,6 @@
 
               <!-- forgot password -->
               <b-form-group>
-                <div class="d-flex justify-content-between">
-                  <label for="login-password">Password</label>
-                  <b-link :to="{name:'auth-forgot-password'}">
-                    <small>¿Olvidó su contraseña?</small>
-                  </b-link>
-                </div>
                 <validation-provider
                   #default="{ errors }"
                   name="Password"
@@ -163,48 +142,6 @@
               </b-button>
             </b-form>
           </validation-observer>
-
-          <b-card-text class="text-center mt-2">
-            <span>¿Nuevo en nuestra plataforma? </span>
-            <b-link :to="{name:'auth-register'}">
-              <span>&nbsp;Crea una cuenta</span>
-            </b-link>
-          </b-card-text>
-
-          <!-- divider -->
-          <!-- <div class="divider my-2">
-            <div class="divider-text">
-              o
-            </div>
-          </div> -->
-
-          <!-- social buttons -->
-          <!-- <div class="auth-footer-btn d-flex justify-content-center">
-            <b-button
-              variant="facebook"
-              href="javascript:void(0)"
-            >
-              <feather-icon icon="FacebookIcon" />
-            </b-button>
-            <b-button
-              variant="twitter"
-              href="javascript:void(0)"
-            >
-              <feather-icon icon="TwitterIcon" />
-            </b-button>
-            <b-button
-              variant="google"
-              href="javascript:void(0)"
-            >
-              <feather-icon icon="MailIcon" />
-            </b-button>
-            <b-button
-              variant="github"
-              href="javascript:void(0)"
-            >
-              <feather-icon icon="GithubIcon" />
-            </b-button>
-          </div> -->
         </b-col>
       </b-col>
     <!-- /Login-->
@@ -277,8 +214,8 @@ export default {
   data() {
     return {
       status: '',
-      password: 'admin',
-      userEmail: 'admin@demo.com',
+      password: '',
+      userEmail: '',
       sideImg: require('@/assets/images/pages/cmp/cmp1.jpg'),
 
       // validation rules

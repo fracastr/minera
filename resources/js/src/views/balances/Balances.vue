@@ -188,6 +188,7 @@
 import {
   BRow,
   BCol,
+  BContainer,
   BFormGroup,
   BFormInput,
   BFormCheckbox,
@@ -447,7 +448,6 @@ this.defaultColDef = {
     },
     correr_tables(event) {
         this.loadingTable = true;
-        console.log(this.datos_entrada);
       axios
         .post("correr_balance", {
             "datos_entrada": this.datos_entrada,
@@ -465,7 +465,6 @@ this.defaultColDef = {
         .then((response) => {
           this.balances_table = response.data.balances_table;
           this.restricciones_table = response.data.restricciones_table;
-          //this.resultado_restricciones = response.data.resultado_restricciones;
           this.balance_nodos = response.data.balance_nodos;
           this.balance_nodos_fields = response.data.balance_nodos_fields;
           this.restricciones_fields = response.data.restricciones_fields;
@@ -474,10 +473,8 @@ this.defaultColDef = {
           this.datos_entrada_id = response.data.datos_entrada_id;
           this.inventarios_fields = response.data.inventarios_fields;
           this.inventarios_data = response.data.inventarios_data;
-            //console.log("response", response);
           // armar formateo dinamico de numeros
           this.balances_fields.map(function(value, index){
-            //   console.log("index y value");
               if(index === 2 || index === 3){
                   value.valueFormatter = intFormatter;
               }
@@ -488,15 +485,12 @@ this.defaultColDef = {
         let data_restricciones = this.restricciones_fields;
           // armar formateo dinamico de numeros tabla 2
           this.restricciones_fields.map(function(value, index){
-              console.log("index y value", index, value, data_restricciones.length);
               if(index != data_restricciones.length - 1 && index > 1){
-                  console.log(index);
                   value.valueFormatter = decimalFormatter;
               }
           })
 
           this.inventarios_fields.map(function(value, index){
-              //console.log("index y value", index, value, data_restricciones.length);
               if(![0,4,8,9].includes(index)){
                   value.valueFormatter = intFormatter2;
               }
@@ -537,7 +531,6 @@ this.defaultColDef = {
         .then((response) => {
           this.balances_table = response.data.balances_table;
           this.restricciones_table = response.data.restricciones_table;
-          //this.resultado_restricciones = response.data.resultado_restricciones;
           this.balance_nodos = response.data.balance_nodos;
           this.balance_nodos_fields = response.data.balance_nodos_fields;
           this.restricciones_fields = response.data.restricciones_fields;
@@ -547,12 +540,9 @@ this.defaultColDef = {
           this.inventarios_fields = response.data.inventarios_fields;
           this.inventarios_data = response.data.inventarios_data;
           this.correr_button = true;
-          //console.log("items after call");
-        //   console.log(this.datos_entrada);
 
           // armar formateo dinamico de numeros
           this.balances_fields.map(function(value, index){
-            //   console.log("index y value");
               if(index === 2 || index === 3){
                   value.valueFormatter = intFormatter;
               }
@@ -560,22 +550,15 @@ this.defaultColDef = {
                   value.valueFormatter = decimalFormatter;
               }
           })
-
-        //   this.balances_table.map(function(value, index) {
-        //     value.Flujos = index + 1 + "-" + value.Flujos
-        //   })
         let data_restricciones = this.restricciones_fields;
           // armar formateo dinamico de numeros tabla 2
           this.restricciones_fields.map(function(value, index){
-              //console.log("index y value", index, value, data_restricciones.length);
               if(index != data_restricciones.length - 1 && index > 1){
-                //   console.log(index);
                   value.valueFormatter = decimalFormatter;
               }
           })
 
           this.inventarios_fields.map(function(value, index){
-              //console.log("index y value", index, value, data_restricciones.length);
               if(![0,4,8,9].includes(index)){
                   value.valueFormatter = intFormatter2;
               }
@@ -610,6 +593,7 @@ this.defaultColDef = {
     BModal,
     BRow,
     BCol,
+    BContainer,
     BFormGroup,
     BFormInput,
     BFormCheckbox,
