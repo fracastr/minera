@@ -207,7 +207,7 @@ import ToastificationContent from '@core/components/toastification/Toastificatio
 function decimalFormatter(params) {
     // console.log("params decimal", params.value);
     // console.log(parseFloat(params.value));
-    return (parseFloat(params.value) ).toFixed(2);
+    return (parseFloat(params.value)).toFixed(2);
 }
 function decimalFormatter2(params) {
     // console.log("params decimal", params.value);
