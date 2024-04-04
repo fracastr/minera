@@ -32,10 +32,10 @@ function write_excel (array, data_extra){
         // Modify the workbook.
         // Set all cell values to the same value:
         console.log("carga libro");
-        const value = workbook.sheet("Utilidad").range("A1:M80");
+        const value = workbook.sheet("Utilidad").range("A1:M100");
         value.value(array)
 
-        const value2 = workbook.sheet("Datos Extra").range("A1:M80");
+        const value2 = workbook.sheet("Datos Extra").range("A1:M100");
         value2.value(data_extra)
         // value.value((cell, ri, ci, range) => array);
         console.log(storage + "/" + file);
