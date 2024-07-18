@@ -18,7 +18,7 @@ class MyCustomPolicy extends Basic
             'fonts.googleapis.com',
             // 'cdn.datatables.net',
             // 'cdn.jsdelivr.net',
-            // 'unsafe-inline',
+            'unsafe-inline',
             // 'sha256-hash',
 
         ]);
