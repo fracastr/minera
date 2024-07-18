@@ -44,7 +44,7 @@
             class="mb-1 font-weight-bold"
             title-tag="h2"
           >
-            Bienvenido al sistema!test 👋
+            Bienvenido al sistema! 👋
           </b-card-title>
           <b-card-text class="mb-2">
             Por favor inicie sesión
@@ -212,7 +212,7 @@
   </div>
 </template>
 
-<script>
+<script nonce="{{ csp_nonce() }}">
 /* eslint-disable global-require */
 import { ValidationProvider, ValidationObserver } from 'vee-validate'
 import VuexyLogo from '@core/layouts/components/Logo.vue'
@@ -371,6 +371,6 @@ export default {
 }
 </script>
 
-<style lang="scss">
+<style nonce="{{ csp_nonce() }}" lang="scss">
 @import '~@core/scss/vue/pages/page-auth.scss';
 </style>
