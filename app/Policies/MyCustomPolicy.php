@@ -13,7 +13,7 @@ class MyCustomPolicy extends Basic
 
 
         //Styles
-        /* $this->addDirective(Directive::STYLE, [
+        $this->addDirective(Directive::STYLE, [
             'cdnjs.cloudflare.com',
             'fonts.googleapis.com',
             'cdn.datatables.net',
@@ -21,7 +21,7 @@ class MyCustomPolicy extends Basic
             'unsafe-inline',
             'sha256-hash',
 
-        ]); */
+        ]);
 
         //$this->addDirective(Directive::SCRIPT, Keyword::SELF); // will output `'self'` when outputting headers
         //$this->addDirective(Directive::STYLE, 'sha256-hash'); // will output `'sha256-hash'` when outputting headers
