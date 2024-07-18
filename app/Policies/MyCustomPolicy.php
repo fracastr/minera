@@ -14,12 +14,12 @@ class MyCustomPolicy extends Basic
 
         //Styles
         $this->addDirective(Directive::STYLE, [
-            'cdnjs.cloudflare.com',
+            // 'cdnjs.cloudflare.com',
             'fonts.googleapis.com',
-            'cdn.datatables.net',
-            'cdn.jsdelivr.net',
-            'unsafe-inline',
-            'sha256-hash',
+            // 'cdn.datatables.net',
+            // 'cdn.jsdelivr.net',
+            // 'unsafe-inline',
+            // 'sha256-hash',
 
         ]);
 
