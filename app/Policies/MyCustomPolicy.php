@@ -63,7 +63,7 @@ class MyCustomPolicy extends Basic
         ]);
 
 //        //Inline Styles,Script
-        //$this->addNonceForDirective(Directive::SCRIPT);
-        //$this->addNonceForDirective(Directive::STYLE);
+        $this->addNonceForDirective(Directive::SCRIPT);
+        $this->addNonceForDirective(Directive::STYLE);
     }
 }
