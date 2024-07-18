@@ -43,6 +43,7 @@ class MyCustomPolicy extends Basic
             'www.google.com',
             'www.gstatic.com',
             Keyword::SELF,
+            Keyword::UNSAFE_INLINE,
 
 
         ]);
