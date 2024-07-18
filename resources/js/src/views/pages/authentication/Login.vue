@@ -44,7 +44,7 @@
             class="mb-1 font-weight-bold"
             title-tag="h2"
           >
-            Bienvenido al sistema! 👋
+            Bienvenido al sistema!test 👋
           </b-card-title>
           <b-card-text class="mb-2">
             Por favor inicie sesión
