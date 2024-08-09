@@ -141,8 +141,7 @@ class UtilsController extends Controller
         $data_extra = json_encode($data_response->data_extra);
         $command = $public . '/excelnode.js';
         $filename = '';
-        $nodepath = env('NODEPATH');
-        $process = new Process([$nodepath, $command, $data, $data_extra, $datos_entrada_id, $public, $public . '/' . $arr_files[$proceso_id], $storage]);
+        $process = new Process(['/usr/bin/node', $command, $data, $data_extra, $datos_entrada_id, $public, $public . '/' . $arr_files[$proceso_id], $storage]);
         $process->run();
 
         // executes after the command finishes
