@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Datos_entrada;
 use App\Models\Procesos;
 use App\Models\Valles;
+use Exception;
 use Google_Client;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
@@ -103,73 +104,76 @@ class UtilsController extends Controller
     }
 
     public function getExcel($datos_entrada_id, $proceso_id){
+        try {
 
-        $filename = $datos_entrada_id . '.xlsx';
-        // funcion que descarga el excel asociado a un balance
-        $proceso = Procesos::find($proceso_id);
-        $proceso = json_decode($proceso->componentes);
-        $componentes = $proceso->data;
-        $url = env('APP_URL') . '/flaskapi/get_excel';
-        $response = Http::acceptJson()->post($url, [
-            'datos_entrada_id' => $datos_entrada_id,
-            'componentes' => $componentes
-        ]);
-        /*
-        Lista de procesos por id
-        #   valle, proceso, valle_id, proceso_id
-            Copiapo, Puerto, 1, 1
-            Copiapo, CNN, 1, 2
-            Copiapo, Planta Magnetita, 1, 3
-            Huasco, Los Colorados, 2, 4
-            Huasco, Pellet, 2, 5
-            Elqui, Elqui, 3, 6
-            Elqui, Pleito, 3, 7
-        */
-        $arr_files = array();
-        $arr_files[1] = 'Exportar_Copiapo_Puerto.xlsx';
-        $arr_files[2] = 'Exportar_Copiapo_CNN.xlsx';
-        $arr_files[3] = 'Exportar_Copiapo_PM.xlsx';
-        $arr_files[4] = 'Exportar_Huasco_Colorados.xlsx';
-        $arr_files[5] = 'Exportar_Huasco_Pellet.xlsx';
-        $arr_files[6] = 'Exportar_Elqui_Elqui.xlsx';
-        $arr_files[7] = 'Exportar_Elqui_Pleito.xlsx';
-
-        $data_response = json_decode($response->getBody()->getContents());
-        $public = public_path('Export');
-        $storage = storage_path('app/public');
-        $data = json_encode($data_response->matriz);
-        $data_extra = json_encode($data_response->data_extra);
-        $command = $public . '/excelnode.js';
-        $filename = '';
-        $nodepath = env('NODEPATH');
-        $process = new Process([$nodepath, $command, $data, $data_extra, $datos_entrada_id, $public, $public . '/' . $arr_files[$proceso_id], $storage]);
-        $process->run();
-
-        // executes after the command finishes
-        if (!$process->isSuccessful()) {
-            throw new ProcessFailedException($process);
-        }
-        else{
-            $contents = Storage::get('public/'. $datos_entrada_id.'.xlsx');
-            $move = Storage::disk('google')->put($datos_entrada_id.'.xlsx', $contents);
-
-
-            $client = new Google_Client();
-            $client->setClientId(env('GOOGLE_DRIVE_CLIENT_ID'));
-            $client->setClientSecret(env('GOOGLE_DRIVE_CLIENT_SECRET'));
-            $client->refreshToken(env('GOOGLE_DRIVE_REFRESH_TOKEN'));
-            $service = new \Google_Service_Drive($client);
-
-            $qry = "name='".$datos_entrada_id.".xlsx'";
-
-            $files = $service->files->listFiles([
-                'q' => $qry,
-                'fields' => 'files(webViewLink)'
+            $filename = $datos_entrada_id . '.xlsx';
+            // funcion que descarga el excel asociado a un balance
+            $proceso = Procesos::find($proceso_id);
+            $proceso = json_decode($proceso->componentes);
+            $componentes = $proceso->data;
+            $url = env('APP_URL') . '/flaskapi/get_excel';
+            $response = Http::acceptJson()->post($url, [
+                'datos_entrada_id' => $datos_entrada_id,
+                'componentes' => $componentes
             ]);
+            /*
+            Lista de procesos por id
+            #   valle, proceso, valle_id, proceso_id
+                Copiapo, Puerto, 1, 1
+                Copiapo, CNN, 1, 2
+                Copiapo, Planta Magnetita, 1, 3
+                Huasco, Los Colorados, 2, 4
+                Huasco, Pellet, 2, 5
+                Elqui, Elqui, 3, 6
+                Elqui, Pleito, 3, 7
+            */
+            $arr_files = array();
+            $arr_files[1] = 'Exportar_Copiapo_Puerto.xlsx';
+            $arr_files[2] = 'Exportar_Copiapo_CNN.xlsx';
+            $arr_files[3] = 'Exportar_Copiapo_PM.xlsx';
+            $arr_files[4] = 'Exportar_Huasco_Colorados.xlsx';
+            $arr_files[5] = 'Exportar_Huasco_Pellet.xlsx';
+            $arr_files[6] = 'Exportar_Elqui_Elqui.xlsx';
+            $arr_files[7] = 'Exportar_Elqui_Pleito.xlsx';
 
-            $return = $files[0]->webViewLink;
-            return $return;
+            $data_response = json_decode($response->getBody()->getContents());
+            $public = public_path('Export');
+            $storage = storage_path('app/public');
+            $data = json_encode($data_response->matriz);
+            $data_extra = json_encode($data_response->data_extra);
+            $command = $public . '/excelnode.js';
+            $filename = '';
+            $nodepath = env('NODEPATH');
+            $process = new Process([$nodepath, $command, $data, $data_extra, $datos_entrada_id, $public, $public . '/' . $arr_files[$proceso_id], $storage]);
+            $process->run();
 
+            // executes after the command finishes
+            if (!$process->isSuccessful()) {
+                throw new ProcessFailedException($process);
+            }
+            else{
+                $contents = Storage::get('public/'. $datos_entrada_id.'.xlsx');
+                $move = Storage::disk('google')->put($datos_entrada_id.'.xlsx', $contents);
+
+
+                $client = new Google_Client();
+                $client->setClientId(env('GOOGLE_DRIVE_CLIENT_ID'));
+                $client->setClientSecret(env('GOOGLE_DRIVE_CLIENT_SECRET'));
+                $client->refreshToken(env('GOOGLE_DRIVE_REFRESH_TOKEN'));
+                $service = new \Google_Service_Drive($client);
+
+                $qry = "name='".$datos_entrada_id.".xlsx'";
+
+                $files = $service->files->listFiles([
+                    'q' => $qry,
+                    'fields' => 'files(webViewLink)'
+                ]);
+
+                $return = $files[0]->webViewLink;
+                return $return;
+            }
+        } catch (Exception $e) {
+            return $e->getMessage();
         }
 
 
