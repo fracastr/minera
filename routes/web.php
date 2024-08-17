@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ApplicationController;
 use App\Http\Controllers\BalancesController;
 use App\Http\Controllers\UtilsController;
+use Illuminate\Support\Facades\Storage;
 
 /*
 |--------------------------------------------------------------------------
@@ -26,3 +27,6 @@ Route::get('balances/getValles/{user_id}', [UtilsController::class, 'getValles']
 Route::get('balances/getProcesos/{valle_id}', [UtilsController::class, 'getProcesos']);
 Route::get('balances/getExcel/{datos_entrada_id}/{proceso_id}', [UtilsController::class, 'getExcel']);
 Route::get('/{any}', [ApplicationController::class, 'index'])->where('any', '.*');
+Route::get('test', function() {
+    Storage::disk('google')->put('test.txt', 'Hello World');
+});
