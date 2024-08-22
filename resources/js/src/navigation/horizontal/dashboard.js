@@ -4,8 +4,8 @@ export default [
     icon: 'HomeIcon',
     children: [
       {
-        title: 'eCommerce',
-        route: 'dashboard-ecommerce',
+        title: 'Balances',
+        route: 'dashboard-balances',
         icon: 'ShoppingCartIcon',
       },
       {

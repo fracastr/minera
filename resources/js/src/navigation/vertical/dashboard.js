@@ -6,8 +6,8 @@ export default [
     tagVariant: 'light-warning',
     children: [
       {
-        title: 'eCommerce',
-        route: 'dashboard-ecommerce',
+        title: 'Balances',
+        route: 'dashboard-balances',
       },
       {
         title: 'Analytics',
