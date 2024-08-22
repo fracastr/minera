@@ -50,7 +50,7 @@
             Por favor inicie sesión
           </b-card-text>
 
-          <b-alert
+          <!-- <b-alert
             variant="primary"
             show
           >
@@ -69,7 +69,7 @@
               class="position-absolute"
               style="top: 10; right: 10;"
             />
-          </b-alert>
+          </b-alert> -->
 
           <!-- form -->
           <validation-observer
@@ -104,12 +104,12 @@
 
               <!-- forgot password -->
               <b-form-group>
-                <div class="d-flex justify-content-between">
+                <!-- <div class="d-flex justify-content-between">
                   <label for="login-password">Password</label>
                   <b-link :to="{name:'auth-forgot-password'}">
                     <small>¿Olvidó su contraseña?</small>
                   </b-link>
-                </div>
+                </div> -->
                 <validation-provider
                   #default="{ errors }"
                   name="Password"
@@ -164,12 +164,12 @@
             </b-form>
           </validation-observer>
 
-          <b-card-text class="text-center mt-2">
+          <!-- <b-card-text class="text-center mt-2">
             <span>¿Nuevo en nuestra plataforma? </span>
             <b-link :to="{name:'auth-register'}">
               <span>&nbsp;Crea una cuenta</span>
             </b-link>
-          </b-card-text>
+          </b-card-text> -->
 
           <!-- divider -->
           <!-- <div class="divider my-2">
