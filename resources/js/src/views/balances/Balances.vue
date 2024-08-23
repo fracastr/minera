@@ -391,17 +391,17 @@ export default {
   },
   methods: {
     exportar_excel() {
-        this.isLoading = true
+      this.isLoading = true
       axios
         .get(`getExcel/${this.datos_entrada_id}/${this.proceso}`)
         .then(response => {
-            this.isLoading = false
+          this.isLoading = false
           console.log('response excel', response)
           const url = response.data
           window.open(url, '_blank').focus()
         })
         .catch(e => {
-            this.isLoading = false
+          this.isLoading = false
           console.log('FAILURE!!', e)
         }).finally(() => {
         })
@@ -536,6 +536,7 @@ export default {
     },
     correr_tables(event) {
       this.isLoading = true
+      event.preventDefault()
       console.log(this.datos_entrada)
       axios
         .post('correr_balance', {
