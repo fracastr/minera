@@ -242,8 +242,12 @@
     </b-container>
     <loading
       :active.sync="isLoading"
-      :can-cancel="true"
+      :can-cancel="false"
       :is-full-page="fullPage"
+      color="#7367f0"
+      loader="bars"
+      :height="128"
+      :width="128"
     />
   </div>
 </template>
@@ -267,6 +271,7 @@ import {
   BModal,
   BSpinner,
   BImg,
+  BContainer,
 } from 'bootstrap-vue'
 import Ripple from 'vue-ripple-directive'
 import axios from 'axios'
@@ -325,6 +330,7 @@ export default {
     AgGridVue,
     BSpinner,
     BImg,
+    BContainer,
   },
   directives: {
     Ripple,
@@ -605,8 +611,6 @@ export default {
           this.isLoading = false
           console.log('FAILURE!! correr_balance', e)
         })
-
-      this.isLoading = false
     },
     onSubmit(event) {
       this.isLoading = true
