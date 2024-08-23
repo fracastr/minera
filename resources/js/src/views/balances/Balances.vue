@@ -65,12 +65,12 @@
       </b-row>
     </b-form>
     <br>
-    <div
-      v-if="loadingTable"
+    <!-- <div
+      v-if="isLoading"
       class="text-center"
     >
       <b-spinner label="Cargando..." />
-    </div>
+    </div> -->
     <hr>
     <b-container v-if="show_tables">
       <b-row cols="4">
@@ -96,8 +96,8 @@
             rel="stylesheet"
           >
           <ag-grid-vue
-            style="width: 100%; height: 500px;"
             id="tbalances"
+            style="width: 100%; height: 500px;"
             class="ag-theme-alpine"
             :column-defs="balances_fields"
             :row-data="balances_table"
@@ -240,10 +240,19 @@
         />
       </b-modal>
     </b-container>
+    <loading
+      :active.sync="isLoading"
+      :can-cancel="true"
+      :is-full-page="fullPage"
+    />
   </div>
 </template>
 
 <script>
+// Import component
+import Loading from 'vue-loading-overlay'
+// Import stylesheet
+import 'vue-loading-overlay/dist/vue-loading.css'
 import {
   BRow,
   BCol,
@@ -301,8 +310,7 @@ function nodosCellStyle(params) {
 export default {
   components: {
     ToastificationContent,
-  },
-  components: {
+    Loading,
     BModal,
     BRow,
     BCol,
@@ -358,7 +366,8 @@ export default {
       modal_fields: [],
       modal_data: [],
       exportar_button: false,
-      loadingTable: false,
+      isLoading: false,
+      fullPage: true,
       inventarios_fields: [],
       inventarios_data: [],
       proceso_id: '',
@@ -510,7 +519,7 @@ export default {
           this.gridApiRestriccionesTable.redrawRows()
         })
         .catch(e => {
-          this.loadingTable = false
+          this.isLoading = false
           console.log('FAILURE!!', e)
           this.$toast({
             component: ToastificationContent,
@@ -523,7 +532,7 @@ export default {
         })
     },
     correr_tables(event) {
-      this.loadingTable = true
+      this.isLoading = true
       console.log(this.datos_entrada)
       axios
         .post('correr_balance', {
@@ -585,18 +594,18 @@ export default {
             value.cellStyle = nodosCellStyle
           })
           this.exportar_button = true
-          this.loadingTable = false
+          this.isLoading = false
           this.show_tables = true
         })
         .catch(function (e) {
-          this.loadingTable = false
+          this.isLoading = false
           console.log('FAILURE!! correr_balance', e)
         })
 
-      this.loadingTable = false
+      this.isLoading = false
     },
     onSubmit(event) {
-      this.loadingTable = true
+      this.isLoading = true
       event.preventDefault()
       const formData = new FormData()
       formData.append('file', this.file_1)
@@ -662,10 +671,10 @@ export default {
           })
 
           this.show_tables = true
-          this.loadingTable = false
+          this.isLoading = false
         })
         .catch(e => {
-          this.loadingTable = false
+          this.isLoading = false
           console.log('FAILURE!!', e)
           this.$toast({
             component: ToastificationContent,
