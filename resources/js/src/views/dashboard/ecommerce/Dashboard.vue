@@ -1,81 +1,81 @@
 <template>
-  <div class="dashboard-container" :class="{ 'dark-mode': isDark }">
+  <div class="dashboard-cmp-container" :class="{ 'dark-mode': isDark }">
     <!-- Header Section -->
-    <div class="header-section">
-      <div class="header-content">
-        <div class="logo-section">
-          <div class="logo-icon">
-            <span class="logo-symbol">⚖️</span>
+    <div class="dashboard-cmp-header-section">
+      <div class="dashboard-cmp-header-content">
+        <div class="dashboard-cmp-logo-section">
+          <div class="dashboard-cmp-logo-icon">
+            <span class="dashboard-cmp-logo-symbol">⚖️</span>
           </div>
-          <div class="title-section">
-            <h1 class="main-title">Sistema Balances CMP</h1>
-            <p class="subtitle">Gestión Integral de Balances Mineros</p>
+          <div class="dashboard-cmp-title-section">
+            <h1 class="dashboard-cmp-main-title">Sistema Balances CMP</h1>
+            <p class="dashboard-cmp-subtitle">Gestión Integral de Balances Mineros</p>
           </div>
         </div>
-        <div class="header-actions">
-          <div class="status-indicator">
-            <span class="status-dot"></span>
-            <span class="status-text">Sistema Activo</span>
+        <div class="dashboard-cmp-header-actions">
+          <div class="dashboard-cmp-status-indicator">
+            <span class="dashboard-cmp-status-dot"></span>
+            <span class="dashboard-cmp-status-text">Sistema Activo</span>
           </div>
         </div>
       </div>
     </div>
 
     <!-- Main Content -->
-    <div class="main-content">
-      <div class="hero-section">
-        <div class="hero-content">
-          <div class="hero-text">
-            <h2 class="hero-title">Bienvenido al Sistema de Balances</h2>
-            <p class="hero-description">
+    <div class="dashboard-cmp-main-content">
+      <div class="dashboard-cmp-hero-section">
+        <div class="dashboard-cmp-hero-content">
+          <div class="dashboard-cmp-hero-text">
+            <h2 class="dashboard-cmp-hero-title">Bienvenido al Sistema de Balances</h2>
+            <p class="dashboard-cmp-hero-description">
               Plataforma integral para la gestión y análisis de balances mineros de CMP.
               Acceda a reportes detallados, estadísticas en tiempo real y análisis avanzados.
             </p>
-            <div class="hero-stats">
-              <div class="stat-item">
-                <div class="stat-number">24/7</div>
-                <div class="stat-label">Disponibilidad</div>
+            <div class="dashboard-cmp-hero-stats">
+              <div class="dashboard-cmp-stat-item">
+                <div class="dashboard-cmp-stat-number">24/7</div>
+                <div class="dashboard-cmp-stat-label">Disponibilidad</div>
               </div>
-              <div class="stat-item">
-                <div class="stat-number">99.9%</div>
-                <div class="stat-label">Precisión</div>
+              <div class="dashboard-cmp-stat-item">
+                <div class="dashboard-cmp-stat-number">99.9%</div>
+                <div class="dashboard-cmp-stat-label">Precisión</div>
               </div>
-              <div class="stat-item">
-                <div class="stat-number">Real-time</div>
-                <div class="stat-label">Datos</div>
+              <div class="dashboard-cmp-stat-item">
+                <div class="dashboard-cmp-stat-number">Real-time</div>
+                <div class="dashboard-cmp-stat-label">Datos</div>
               </div>
             </div>
           </div>
-          <div class="hero-image">
+          <div class="dashboard-cmp-hero-image">
             <b-img
               :src="fondocmp"
               alt="CMP Mining Operations"
-              class="main-image"
+              class="dashboard-cmp-main-image"
             />
           </div>
         </div>
       </div>
 
       <!-- Feature Cards -->
-      <div class="features-section">
-        <h3 class="section-title">Características Principales</h3>
-        <div class="features-grid">
-          <div class="feature-card">
-            <div class="feature-icon">
+      <div class="dashboard-cmp-features-section">
+        <h3 class="dashboard-cmp-section-title">Características Principales</h3>
+        <div class="dashboard-cmp-features-grid">
+          <div class="dashboard-cmp-feature-card">
+            <div class="dashboard-cmp-feature-icon">
               <i class="fas fa-chart-line"></i>
             </div>
             <h4>Análisis Avanzado</h4>
             <p>Reportes detallados y análisis estadísticos en tiempo real</p>
           </div>
-          <div class="feature-card">
-            <div class="feature-icon">
+          <div class="dashboard-cmp-feature-card">
+            <div class="dashboard-cmp-feature-icon">
               <i class="fas fa-database"></i>
             </div>
             <h4>Gestión de Datos</h4>
             <p>Almacenamiento seguro y gestión eficiente de información</p>
           </div>
-          <div class="feature-card">
-            <div class="feature-icon">
+          <div class="dashboard-cmp-feature-card">
+            <div class="dashboard-cmp-feature-icon">
               <i class="fas fa-shield-alt"></i>
             </div>
             <h4>Seguridad Total</h4>
@@ -111,341 +111,342 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.dashboard-container {
-  min-height: 100vh;
-  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 50%, #cbd5e1 100%);
-  color: #1e293b;
-  transition: all 0.3s ease;
+.dashboard-cmp-container {
+  min-height: 100vh !important;
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 50%, #cbd5e1 100%) !important;
+  color: #1e293b !important;
+  transition: all 0.3s ease !important;
 
   &.dark-mode {
-    background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
-    color: #f1f5f9;
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%) !important;
+    color: #f1f5f9 !important;
   }
 }
 
-.header-section {
-  background: rgba(255, 255, 255, 0.8);
-  backdrop-filter: blur(10px);
-  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-  padding: 1rem 2rem;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  transition: all 0.3s ease;
+.dashboard-cmp-header-section {
+  background: rgba(255, 255, 255, 0.8) !important;
+  backdrop-filter: blur(10px) !important;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1) !important;
+  padding: 1rem 2rem !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1) !important;
+  transition: all 0.3s ease !important;
 
   .dark-mode & {
-    background: rgba(15, 23, 42, 0.8);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+    background: rgba(15, 23, 42, 0.8) !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3) !important;
   }
 }
 
-.header-content {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  max-width: 1200px;
-  margin: 0 auto;
+.dashboard-cmp-header-content {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  max-width: 1200px !important;
+  margin: 0 auto !important;
 }
 
-.logo-section {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
+.dashboard-cmp-logo-section {
+  display: flex !important;
+  align-items: center !important;
+  gap: 1rem !important;
 }
 
-.logo-icon {
-  width: 50px;
-  height: 50px;
-  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.5rem;
-  color: white;
-  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+.dashboard-cmp-logo-icon {
+  width: 50px !important;
+  height: 50px !important;
+  background: linear-gradient(135deg, #3b82f6, #1d4ed8) !important;
+  border-radius: 50% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-size: 1.5rem !important;
+  color: white !important;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3) !important;
 }
 
-.logo-symbol {
-  font-size: 1.8rem;
-  line-height: 1;
+.dashboard-cmp-logo-symbol {
+  font-size: 1.8rem !important;
+  line-height: 1 !important;
 }
 
-.title-section {
-  .main-title {
-    font-size: 1.8rem;
-    font-weight: 700;
-    margin: 0;
-    color: #1e293b;
-    transition: color 0.3s ease;
+.dashboard-cmp-title-section {
+  .dashboard-cmp-main-title {
+    font-size: 1.8rem !important;
+    font-weight: 700 !important;
+    margin: 0 !important;
+    color: #1e293b !important;
+    transition: color 0.3s ease !important;
 
     .dark-mode & {
-      color: #f1f5f9;
+      color: #f1f5f9 !important;
     }
   }
 
-  .subtitle {
-    margin: 0.25rem 0 0 0;
-    font-size: 0.9rem;
-    color: #64748b;
-    transition: color 0.3s ease;
+  .dashboard-cmp-subtitle {
+    margin: 0.25rem 0 0 0 !important;
+    font-size: 0.9rem !important;
+    color: #64748b !important;
+    transition: color 0.3s ease !important;
 
     .dark-mode & {
-      color: #94a3b8;
+      color: #94a3b8 !important;
     }
   }
 }
 
-.status-indicator {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.5rem 1rem;
-  background: rgba(34, 197, 94, 0.1);
-  border-radius: 20px;
-  border: 1px solid rgba(34, 197, 94, 0.2);
-  transition: all 0.3s ease;
+.dashboard-cmp-status-indicator {
+  display: flex !important;
+  align-items: center !important;
+  gap: 0.5rem !important;
+  padding: 0.5rem 1rem !important;
+  background: rgba(34, 197, 94, 0.1) !important;
+  border-radius: 20px !important;
+  border: 1px solid rgba(34, 197, 94, 0.2) !important;
+  transition: all 0.3s ease !important;
 
   .dark-mode & {
-    background: rgba(34, 197, 94, 0.2);
-    border: 1px solid rgba(34, 197, 94, 0.3);
+    background: rgba(34, 197, 94, 0.2) !important;
+    border: 1px solid rgba(34, 197, 94, 0.3) !important;
   }
 }
 
-.status-dot {
-  width: 8px;
-  height: 8px;
-  background: #22c55e;
-  border-radius: 50%;
-  animation: pulse 2s infinite;
+.dashboard-cmp-status-dot {
+  width: 8px !important;
+  height: 8px !important;
+  background: #22c55e !important;
+  border-radius: 50% !important;
+  animation: pulse 2s infinite !important;
 }
 
-.status-text {
-  color: #166534;
-  font-weight: 500;
-  transition: color 0.3s ease;
+.dashboard-cmp-status-text {
+  color: #166534 !important;
+  font-weight: 500 !important;
+  transition: color 0.3s ease !important;
 
   .dark-mode & {
-    color: #22c55e;
+    color: #22c55e !important;
   }
 }
 
 @keyframes pulse {
-  0% { opacity: 1; }
-  50% { opacity: 0.5; }
-  100% { opacity: 1; }
+  0% { opacity: 1 !important; }
+  50% { opacity: 0.5 !important; }
+  100% { opacity: 1 !important; }
 }
 
-.main-content {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 2rem;
+.dashboard-cmp-main-content {
+  max-width: 1200px !important;
+  margin: 0 auto !important;
+  padding: 2rem !important;
 }
 
-.hero-section {
-  margin-bottom: 4rem;
+.dashboard-cmp-hero-section {
+  margin-bottom: 4rem !important;
 }
 
-.hero-content {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 3rem;
-  align-items: center;
+.dashboard-cmp-hero-content {
+  display: grid !important;
+  grid-template-columns: 1fr 1fr !important;
+  gap: 3rem !important;
+  align-items: center !important;
 }
 
-.hero-title {
-  font-size: 2.5rem;
-  font-weight: 700;
-  margin-bottom: 1rem;
-  color: #1e293b;
-  transition: color 0.3s ease;
+.dashboard-cmp-hero-title {
+  font-size: 3.5rem !important;
+  font-weight: 700 !important;
+  margin-bottom: 1rem !important;
+  color: white !important;
+  letter-spacing: -0.02em !important;
+  transition: color 0.3s ease !important;
 
   .dark-mode & {
-    color: #f1f5f9;
+    color: #f1f5f9 !important;
   }
 }
 
-.hero-description {
-  font-size: 1.1rem;
-  line-height: 1.6;
-  margin-bottom: 2rem;
-  color: #475569;
-  transition: color 0.3s ease;
+.dashboard-cmp-hero-description {
+  font-size: 1.1rem !important;
+  line-height: 1.6 !important;
+  margin-bottom: 2rem !important;
+  color: #475569 !important;
+  transition: color 0.3s ease !important;
 
   .dark-mode & {
-    color: #cbd5e1;
+    color: #cbd5e1 !important;
   }
 }
 
-.hero-stats {
-  display: flex;
-  gap: 2rem;
+.dashboard-cmp-hero-stats {
+  display: flex !important;
+  gap: 2rem !important;
 }
 
-.stat-item {
-  text-align: center;
+.dashboard-cmp-stat-item {
+  text-align: center !important;
 
-  .stat-number {
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: #3b82f6;
-    transition: color 0.3s ease;
+  .dashboard-cmp-stat-number {
+    font-size: 1.5rem !important;
+    font-weight: 700 !important;
+    color: #3b82f6 !important;
+    transition: color 0.3s ease !important;
 
     .dark-mode & {
-      color: #60a5fa;
+      color: #60a5fa !important;
     }
   }
 
-  .stat-label {
-    font-size: 0.9rem;
-    color: #64748b;
-    font-weight: 500;
-    transition: color 0.3s ease;
+  .dashboard-cmp-stat-label {
+    font-size: 0.9rem !important;
+    color: #64748b !important;
+    font-weight: 500 !important;
+    transition: color 0.3s ease !important;
 
     .dark-mode & {
-      color: #94a3b8;
+      color: #94a3b8 !important;
     }
   }
 }
 
-.hero-image {
-  .main-image {
-    width: 100%;
-    height: auto;
-    border-radius: 15px;
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
-    transition: transform 0.3s ease;
+.dashboard-cmp-hero-image {
+  .dashboard-cmp-main-image {
+    width: 100% !important;
+    height: auto !important;
+    border-radius: 15px !important;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3) !important;
+    transition: transform 0.3s ease !important;
 
     &:hover {
-      transform: translateY(-5px);
+      transform: translateY(-5px) !important;
     }
   }
 }
 
-.features-section {
-  margin-top: 4rem;
+.dashboard-cmp-features-section {
+  margin-top: 4rem !important;
 }
 
-.section-title {
-  text-align: center;
-  font-size: 2rem;
-  font-weight: 600;
-  margin-bottom: 3rem;
-  color: #1e293b;
-  transition: color 0.3s ease;
+.dashboard-cmp-section-title {
+  text-align: center !important;
+  font-size: 2rem !important;
+  font-weight: 600 !important;
+  margin-bottom: 3rem !important;
+  color: #1e293b !important;
+  transition: color 0.3s ease !important;
 
   .dark-mode & {
-    color: #f1f5f9;
+    color: #f1f5f9 !important;
   }
 }
 
-.features-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 2rem;
+.dashboard-cmp-features-grid {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)) !important;
+  gap: 2rem !important;
 }
 
-.feature-card {
-  background: rgba(255, 255, 255, 0.9);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(0, 0, 0, 0.1);
-  border-radius: 15px;
-  padding: 2rem;
-  text-align: center;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+.dashboard-cmp-feature-card {
+  background: rgba(255, 255, 255, 0.9) !important;
+  backdrop-filter: blur(10px) !important;
+  border: 1px solid rgba(0, 0, 0, 0.1) !important;
+  border-radius: 15px !important;
+  padding: 2rem !important;
+  text-align: center !important;
+  transition: all 0.3s ease !important;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05) !important;
 
   &:hover {
-    transform: translateY(-5px);
-    background: rgba(255, 255, 255, 1);
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    transform: translateY(-5px) !important;
+    background: rgba(255, 255, 255, 1) !important;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1) !important;
   }
 
   .dark-mode & {
-    background: rgba(30, 41, 59, 0.9);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+    background: rgba(30, 41, 59, 0.9) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2) !important;
 
     &:hover {
-      background: rgba(30, 41, 59, 1);
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+      background: rgba(30, 41, 59, 1) !important;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3) !important;
     }
   }
 
-  .feature-icon {
-    width: 60px;
-    height: 60px;
-    background: linear-gradient(135deg, #3b82f6, #1d4ed8);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin: 0 auto 1rem;
-    font-size: 1.5rem;
-    color: white;
-    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+  .dashboard-cmp-feature-icon {
+    width: 60px !important;
+    height: 60px !important;
+    background: linear-gradient(135deg, #3b82f6, #1d4ed8) !important;
+    border-radius: 50% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    margin: 0 auto 1rem !important;
+    font-size: 1.5rem !important;
+    color: white !important;
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3) !important;
   }
 
   h4 {
-    font-size: 1.3rem;
-    font-weight: 600;
-    margin-bottom: 1rem;
-    color: #1e293b;
-    transition: color 0.3s ease;
+    font-size: 1.3rem !important;
+    font-weight: 600 !important;
+    margin-bottom: 1rem !important;
+    color: #1e293b !important;
+    transition: color 0.3s ease !important;
 
     .dark-mode & {
-      color: #f1f5f9;
+      color: #f1f5f9 !important;
     }
   }
 
   p {
-    color: #64748b;
-    line-height: 1.5;
-    margin: 0;
-    transition: color 0.3s ease;
+    color: #64748b !important;
+    line-height: 1.5 !important;
+    margin: 0 !important;
+    transition: color 0.3s ease !important;
 
     .dark-mode & {
-      color: #cbd5e1;
+      color: #cbd5e1 !important;
     }
   }
 }
 
 // Responsive Design
 @media (max-width: 768px) {
-  .hero-content {
-    grid-template-columns: 1fr;
-    gap: 2rem;
+  .dashboard-cmp-hero-content {
+    grid-template-columns: 1fr !important;
+    gap: 2rem !important;
   }
 
-  .hero-title {
-    font-size: 2rem;
+  .dashboard-cmp-hero-title {
+    font-size: 2rem !important;
   }
 
-  .hero-stats {
-    justify-content: center;
+  .dashboard-cmp-hero-stats {
+    justify-content: center !important;
   }
 
-  .header-content {
-    flex-direction: column;
-    gap: 1rem;
+  .dashboard-cmp-header-content {
+    flex-direction: column !important;
+    gap: 1rem !important;
   }
 
-  .features-grid {
-    grid-template-columns: 1fr;
+  .dashboard-cmp-features-grid {
+    grid-template-columns: 1fr !important;
   }
 }
 
 @media (max-width: 480px) {
-  .main-content {
-    padding: 1rem;
+  .dashboard-cmp-main-content {
+    padding: 1rem !important;
   }
 
-  .hero-title {
-    font-size: 1.5rem;
+  .dashboard-cmp-hero-title {
+    font-size: 1.5rem !important;
   }
 
-  .hero-stats {
-    flex-direction: column;
-    gap: 1rem;
+  .dashboard-cmp-hero-stats {
+    flex-direction: column !important;
+    gap: 1rem !important;
   }
 }
 </style>
