@@ -57,26 +57,7 @@
             </b-card-text>
           </div>
 
-          <!-- <b-alert
-            variant="primary"
-            show
-          >
-            <div class="alert-body font-small-2">
-              <p>
-                <small class="mr-50"><span class="font-weight-bold">Admin:</span> admin@demo.com | admin</small>
-              </p>
-              <p>
-                <small class="mr-50"><span class="font-weight-bold">Client:</span> client@demo.com | client</small>
-              </p>
-            </div>
-            <feather-icon
-              v-b-tooltip.hover.left="'This is just for ACL demo purpose'"
-              icon="HelpCircleIcon"
-              size="18"
-              class="position-absolute"
-              style="top: 10; right: 10;"
-            />
-          </b-alert> -->
+
 
           <!-- form -->
           <validation-observer
@@ -111,12 +92,6 @@
 
               <!-- forgot password -->
               <b-form-group>
-                <!-- <div class="d-flex justify-content-between">
-                  <label for="login-password">Password</label>
-                  <b-link :to="{name:'auth-forgot-password'}">
-                    <small>¿Olvidó su contraseña?</small>
-                  </b-link>
-                </div> -->
                 <validation-provider
                   #default="{ errors }"
                   name="Password"
@@ -176,47 +151,7 @@
             </b-form>
           </validation-observer>
 
-          <!-- <b-card-text class="text-center mt-2">
-            <span>¿Nuevo en nuestra plataforma? </span>
-            <b-link :to="{name:'auth-register'}">
-              <span>&nbsp;Crea una cuenta</span>
-            </b-link>
-          </b-card-text> -->
 
-          <!-- divider -->
-          <!-- <div class="divider my-2">
-            <div class="divider-text">
-              o
-            </div>
-          </div> -->
-
-          <!-- social buttons -->
-          <!-- <div class="auth-footer-btn d-flex justify-content-center">
-            <b-button
-              variant="facebook"
-              href="javascript:void(0)"
-            >
-              <feather-icon icon="FacebookIcon" />
-            </b-button>
-            <b-button
-              variant="twitter"
-              href="javascript:void(0)"
-            >
-              <feather-icon icon="TwitterIcon" />
-            </b-button>
-            <b-button
-              variant="google"
-              href="javascript:void(0)"
-            >
-              <feather-icon icon="MailIcon" />
-            </b-button>
-            <b-button
-              variant="github"
-              href="javascript:void(0)"
-            >
-              <feather-icon icon="GithubIcon" />
-            </b-button>
-          </div> -->
         </b-col>
       </b-col>
     <!-- /Login-->
@@ -227,7 +162,6 @@
 <script>
 /* eslint-disable global-require */
 import { ValidationProvider, ValidationObserver } from 'vee-validate'
-import VuexyLogo from '@core/layouts/components/Logo.vue'
 import {
   BRow,
   BCol,
@@ -242,11 +176,8 @@ import {
   BImg,
   BForm,
   BButton,
-  BAlert,
   BSpinner,
-  VBTooltip,
 } from 'bootstrap-vue'
-import useJwt from '@/auth/jwt/useJwt'
 import { required, email } from '@validations'
 import { togglePasswordVisibility } from '@core/mixins/ui/forms'
 import store from '@/store/index'
@@ -256,9 +187,6 @@ import ToastificationContent from '@core/components/toastification/Toastificatio
 import { $themeConfig } from '@themeConfig'
 import axios from 'axios'
 export default {
-  directives: {
-    'b-tooltip': VBTooltip,
-  },
   components: {
     BRow,
     BCol,
@@ -273,17 +201,14 @@ export default {
     BImg,
     BForm,
     BButton,
-    BAlert,
     BSpinner,
-    VuexyLogo,
     ValidationProvider,
     ValidationObserver,
   },
   setup() {
     // App Name
-    const { appName, appLogoImage } = $themeConfig.app
+    const { appLogoImage } = $themeConfig.app
     return {
-      appName,
       appLogoImage,
     }
   },
@@ -315,47 +240,6 @@ export default {
     },
   },
   methods: {
-    login2() {
-      this.$refs.loginForm.validate().then(success => {
-        if (success) {
-          useJwt
-            .login({
-              email: this.userEmail,
-              password: this.password,
-            })
-            .then(response => {
-              console.log('response', response);
-              const { userData } = response.data
-              console.log(userData)
-              useJwt.setToken(response.data.accessToken)
-              useJwt.setRefreshToken(response.data.refreshToken)
-              localStorage.setItem('userData', JSON.stringify(userData))
-              this.$ability.update(userData.ability)
-
-              // ? This is just for demo purpose as well.
-              // ? Because we are showing eCommerce app's cart items count in navbar
-              this.$store.commit('app-ecommerce/UPDATE_CART_ITEMS_COUNT', userData.extras.eCommerceCartItemsCount)
-
-              // ? This is just for demo purpose. Don't think CASL is role based in this case, we used role in if condition just for ease
-              this.$router.replace(getHomeRouteForLoggedInUser(userData.role)).then(() => {
-                this.$toast({
-                  component: ToastificationContent,
-                  position: 'top-right',
-                  props: {
-                    title: `Welcome ${userData.fullName || userData.username}`,
-                    icon: 'CoffeeIcon',
-                    variant: 'success',
-                    text: `You have successfully logged in as ${userData.role}. Now you can start to explore!`,
-                  },
-                })
-              })
-            })
-            .catch(error => {
-              this.$refs.loginForm.setErrors(error.response.data.error)
-            })
-        }
-      })
-    },
     login() {
         this.isLoading = true;
         axios.get('/sanctum/csrf-cookie').then(response => {
@@ -454,9 +338,9 @@ export default {
     bottom: 0;
     background: linear-gradient(
       135deg,
-      rgba(0, 0, 0, 0.3) 0%,
-      rgba(0, 0, 0, 0.1) 50%,
-      rgba(0, 0, 0, 0.5) 100%
+      rgba(0, 0, 0, 0.6) 0%,
+      rgba(0, 0, 0, 0.4) 50%,
+      rgba(0, 0, 0, 0.7) 100%
     );
     z-index: 2;
   }
