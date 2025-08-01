@@ -21,6 +21,7 @@
   <link rel="shortcut icon" href="{{ asset('images/logo/favicon.png') }}">
 
   <!-- Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap"
     rel="stylesheet">
 </head>
@@ -32,12 +33,15 @@
   </noscript>
   <div id="loading-bg">
     <div class="loading-logo">
-      <img src="{{ asset('logo.png') }}" alt="Logo" />
+      <img src="{{ asset('logo.png') }}" alt="CMP Logo" />
     </div>
     <div class="loading">
       <div class="effect-1 effects"></div>
       <div class="effect-2 effects"></div>
       <div class="effect-3 effects"></div>
+    </div>
+    <div class="loading-text">
+      Cargando Sistema CMP...
     </div>
   </div>
   <div id="app">

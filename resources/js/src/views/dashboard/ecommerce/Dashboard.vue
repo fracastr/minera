@@ -62,21 +62,21 @@
         <div class="dashboard-cmp-features-grid">
           <div class="dashboard-cmp-feature-card">
             <div class="dashboard-cmp-feature-icon">
-              <i class="fas fa-chart-line"></i>
+              <feather-icon icon="TrendingUpIcon" size="24" />
             </div>
             <h4>Análisis Avanzado</h4>
             <p>Reportes detallados y análisis estadísticos en tiempo real</p>
           </div>
           <div class="dashboard-cmp-feature-card">
             <div class="dashboard-cmp-feature-icon">
-              <i class="fas fa-database"></i>
+              <feather-icon icon="HardDriveIcon" size="24" />
             </div>
             <h4>Gestión de Datos</h4>
             <p>Almacenamiento seguro y gestión eficiente de información</p>
           </div>
           <div class="dashboard-cmp-feature-card">
             <div class="dashboard-cmp-feature-icon">
-              <i class="fas fa-shield-alt"></i>
+              <feather-icon icon="ShieldIcon" size="24" />
             </div>
             <h4>Seguridad Total</h4>
             <p>Protección de datos con estándares de seguridad industrial</p>
@@ -172,11 +172,14 @@ export default {
 
 .dashboard-cmp-title-section {
   .dashboard-cmp-main-title {
-    font-size: 1.8rem !important;
-    font-weight: 700 !important;
+    font-size: 2.2rem !important;
+    font-weight: 800 !important;
     margin: 0 !important;
     color: #1e293b !important;
     transition: color 0.3s ease !important;
+    letter-spacing: -0.025em !important;
+    line-height: 1.1 !important;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
 
     .dark-mode & {
       color: #f1f5f9 !important;
@@ -184,10 +187,14 @@ export default {
   }
 
   .dashboard-cmp-subtitle {
-    margin: 0.25rem 0 0 0 !important;
-    font-size: 0.9rem !important;
+    margin: 0.5rem 0 0 0 !important;
+    font-size: 1rem !important;
     color: #64748b !important;
     transition: color 0.3s ease !important;
+    font-weight: 500 !important;
+    letter-spacing: 0.01em !important;
+    line-height: 1.4 !important;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
 
     .dark-mode & {
       color: #94a3b8 !important;
@@ -199,15 +206,17 @@ export default {
   display: flex !important;
   align-items: center !important;
   gap: 0.5rem !important;
-  padding: 0.5rem 1rem !important;
-  background: rgba(34, 197, 94, 0.1) !important;
+  padding: 0.75rem 1.5rem !important;
+  background: rgba(34, 197, 94, 0.15) !important;
   border-radius: 20px !important;
-  border: 1px solid rgba(34, 197, 94, 0.2) !important;
+  border: 1px solid rgba(34, 197, 94, 0.3) !important;
   transition: all 0.3s ease !important;
+  box-shadow: 0 2px 8px rgba(34, 197, 94, 0.2) !important;
 
   .dark-mode & {
-    background: rgba(34, 197, 94, 0.2) !important;
-    border: 1px solid rgba(34, 197, 94, 0.3) !important;
+    background: rgba(34, 197, 94, 0.25) !important;
+    border: 1px solid rgba(34, 197, 94, 0.4) !important;
+    box-shadow: 0 2px 8px rgba(34, 197, 94, 0.3) !important;
   }
 }
 
@@ -221,8 +230,12 @@ export default {
 
 .dashboard-cmp-status-text {
   color: #166534 !important;
-  font-weight: 500 !important;
+  font-weight: 600 !important;
   transition: color 0.3s ease !important;
+  font-size: 0.875rem !important;
+  letter-spacing: 0.02em !important;
+  text-transform: uppercase !important;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
 
   .dark-mode & {
     color: #22c55e !important;
@@ -243,22 +256,38 @@ export default {
 
 .dashboard-cmp-hero-section {
   margin-bottom: 4rem !important;
+  background: rgba(255, 255, 255, 0.7) !important;
+  border-radius: 20px !important;
+  padding: 3rem !important;
+  backdrop-filter: blur(10px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.5) !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08) !important;
+
+  .dark-mode & {
+    background: rgba(30, 41, 59, 0.7) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2) !important;
+  }
 }
 
 .dashboard-cmp-hero-content {
   display: grid !important;
   grid-template-columns: 1fr 1fr !important;
-  gap: 3rem !important;
+  gap: 4rem !important;
   align-items: center !important;
+  min-height: 400px !important;
 }
 
 .dashboard-cmp-hero-title {
   font-size: 3.5rem !important;
-  font-weight: 700 !important;
-  margin-bottom: 1rem !important;
-  color: white !important;
+  font-weight: 800 !important;
+  margin-bottom: 1.5rem !important;
+  color: #1e293b !important;
   letter-spacing: -0.02em !important;
   transition: color 0.3s ease !important;
+  line-height: 1.2 !important;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+  text-shadow: none !important;
 
   .dark-mode & {
     color: #f1f5f9 !important;
@@ -266,11 +295,15 @@ export default {
 }
 
 .dashboard-cmp-hero-description {
-  font-size: 1.1rem !important;
+  font-size: 1.2rem !important;
   line-height: 1.6 !important;
-  margin-bottom: 2rem !important;
+  margin-bottom: 2.5rem !important;
   color: #475569 !important;
   transition: color 0.3s ease !important;
+  font-weight: 400 !important;
+  letter-spacing: 0.01em !important;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+  text-shadow: none !important;
 
   .dark-mode & {
     color: #cbd5e1 !important;
@@ -284,23 +317,54 @@ export default {
 
 .dashboard-cmp-stat-item {
   text-align: center !important;
+  padding: 1.5rem !important;
+  background: rgba(255, 255, 255, 0.8) !important;
+  border-radius: 12px !important;
+  backdrop-filter: blur(8px) !important;
+  border: 1px solid rgba(0, 0, 0, 0.08) !important;
+  transition: all 0.3s ease !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06) !important;
+
+  &:hover {
+    transform: translateY(-2px) !important;
+    background: rgba(255, 255, 255, 0.95) !important;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1) !important;
+  }
+
+  .dark-mode & {
+    background: transparent !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2) !important;
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.05) !important;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3) !important;
+    }
+  }
 
   .dashboard-cmp-stat-number {
-    font-size: 1.5rem !important;
+    font-size: 1.75rem !important;
     font-weight: 700 !important;
-    color: #3b82f6 !important;
+    color: #1e293b !important;
     transition: color 0.3s ease !important;
+    letter-spacing: -0.01em !important;
+    line-height: 1 !important;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+    margin-bottom: 0.5rem !important;
 
     .dark-mode & {
-      color: #60a5fa !important;
+      color: #f1f5f9 !important;
     }
   }
 
   .dashboard-cmp-stat-label {
-    font-size: 0.9rem !important;
+    font-size: 0.875rem !important;
     color: #64748b !important;
     font-weight: 500 !important;
     transition: color 0.3s ease !important;
+    letter-spacing: 0.01em !important;
+    text-transform: uppercase !important;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
 
     .dark-mode & {
       color: #94a3b8 !important;
@@ -328,11 +392,14 @@ export default {
 
 .dashboard-cmp-section-title {
   text-align: center !important;
-  font-size: 2rem !important;
-  font-weight: 600 !important;
+  font-size: 2.5rem !important;
+  font-weight: 800 !important;
   margin-bottom: 3rem !important;
   color: #1e293b !important;
   transition: color 0.3s ease !important;
+  letter-spacing: -0.025em !important;
+  line-height: 1.2 !important;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
 
   .dark-mode & {
     color: #f1f5f9 !important;
@@ -346,52 +413,90 @@ export default {
 }
 
 .dashboard-cmp-feature-card {
-  background: rgba(255, 255, 255, 0.9) !important;
-  backdrop-filter: blur(10px) !important;
-  border: 1px solid rgba(0, 0, 0, 0.1) !important;
-  border-radius: 15px !important;
-  padding: 2rem !important;
+  background: rgba(255, 255, 255, 0.95) !important;
+  backdrop-filter: blur(20px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.3) !important;
+  border-radius: 20px !important;
+  padding: 2.5rem !important;
   text-align: center !important;
-  transition: all 0.3s ease !important;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05) !important;
+  position: relative !important;
+  overflow: hidden !important;
+
+  &::before {
+    content: '' !important;
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    height: 4px !important;
+    background: linear-gradient(135deg, #3b82f6, #1d4ed8) !important;
+    transform: scaleX(0) !important;
+    transition: transform 0.3s ease !important;
+  }
 
   &:hover {
-    transform: translateY(-5px) !important;
+    transform: translateY(-8px) !important;
     background: rgba(255, 255, 255, 1) !important;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1) !important;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12) !important;
+
+    &::before {
+      transform: scaleX(1) !important;
+    }
   }
 
   .dark-mode & {
-    background: rgba(30, 41, 59, 0.9) !important;
+    background: rgba(30, 41, 59, 0.95) !important;
     border: 1px solid rgba(255, 255, 255, 0.1) !important;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2) !important;
 
     &:hover {
       background: rgba(30, 41, 59, 1) !important;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3) !important;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3) !important;
     }
   }
 
   .dashboard-cmp-feature-icon {
-    width: 60px !important;
-    height: 60px !important;
+    width: 70px !important;
+    height: 70px !important;
     background: linear-gradient(135deg, #3b82f6, #1d4ed8) !important;
-    border-radius: 50% !important;
+    border-radius: 18px !important;
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
-    margin: 0 auto 1rem !important;
-    font-size: 1.5rem !important;
+    margin: 0 auto 1.5rem !important;
     color: white !important;
-    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3) !important;
+    box-shadow: 0 8px 20px rgba(59, 130, 246, 0.3) !important;
+    transition: all 0.3s ease !important;
+
+    .feather-icon {
+      color: white !important;
+    }
+
+    svg {
+      width: 24px !important;
+      height: 24px !important;
+      stroke: white !important;
+      stroke-width: 2 !important;
+      fill: none !important;
+    }
+
+    &:hover {
+      transform: scale(1.1) !important;
+      box-shadow: 0 12px 30px rgba(59, 130, 246, 0.4) !important;
+    }
   }
 
   h4 {
-    font-size: 1.3rem !important;
-    font-weight: 600 !important;
+    font-size: 1.5rem !important;
+    font-weight: 700 !important;
     margin-bottom: 1rem !important;
     color: #1e293b !important;
     transition: color 0.3s ease !important;
+    letter-spacing: -0.01em !important;
+    line-height: 1.3 !important;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
 
     .dark-mode & {
       color: #f1f5f9 !important;
@@ -400,9 +505,13 @@ export default {
 
   p {
     color: #64748b !important;
-    line-height: 1.5 !important;
+    line-height: 1.6 !important;
     margin: 0 !important;
     transition: color 0.3s ease !important;
+    font-size: 1rem !important;
+    font-weight: 400 !important;
+    letter-spacing: 0.01em !important;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
 
     .dark-mode & {
       color: #cbd5e1 !important;
@@ -418,11 +527,26 @@ export default {
   }
 
   .dashboard-cmp-hero-title {
-    font-size: 2rem !important;
+    font-size: 2.5rem !important;
+    letter-spacing: -0.02em !important;
+  }
+
+  .dashboard-cmp-hero-description {
+    font-size: 1.125rem !important;
+    line-height: 1.6 !important;
   }
 
   .dashboard-cmp-hero-stats {
     justify-content: center !important;
+    gap: 1rem !important;
+  }
+
+  .dashboard-cmp-stat-item {
+    padding: 1rem !important;
+  }
+
+  .dashboard-cmp-stat-number {
+    font-size: 1.5rem !important;
   }
 
   .dashboard-cmp-header-content {
@@ -433,6 +557,14 @@ export default {
   .dashboard-cmp-features-grid {
     grid-template-columns: 1fr !important;
   }
+
+  .dashboard-cmp-section-title {
+    font-size: 2rem !important;
+  }
+
+  .dashboard-cmp-feature-card {
+    padding: 2rem !important;
+  }
 }
 
 @media (max-width: 480px) {
@@ -441,12 +573,34 @@ export default {
   }
 
   .dashboard-cmp-hero-title {
-    font-size: 1.5rem !important;
+    font-size: 2rem !important;
+    letter-spacing: -0.01em !important;
+  }
+
+  .dashboard-cmp-hero-description {
+    font-size: 1rem !important;
+    line-height: 1.5 !important;
   }
 
   .dashboard-cmp-hero-stats {
     flex-direction: column !important;
     gap: 1rem !important;
+  }
+
+  .dashboard-cmp-stat-item {
+    padding: 1.25rem !important;
+  }
+
+  .dashboard-cmp-section-title {
+    font-size: 1.75rem !important;
+  }
+
+  .dashboard-cmp-feature-card {
+    padding: 1.5rem !important;
+  }
+
+  .dashboard-cmp-feature-card h4 {
+    font-size: 1.25rem !important;
   }
 }
 </style>
