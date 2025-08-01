@@ -17,19 +17,19 @@
         </p>
       </div>
     </b-alert>
-    <ecommerce />
+    <dashboard />
   </div>
 </template>
 
 <script>
-import Ecommerce from '@/views/dashboard/ecommerce/Ecommerce.vue'
+import Dashboard from '@/views/dashboard/ecommerce/Dashboard.vue'
 import { BAlert, BLink } from 'bootstrap-vue'
 
 export default {
   components: {
     BAlert,
     BLink,
-    Ecommerce,
+    Dashboard,
   },
   data() {
     return {

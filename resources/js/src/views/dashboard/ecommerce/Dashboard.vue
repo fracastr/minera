@@ -93,6 +93,7 @@ import useAppConfig from '@core/app-config/useAppConfig'
 import { computed } from '@vue/composition-api'
 
 export default {
+  name: 'Dashboard',
   components: {
     BImg,
   },

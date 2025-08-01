@@ -7,6 +7,6 @@ export default [
   {
     path: '/dashboard/balances',
     name: 'dashboard-balances',
-    component: () => import('@/views/dashboard/ecommerce/Ecommerce.vue'),
+    component: () => import('@/views/dashboard/ecommerce/Dashboard.vue'),
   },
 ]
