@@ -98,6 +98,34 @@
   "Form Validation": "Form Validation",
   "Form Repeater": "Form Repeater",
   "BS Table": "BS Table",
+  "dashboard": {
+    "title": "CMP Balances System",
+    "subtitle": "Comprehensive Mining Balances Management",
+    "status": "System Active",
+    "welcome": "Welcome to the Balances System",
+    "description": "Comprehensive platform for the management and analysis of CMP mining balances. Access detailed reports, real-time statistics and advanced data analysis.",
+    "stats": {
+      "availability": "Availability",
+      "accuracy": "Accuracy",
+      "data": "Data",
+      "realtime": "Real Time"
+    },
+    "features": {
+      "title": "Main Features",
+      "advancedAnalysis": {
+        "title": "Advanced Analysis",
+        "description": "Detailed reports and real-time statistical analysis with interactive visualizations"
+      },
+      "dataManagement": {
+        "title": "Data Management",
+        "description": "Secure storage and efficient information management with automatic backups"
+      },
+      "security": {
+        "title": "Total Security",
+        "description": "Data protection with industrial security standards and advanced encryption"
+      }
+    }
+  },
   "Good Table": "Good Table",
   "Charts": "Charts",
   "Apex Chart": "Apex Chart",
@@ -124,6 +152,12 @@
   "Raise Support": "Raise Support",
   "Documentation": "Documentation",
   "Dashboards": "Dashboards",
+  "Balances": "Balances",
+  "Modulo Balances": "Balances Module",
+  "Generar Balance": "Generate Balance",
+  "Listado Balances": "Balances List",
+  "Menú de aplicaciones": "Applications Menu",
+  "Modulos": "Modules",
   "eCommerce": "eCommerce",
   "Analytics": "Analytics",
   "Apps & Pages": "Apps & Pages",
@@ -173,5 +207,30 @@
   "Layout Boxed": "Layout Boxed",
   "Without Menu": "Without Menu",
   "Layout Empty": "Layout Empty",
-  "Layout Blank": "Layout Blank"
+  "Layout Blank": "Layout Blank",
+  "userDropdown": {
+    "profile": "Profile",
+    "inbox": "Inbox",
+    "task": "Task",
+    "chat": "Chat",
+    "settings": "Settings",
+    "pricing": "Pricing",
+    "faq": "FAQ",
+    "logout": "Logout"
+  },
+  "customizer": {
+    "title": "Theme Customizer",
+    "subtitle": "Customize & Preview in Real Time",
+    "skin": "Skin",
+    "contentWidth": "Content Width",
+    "rtl": "RTL",
+    "routerTransition": "Router Transition",
+    "menuLayout": "Menu Layout",
+    "menuCollapsed": "Menu Collapsed",
+    "menuHidden": "Menu Hidden",
+    "navbarColor": "Navbar Color",
+    "navbarType": "Navbar Type",
+    "menuType": "Menu Type",
+    "footerType": "Footer Type"
+  }
 }

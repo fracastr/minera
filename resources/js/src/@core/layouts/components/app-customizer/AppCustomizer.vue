@@ -20,9 +20,9 @@
     <div class="customizer-section d-flex justify-content-between align-items-center">
       <div>
         <h4 class="text-uppercase mb-0">
-          Theme Customizer
+          {{ $t('customizer.title') }}
         </h4>
-        <small>Customize &amp; Preview in Real Time</small>
+        <small>{{ $t('customizer.subtitle') }}</small>
       </div>
       <feather-icon
         icon="XIcon"
@@ -41,7 +41,7 @@
       <div class="customizer-section">
 
         <!-- Skin -->
-        <b-form-group label="Skin">
+        <b-form-group :label="$t('customizer.skin')">
           <b-form-radio-group
             id="skin-radio-group"
             v-model="skin"
@@ -50,8 +50,8 @@
           />
         </b-form-group>
 
-        <!-- Skin -->
-        <b-form-group label="Content Width">
+        <!-- Content Width -->
+        <b-form-group :label="$t('customizer.contentWidth')">
           <b-form-radio-group
             id="content-width-radio-group"
             v-model="contentWidth"
@@ -62,7 +62,7 @@
 
         <!-- RTL -->
         <b-form-group
-          label="RTL"
+          :label="$t('customizer.rtl')"
           label-cols="10"
         >
           <b-form-checkbox
@@ -76,7 +76,7 @@
 
         <!-- Router Transition -->
         <b-form-group
-          label="Router Transition"
+          :label="$t('customizer.routerTransition')"
           label-cols="6"
         >
           <v-select
@@ -96,7 +96,7 @@
 
         <!-- Layout Type -->
         <b-form-group
-          label="Menu Layout"
+          :label="$t('customizer.menuLayout')"
         >
           <b-form-radio-group
             v-model="layoutType"
@@ -110,7 +110,7 @@
           v-if="layoutType === 'vertical'"
           class="d-flex justify-content-between align-items-center mt-2"
         >
-          <span class="font-weight-bold">Menu Collapsed</span>
+          <span class="font-weight-bold">{{ $t('customizer.menuCollapsed') }}</span>
           <b-form-checkbox
             v-model="isVerticalMenuCollapsed"
             name="is-vertical-menu-collapsed"
@@ -120,9 +120,9 @@
           />
         </div>
 
-        <!-- Menu Visiblity -->
+        <!-- Menu Visibility -->
         <div class="d-flex justify-content-between align-items-center mt-2">
-          <span class="font-weight-bold">Menu Hidden</span>
+          <span class="font-weight-bold">{{ $t('customizer.menuHidden') }}</span>
           <b-form-checkbox
             v-model="isNavMenuHidden"
             name="is-menu-visible"
@@ -140,7 +140,7 @@
         <!-- Navbar Color -->
         <b-form-group
           v-show="layoutType === 'vertical'"
-          label="Navbar Color"
+          :label="$t('customizer.navbarColor')"
         >
           <div
             v-for="(color, index) in navbarColors"
@@ -152,7 +152,7 @@
         </b-form-group>
 
         <!-- Navbar Type -->
-        <b-form-group :label="layoutType === 'vertical' ? 'Navbar Type' : 'Menu Type'">
+        <b-form-group :label="layoutType === 'vertical' ? $t('customizer.navbarType') : $t('customizer.menuType')">
           <b-form-radio-group
             v-model="navbarType"
             name="navbar-type"
@@ -165,7 +165,7 @@
       <div class="customizer-section">
 
         <!-- Footer Type -->
-        <b-form-group label="Footer Type">
+        <b-form-group :label="$t('customizer.footerType')">
           <b-form-radio-group
             v-model="footerType"
             name="footer-type"

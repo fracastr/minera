@@ -17,7 +17,7 @@
     <b-dropdown-item
       v-for="localeObj in locales"
       :key="localeObj.locale"
-      @click="$i18n.locale = localeObj.locale"
+      @click="changeLocale(localeObj.locale)"
     >
       <b-img
         :src="localeObj.img"
@@ -54,19 +54,9 @@ export default {
         name: 'English',
       },
       {
-        locale: 'fr',
-        img: require('@/assets/images/flags/fr.png'),
-        name: 'French',
-      },
-      {
-        locale: 'de',
-        img: require('@/assets/images/flags/de.png'),
-        name: 'German',
-      },
-      {
-        locale: 'pt',
-        img: require('@/assets/images/flags/pt.png'),
-        name: 'Portuguese',
+        locale: 'es',
+        img: require('@/assets/images/flags/es.png'),
+        name: 'Español',
       },
     ]
     /* eslint-disable global-require */
@@ -74,6 +64,14 @@ export default {
     return {
       locales,
     }
+  },
+  mounted() {
+    // El plugin se encarga de cargar el idioma guardado
+  },
+  methods: {
+    changeLocale(locale) {
+      this.$setLocale(locale)
+    },
   },
 }
 </script>

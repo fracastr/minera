@@ -3,6 +3,7 @@ import { ToastPlugin, ModalPlugin } from 'bootstrap-vue'
 import VueCompositionAPI from '@vue/composition-api'
 
 import i18n from '@/libs/i18n'
+import i18nPlugin from '@/libs/i18n/plugin'
 import router from './router'
 import store from './store'
 import App from './App.vue'
@@ -29,6 +30,9 @@ Vue.use(ModalPlugin)
 
 // Composition API
 Vue.use(VueCompositionAPI)
+
+// i18n Plugin
+Vue.use(i18nPlugin)
 
 // Feather font icon - For form-wizard
 // * Shall remove it if not using font-icons of feather-icons - For form-wizard

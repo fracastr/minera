@@ -23,8 +23,8 @@
 
     <!-- Right Col -->
     <b-navbar-nav class="nav align-items-center ml-auto">
-      <!-- <locale />
-      <search-bar />
+      <locale />
+      <!-- <search-bar />
       <cart-dropdown />
       <notification-dropdown /> -->
       <dark-Toggler class="d-none d-lg-block" />

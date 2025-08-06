@@ -1,4 +1,5 @@
 const mix = require('laravel-mix')
+const BrowserSyncPlugin = require('browser-sync-webpack-plugin')
 
 /*
  |--------------------------------------------------------------------------
@@ -83,5 +84,20 @@ mix.copy('resources/scss/loader.css', 'public/css')
 mix.webpackConfig({
   output: {
     chunkFilename: 'js/chunks/[name].[chunkhash].js'
-  }
+  },
+  plugins: [
+    new BrowserSyncPlugin({
+      host: 'localhost',
+      port: 3000,
+      proxy: 'http://localhost:8000', // Assuming your Laravel app runs on port 8000
+      files: [
+        'public/**/*',
+        'resources/**/*',
+        'app/**/*'
+      ],
+      reloadDelay: 0,
+      reloadDebounce: 0,
+      reloadThrottle: 0
+    })
+  ]
 })

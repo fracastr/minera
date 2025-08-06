@@ -8,14 +8,14 @@
             <span class="dashboard-cmp-logo-symbol">⚖️</span>
           </div>
           <div class="dashboard-cmp-title-section">
-            <h1 class="dashboard-cmp-main-title">Sistema Balances CMP</h1>
-            <p class="dashboard-cmp-subtitle">Gestión Integral de Balances Mineros</p>
+            <h1 class="dashboard-cmp-main-title">{{ $t('dashboard.title') }}</h1>
+            <p class="dashboard-cmp-subtitle">{{ $t('dashboard.subtitle') }}</p>
           </div>
         </div>
         <div class="dashboard-cmp-header-actions">
           <div class="dashboard-cmp-status-indicator">
             <span class="dashboard-cmp-status-dot"></span>
-            <span class="dashboard-cmp-status-text">Sistema Activo</span>
+            <span class="dashboard-cmp-status-text">{{ $t('dashboard.status') }}</span>
           </div>
         </div>
       </div>
@@ -26,23 +26,22 @@
       <div class="dashboard-cmp-hero-section">
         <div class="dashboard-cmp-hero-content">
           <div class="dashboard-cmp-hero-text">
-            <h2 class="dashboard-cmp-hero-title">Bienvenido al Sistema de Balances</h2>
+            <h2 class="dashboard-cmp-hero-title">{{ $t('dashboard.welcome') }}</h2>
             <p class="dashboard-cmp-hero-description">
-              Plataforma integral para la gestión y análisis de balances mineros de CMP.
-              Acceda a reportes detallados, estadísticas en tiempo real y análisis avanzados.
+              {{ $t('dashboard.description') }}
             </p>
             <div class="dashboard-cmp-hero-stats">
               <div class="dashboard-cmp-stat-item">
                 <div class="dashboard-cmp-stat-number">24/7</div>
-                <div class="dashboard-cmp-stat-label">Disponibilidad</div>
+                <div class="dashboard-cmp-stat-label">{{ $t('dashboard.stats.availability') }}</div>
               </div>
               <div class="dashboard-cmp-stat-item">
                 <div class="dashboard-cmp-stat-number">99.9%</div>
-                <div class="dashboard-cmp-stat-label">Precisión</div>
+                <div class="dashboard-cmp-stat-label">{{ $t('dashboard.stats.accuracy') }}</div>
               </div>
               <div class="dashboard-cmp-stat-item">
-                <div class="dashboard-cmp-stat-number">Real-time</div>
-                <div class="dashboard-cmp-stat-label">Datos</div>
+                <div class="dashboard-cmp-stat-number">{{ $t('dashboard.stats.realtime') }}</div>
+                <div class="dashboard-cmp-stat-label">{{ $t('dashboard.stats.data') }}</div>
               </div>
             </div>
           </div>
@@ -58,28 +57,28 @@
 
       <!-- Feature Cards -->
       <div class="dashboard-cmp-features-section">
-        <h3 class="dashboard-cmp-section-title">Características Principales</h3>
+        <h3 class="dashboard-cmp-section-title">{{ $t('dashboard.features.title') }}</h3>
         <div class="dashboard-cmp-features-grid">
           <div class="dashboard-cmp-feature-card">
             <div class="dashboard-cmp-feature-icon">
               <feather-icon icon="TrendingUpIcon" size="24" />
             </div>
-            <h4>Análisis Avanzado</h4>
-            <p>Reportes detallados y análisis estadísticos en tiempo real</p>
+            <h4>{{ $t('dashboard.features.advancedAnalysis.title') }}</h4>
+            <p>{{ $t('dashboard.features.advancedAnalysis.description') }}</p>
           </div>
           <div class="dashboard-cmp-feature-card">
             <div class="dashboard-cmp-feature-icon">
               <feather-icon icon="HardDriveIcon" size="24" />
             </div>
-            <h4>Gestión de Datos</h4>
-            <p>Almacenamiento seguro y gestión eficiente de información</p>
+            <h4>{{ $t('dashboard.features.dataManagement.title') }}</h4>
+            <p>{{ $t('dashboard.features.dataManagement.description') }}</p>
           </div>
           <div class="dashboard-cmp-feature-card">
             <div class="dashboard-cmp-feature-icon">
               <feather-icon icon="ShieldIcon" size="24" />
             </div>
-            <h4>Seguridad Total</h4>
-            <p>Protección de datos con estándares de seguridad industrial</p>
+            <h4>{{ $t('dashboard.features.security.title') }}</h4>
+            <p>{{ $t('dashboard.features.security.description') }}</p>
           </div>
         </div>
       </div>

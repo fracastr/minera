@@ -36,7 +36,7 @@
         icon="UserIcon"
         class="mr-50"
       />
-      <span>Profile</span>
+      <span>{{ $t('userDropdown.profile') }}</span>
     </b-dropdown-item>
     <b-dropdown-item
       :to="{ name: 'apps-email' }"
@@ -47,7 +47,7 @@
         icon="MailIcon"
         class="mr-50"
       />
-      <span>Inbox</span>
+      <span>{{ $t('userDropdown.inbox') }}</span>
     </b-dropdown-item>
     <b-dropdown-item
       :to="{ name: 'apps-todo' }"
@@ -58,7 +58,7 @@
         icon="CheckSquareIcon"
         class="mr-50"
       />
-      <span>Task</span>
+      <span>{{ $t('userDropdown.task') }}</span>
     </b-dropdown-item>
     <b-dropdown-item
       :to="{ name: 'apps-chat' }"
@@ -69,7 +69,7 @@
         icon="MessageSquareIcon"
         class="mr-50"
       />
-      <span>Chat</span>
+      <span>{{ $t('userDropdown.chat') }}</span>
     </b-dropdown-item>
 
     <b-dropdown-divider />
@@ -83,7 +83,7 @@
         icon="SettingsIcon"
         class="mr-50"
       />
-      <span>Settings</span>
+      <span>{{ $t('userDropdown.settings') }}</span>
     </b-dropdown-item>
     <b-dropdown-item
       :to="{ name: 'pages-pricing' }"
@@ -94,7 +94,7 @@
         icon="CreditCardIcon"
         class="mr-50"
       />
-      <span>Pricing</span>
+      <span>{{ $t('userDropdown.pricing') }}</span>
     </b-dropdown-item>
     <b-dropdown-item
       :to="{ name: 'pages-faq' }"
@@ -105,7 +105,7 @@
         icon="HelpCircleIcon"
         class="mr-50"
       />
-      <span>FAQ</span>
+      <span>{{ $t('userDropdown.faq') }}</span>
     </b-dropdown-item> -->
     <b-dropdown-item
       link-class="d-flex align-items-center"
@@ -116,7 +116,7 @@
         icon="LogOutIcon"
         class="mr-50"
       />
-      <span>Cerrar Sesión</span>
+      <span>{{ $t('userDropdown.logout') }}</span>
     </b-dropdown-item></b-nav-item-dropdown>
 </template>
 
