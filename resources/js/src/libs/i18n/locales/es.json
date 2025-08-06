@@ -232,5 +232,87 @@
     "navbarType": "Tipo de Barra de Navegación",
     "menuType": "Tipo de Menú",
     "footerType": "Tipo de Pie de Página"
+  },
+  "balanceFormWizard": {
+    "finishButton": "Guardar",
+    "backButton": "Anterior",
+    "nextButton": "Siguiente",
+    "spinning": "Cargando",
+    "header": {
+      "title": "Configuración de Balance",
+      "subtitle": "Complete los pasos para configurar su balance de manera eficiente"
+    },
+    "loading": {
+      "title": "Cargando datos",
+      "subtitle": "Por favor espere mientras se cargan los datos del sistema",
+      "progress": "Inicializando...",
+      "systemName": "Sistema CMP Balances"
+    },
+    "valleSelection": {
+      "title": "Selección de valle",
+      "systemTitle": "Sistema de balance CMP",
+      "subtitle": "Selección de valle",
+      "label": "Valle",
+      "name": "Valle",
+      "placeholder": "Selecciona un valle"
+    },
+    "procesoSelection": {
+      "title": "Selección de proceso",
+      "systemTitle": "Sistema de balance CMP",
+      "subtitle": "Selección de proceso",
+      "label": "Proceso",
+      "name": "Proceso",
+      "placeholder": "Selecciona un proceso"
+    },
+    "balances": {
+      "title": "Balances",
+      "configTitle": "Configuración de Balances",
+      "configSubtitle": "Configure los parámetros de su balance"
+    },
+    "saveModal": {
+      "title": "Guardar Balance",
+      "subtitle": "Ingrese un nombre descriptivo para su balance",
+      "label": "Nombre Balance",
+      "placeholder": "Ej: Balance Q1 2024",
+      "invalidFeedback": "Nombre es requerido",
+      "cancel": "Cancelar",
+      "save": "Guardar Balance"
+    },
+    "toast": {
+      "success": "Se ha guardado el balance con éxito",
+      "error": "Ocurrió un problema al intentar guardar el balance",
+      "loadError": "Error al cargar los valles",
+      "processError": "Error al cargar los procesos"
+    }
+  },
+  "balances": {
+    "fileUpload": {
+      "label": "Archivo carga",
+      "placeholder": "Eliga su archivo",
+      "dropPlaceholder": "Suelte su archivo aqui",
+      "browseText": "Buscar"
+    },
+    "buttons": {
+      "load": "Cargar",
+      "reset": "Reset",
+      "run": "Correr",
+      "generateExcel": "Generar Excel Resultados"
+    },
+    "tables": {
+      "balances": "Tabla Balances",
+      "restrictions": "Tabla Restricciones",
+      "nodeAdjustment": "Tabla Ajuste Nodos",
+      "inventoryVariations": "Tabla Variaciones Inventario"
+    },
+    "modals": {
+      "balancesDetail": "Detalle Tabla Balances",
+      "restrictionsDetail": "Detalle Tabla Restricciones",
+      "nodeAdjustmentDetail": "Detalle Tabla Ajuste Nodos",
+      "inventoryVariationsDetail": "Detalle Tabla Variaciones Inventario"
+    },
+    "toast": {
+      "runError": "Ocurrio un error al correr el balance",
+      "importError": "Ocurrio un error al importar el archivo"
+    }
   }
 }

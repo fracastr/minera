@@ -5,7 +5,7 @@
       <div class="dashboard-cmp-header-content">
         <div class="dashboard-cmp-logo-section">
           <div class="dashboard-cmp-logo-icon">
-            <span class="dashboard-cmp-logo-symbol">⚖️</span>
+            <feather-icon icon="BarChart2Icon" size="24" />
           </div>
           <div class="dashboard-cmp-title-section">
             <h1 class="dashboard-cmp-main-title">{{ $t('dashboard.title') }}</h1>

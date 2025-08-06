@@ -7,16 +7,16 @@
       <b-row>
         <b-col cols="12">
           <b-form-group
-            label="Archivo carga"
+            :label="$t('balances.fileUpload.label')"
             label-for="h-archivo-carga"
             label-cols-md="4"
           >
             <b-form-file
               ref="input_file1"
               v-model="file_1"
-              placeholder="Eliga su archivo"
-              drop-placeholder="Suelte su archivo aqui"
-              browse-text="Buscar"
+              :placeholder="$t('balances.fileUpload.placeholder')"
+              :drop-placeholder="$t('balances.fileUpload.dropPlaceholder')"
+              :browse-text="$t('balances.fileUpload.browseText')"
               required
             />
           </b-form-group>
@@ -34,7 +34,7 @@
             variant="primary"
             class="mr-1"
           >
-            Cargar
+            {{ $t('balances.buttons.load') }}
           </b-button>
           <b-button
             v-ripple.400="'rgba(186, 191, 199, 0.15)'"
@@ -42,7 +42,7 @@
             variant="outline-secondary"
             class="mr-1"
           >
-            Reset
+            {{ $t('balances.buttons.reset') }}
           </b-button>
           <b-button
             v-show="correr_button"
@@ -51,7 +51,7 @@
             variant="warning"
             @click="correr_tables"
           >
-            Correr
+            {{ $t('balances.buttons.run') }}
           </b-button>
           <b-button
             v-show="exportar_button"
@@ -59,7 +59,7 @@
             variant="success"
             @click="exportar_excel"
           >
-            Generar Excel Resultados
+            {{ $t('balances.buttons.generateExcel') }}
           </b-button>
         </b-col>
       </b-row>
@@ -80,7 +80,7 @@
         >
           <b-row align-v="center">
             <h5 class="ml-1">
-              Tabla Balances
+              {{ $t('balances.tables.balances') }}
             </h5>
             <b-button
               v-ripple.400="'rgba(113, 102, 240, 0.15)'"
@@ -114,7 +114,7 @@
         >
           <b-row align-v="center">
             <h5 class="ml-1">
-              Tabla Restricciones
+              {{ $t('balances.tables.restrictions') }}
             </h5>
             <b-button
               v-ripple.400="'rgba(113, 102, 240, 0.15)'"
@@ -151,7 +151,7 @@
         >
           <b-row align-v="center">
             <h5 class="ml-1">
-              Tabla Ajuste Nodos
+              {{ $t('balances.tables.nodeAdjustment') }}
             </h5>
             <b-button
               v-ripple.400="'rgba(113, 102, 240, 0.15)'"
@@ -183,7 +183,7 @@
         >
           <b-row align-v="center">
             <h5 class="ml-1">
-              Tabla Variaciones Inventario
+              {{ $t('balances.tables.inventoryVariations') }}
             </h5>
             <b-button
               v-ripple.400="'rgba(113, 102, 240, 0.15)'"
@@ -418,20 +418,20 @@ export default {
         case 1:
           this.modal_fields = this.balances_fields
           this.modal_data = this.balances_table
-          this.modalTitle = 'Detalle Tabla Balances'
+          this.modalTitle = this.$t('balances.modals.balancesDetail')
           break
         case 2:
-          this.modalTitle = 'Detalle Tabla Restricciones'
+          this.modalTitle = this.$t('balances.modals.restrictionsDetail')
           this.modal_fields = this.restricciones_fields
           this.modal_data = this.restricciones_table
           break
         case 3:
-          this.modalTitle = 'Detalle Tabla Ajuste Nodos'
+          this.modalTitle = this.$t('balances.modals.nodeAdjustmentDetail')
           this.modal_fields = this.balance_nodos_fields
           this.modal_data = this.balance_nodos
           break
         case 4:
-          this.modalTitle = 'Detalle Tabla Variaciones Inventario'
+          this.modalTitle = this.$t('balances.modals.inventoryVariationsDetail')
           this.modal_fields = this.inventarios_fields
           this.modal_data = this.inventarios_data
           break
@@ -533,7 +533,7 @@ export default {
           this.$toast({
             component: ToastificationContent,
             props: {
-              title: 'Ocurrio un error al correr el balance',
+              title: this.$t('balances.toast.runError'),
               icon: 'AlertTriangleIcon',
               variant: 'danger',
             },
@@ -687,7 +687,7 @@ export default {
           this.$toast({
             component: ToastificationContent,
             props: {
-              title: 'Ocurrio un error al importar el archivo',
+              title: this.$t('balances.toast.importError'),
               icon: 'AlertTriangleIcon',
               variant: 'danger',
             },

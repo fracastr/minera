@@ -232,5 +232,87 @@
     "navbarType": "Navbar Type",
     "menuType": "Menu Type",
     "footerType": "Footer Type"
+  },
+  "balanceFormWizard": {
+    "finishButton": "Save",
+    "backButton": "Previous",
+    "nextButton": "Next",
+    "spinning": "Loading",
+    "header": {
+      "title": "Balance Configuration",
+      "subtitle": "Complete the steps to configure your balance efficiently"
+    },
+    "loading": {
+      "title": "Loading data",
+      "subtitle": "Please wait while the system data is being loaded",
+      "progress": "Initializing...",
+      "systemName": "CMP Balances System"
+    },
+    "valleSelection": {
+      "title": "Valley Selection",
+      "systemTitle": "CMP Balance System",
+      "subtitle": "Valley Selection",
+      "label": "Valley",
+      "name": "Valley",
+      "placeholder": "Select a valley"
+    },
+    "procesoSelection": {
+      "title": "Process Selection",
+      "systemTitle": "CMP Balance System",
+      "subtitle": "Process Selection",
+      "label": "Process",
+      "name": "Process",
+      "placeholder": "Select a process"
+    },
+    "balances": {
+      "title": "Balances",
+      "configTitle": "Balance Configuration",
+      "configSubtitle": "Configure your balance parameters"
+    },
+    "saveModal": {
+      "title": "Save Balance",
+      "subtitle": "Enter a descriptive name for your balance",
+      "label": "Balance Name",
+      "placeholder": "Ex: Balance Q1 2024",
+      "invalidFeedback": "Name is required",
+      "cancel": "Cancel",
+      "save": "Save Balance"
+    },
+    "toast": {
+      "success": "Balance has been saved successfully",
+      "error": "An error occurred while trying to save the balance",
+      "loadError": "Error loading valleys",
+      "processError": "Error loading processes"
+    }
+  },
+  "balances": {
+    "fileUpload": {
+      "label": "Upload File",
+      "placeholder": "Choose your file",
+      "dropPlaceholder": "Drop your file here",
+      "browseText": "Browse"
+    },
+    "buttons": {
+      "load": "Load",
+      "reset": "Reset",
+      "run": "Run",
+      "generateExcel": "Generate Excel Results"
+    },
+    "tables": {
+      "balances": "Balances Table",
+      "restrictions": "Restrictions Table",
+      "nodeAdjustment": "Node Adjustment Table",
+      "inventoryVariations": "Inventory Variations Table"
+    },
+    "modals": {
+      "balancesDetail": "Balances Table Detail",
+      "restrictionsDetail": "Restrictions Table Detail",
+      "nodeAdjustmentDetail": "Node Adjustment Table Detail",
+      "inventoryVariationsDetail": "Inventory Variations Table Detail"
+    },
+    "toast": {
+      "runError": "An error occurred while running the balance",
+      "importError": "An error occurred while importing the file"
+    }
   }
 }

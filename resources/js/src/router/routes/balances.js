@@ -5,9 +5,9 @@ export default [
       component: () => import('@/views/balances/Balances.vue'),
     },
     {
-        path: '/balances/FormWizardNumber',
-        name: 'balances-FormWizardNumber',
-        component: () => import('@/views/balances/FormWizardNumber.vue'),
+        path: '/balances/BalanceFormWizard',
+        name: 'balances-BalanceFormWizard',
+        component: () => import('@/views/balances/BalanceFormWizard.vue'),
     },
     {
         path: '/balances/Listado',

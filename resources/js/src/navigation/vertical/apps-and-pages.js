@@ -14,7 +14,7 @@ export default [
 //   },
 //   {
 //     title: 'Wizard',
-//     route: 'balances-FormWizardNumber',
+//     route: 'balances-BalanceFormWizard',
 //     icon: 'CheckSquareIcon',
 //   },
   {
@@ -23,7 +23,7 @@ export default [
     children: [
       {
         title: 'Generar Balance',
-        route: 'balances-FormWizardNumber',
+        route: 'balances-BalanceFormWizard',
         icon: 'CheckSquareIcon',
       },
       {
