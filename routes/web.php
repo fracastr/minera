@@ -29,5 +29,15 @@ Route::get('balances/getExcel/{datos_entrada_id}/{proceso_id}', [UtilsController
 Route::get('test', function() {
     Storage::disk('google')->put('test.txt', 'Hello World');
 });
+
+// Password Reset Routes
+Route::get('reset-password/{token}', function ($token) {
+    return view('application');
+})->name('password.reset');
+
+Route::get('forgot-password', function () {
+    return view('application');
+})->name('password.request');
+
 Route::get('/{any}', [ApplicationController::class, 'index'])->where('any', '.*');
 

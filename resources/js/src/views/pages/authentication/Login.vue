@@ -123,8 +123,8 @@
                 </validation-provider>
               </b-form-group>
 
-              <!-- checkbox -->
-              <b-form-group>
+              <!-- forgot password link -->
+              <div class="d-flex justify-content-between align-items-center mb-2">
                 <b-form-checkbox
                   id="remember-me"
                   v-model="status"
@@ -132,7 +132,13 @@
                 >
                   Recuerdame
                 </b-form-checkbox>
-              </b-form-group>
+                <b-link
+                  class="text-white"
+                  @click="$router.push('/forgot-password')"
+                >
+                  ¿Olvidaste tu contraseña?
+                </b-link>
+              </div>
 
               <!-- submit buttons -->
               <b-button
