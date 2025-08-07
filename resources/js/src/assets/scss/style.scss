@@ -4,3 +4,138 @@ NOTE:
 ------
 PLACE HERE YOUR OWN SCSS CODES AND IF NEEDED, OVERRIDE THE STYLES FROM THE OTHER STYLESHEETS.
 WE WILL RELEASE FUTURE UPDATES SO IN ORDER TO NOT OVERWRITE YOUR STYLES IT'S BETTER LIKE THIS.  */
+
+// ==========================================
+// GLOBAL SCROLL FIX - Override theme restrictions
+// ==========================================
+
+// Force vertical scrolling on all elements
+html, body {
+  overflow-y: auto !important;
+  height: auto !important;
+  min-height: 100vh !important;
+}
+
+// Override all theme overflow restrictions
+.app-content {
+  overflow: visible !important;
+
+  .content-area-wrapper {
+    overflow: visible !important;
+    height: auto !important;
+    min-height: auto !important;
+  }
+
+  .content-wrapper {
+    overflow: visible !important;
+    height: auto !important;
+    min-height: auto !important;
+  }
+
+  .content-body {
+    overflow: visible !important;
+    height: auto !important;
+    min-height: auto !important;
+  }
+}
+
+// Fix for all layout types
+.vertical-layout,
+.horizontal-layout,
+.layout-vertical,
+.layout-horizontal {
+  overflow: visible !important;
+
+  .app-content {
+    overflow: visible !important;
+  }
+}
+
+// Override center layout overflow hidden
+.app-content.center-layout {
+  overflow: visible !important;
+}
+
+// Ensure all containers allow scrolling
+.card,
+.container,
+.container-fluid,
+.b-container {
+  overflow: visible !important;
+}
+
+// Fix for vue-good-table
+.vgt-table,
+.vue-good-table {
+  overflow: visible !important;
+}
+
+// Override blank page restrictions
+.blank-page .content.app-content {
+  overflow: visible !important;
+}
+
+// Force scrollbar to always be available
+body {
+  overflow-y: scroll !important;
+}
+
+// Fix for any fixed height containers
+.content-area-wrapper,
+.content-wrapper,
+.content-body,
+.app-content {
+  height: auto !important;
+  min-height: auto !important;
+  max-height: none !important;
+}
+
+// Ensure the main app container allows scrolling
+#app {
+  overflow: visible !important;
+  height: auto !important;
+}
+
+// Fix for any Bootstrap containers
+.row, .col, .col-* {
+  overflow: visible !important;
+}
+
+// Override any theme height restrictions
+.vertical-layout,
+.horizontal-layout {
+  height: auto !important;
+  min-height: 100vh !important;
+}
+
+// Specific fix for the problematic line in _content.scss
+.content .app-content .content-area-wrapper {
+  overflow: visible !important;
+  height: auto !important;
+  min-height: auto !important;
+}
+
+// Override any overflow hidden from the theme
+* {
+  &.overflow-hidden {
+    overflow: visible !important;
+  }
+}
+
+// Force scroll on specific problematic selectors
+.content,
+.content.app-content,
+.content .app-content {
+  overflow: visible !important;
+}
+
+// Additional fixes for layout containers
+.layout-vertical,
+.layout-horizontal,
+.vertical-layout,
+.horizontal-layout {
+  .content,
+  .app-content {
+    overflow: visible !important;
+  }
+}

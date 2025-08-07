@@ -46,9 +46,69 @@ require('@/assets/scss/style.scss')
 
 Vue.config.productionTip = false
 
-new Vue({
+// Function to fix vertical scrolling
+function fixVerticalScroll() {
+  // Force body to allow vertical scrolling
+  document.body.style.overflowY = 'auto'
+  document.body.style.height = 'auto'
+  document.body.style.minHeight = '100vh'
+
+  // Fix app content containers
+  const appContent = document.querySelector('.app-content')
+  if (appContent) {
+    appContent.style.overflow = 'visible'
+
+    const contentAreaWrapper = appContent.querySelector('.content-area-wrapper')
+    if (contentAreaWrapper) {
+      contentAreaWrapper.style.overflow = 'visible'
+      contentAreaWrapper.style.height = 'auto'
+    }
+
+    const contentWrapper = appContent.querySelector('.content-wrapper')
+    if (contentWrapper) {
+      contentWrapper.style.overflow = 'visible'
+      contentWrapper.style.height = 'auto'
+    }
+
+    const contentBody = appContent.querySelector('.content-body')
+    if (contentBody) {
+      contentBody.style.overflow = 'visible'
+      contentBody.style.height = 'auto'
+    }
+  }
+
+  // Fix layout containers
+  const layouts = document.querySelectorAll('.vertical-layout, .horizontal-layout')
+  layouts.forEach(layout => {
+    layout.style.overflow = 'visible'
+  })
+
+  // Force scrollbar to be visible
+  document.documentElement.style.overflowY = 'scroll'
+}
+
+const app = new Vue({
   router,
   store,
   i18n,
   render: h => h(App),
+  mounted() {
+    // Apply scroll fix after app is mounted
+    this.$nextTick(() => {
+      fixVerticalScroll()
+
+      // Watch for route changes to reapply scroll fix
+      this.$watch('$route', () => {
+        this.$nextTick(() => {
+          fixVerticalScroll()
+        })
+      })
+    })
+  }
 }).$mount('#app')
+
+// Also apply scroll fix on window load
+window.addEventListener('load', fixVerticalScroll)
+
+// Apply scroll fix periodically to ensure it stays
+setInterval(fixVerticalScroll, 1000)
