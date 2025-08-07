@@ -53,6 +53,3 @@ export const heightTransition = {
     },
   },
 }
-
-// Ignore below for now. We will remove it when we add more transition in future.
-export const _ = null

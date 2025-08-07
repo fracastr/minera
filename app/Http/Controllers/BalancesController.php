@@ -2,19 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Imports\BalancesImport;
 use App\Models\Balances;
 use App\Models\Datos_entrada;
 use App\Models\Procesos;
-use Google_Client;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
-use Maatwebsite\Excel\Facades\Excel;
-use GuzzleHttp\Client;
-use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
-use stdClass;
 
 class BalancesController extends Controller
 {
@@ -595,7 +587,7 @@ class BalancesController extends Controller
                 $value = json_decode($value, true);
             }
             unset($value);
-       
+
 
             $yellow = array();
             $green = array();
