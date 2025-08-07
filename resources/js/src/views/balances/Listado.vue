@@ -1,4 +1,5 @@
 <template>
+    <b-card-code title="Listado de balances">
   <div>
     <b-container>
       <b-row cols="12">
@@ -6,19 +7,25 @@
           md="12"
           sm="12"
         >
-          <link
-            href="https://fonts.googleapis.com/css?family=Roboto"
-            rel="stylesheet">
-          <ag-grid-vue
-            id="tlistado"
-            style="width: auto; height: 500px;"
-            class="ag-theme-alpine"
-            :column-defs="listado_fields"
-            :row-data="listado_data" />
+          <vue-good-table
+            :columns="listado_fields"
+            :rows="listado_data"
+            :search-options="{
+              enabled: true,
+              placeholder: 'Buscar...'
+            }"
+            :pagination-options="{
+              enabled: true,
+              perPage: 10
+            }"
+            theme="default"
+            styleClass="vgt-table"
+          />
         </b-col>
       </b-row>
     </b-container>
   </div>
+  </b-card-code>
 </template>
 
 <script>
@@ -27,16 +34,15 @@ import {
   BCol,
 } from 'bootstrap-vue'
 import axios from 'axios'
-import { AgGridVue } from 'ag-grid-vue'
-
-import AccionValueRenderer from './accionRendererVue2.vue'
+import { VueGoodTable } from 'vue-good-table'
+import BCardCode from '@core/components/b-card-code/BCardCode.vue'
 
 export default {
   components: {
     BRow,
     BCol,
-    AgGridVue,
-    accionRenderer: AccionValueRenderer,
+    VueGoodTable,
+    BCardCode,
   },
   data() {
     return {
@@ -58,10 +64,24 @@ export default {
   },
   beforeMount() {
     this.listado_fields = [
-      { headerName: 'Nombre', field: 'nombre' },
-      { headerName: 'Tipo', field: 'tipo' },
-      { headerName: 'Fecha', field: 'created_at' },
-      { field: 'accion', cellRenderer: 'accionRenderer' },
+      {
+        label: 'Nombre',
+        field: 'nombre',
+        sortable: true,
+        tdClass: 'text-left',
+      },
+      {
+        label: 'Tipo',
+        field: 'tipo',
+        sortable: true,
+        tdClass: 'text-left',
+      },
+      {
+        label: 'Fecha',
+        field: 'created_at',
+        sortable: true,
+        tdClass: 'text-left',
+      },
     ]
 
     this.rowData = [
@@ -76,6 +96,37 @@ export default {
 </script>
 
 <style lang="scss">
-  @import "~ag-grid-community/styles/ag-grid.css";
-  @import "~ag-grid-community/styles/ag-theme-alpine.css";
+  @import '~@core/scss/vue/libs/vue-good-table.scss';
+
+  // Fix for vertical scrolling issue
+  html, body {
+    overflow-y: auto !important;
+    height: auto !important;
+  }
+
+  .app-content {
+    overflow: visible !important;
+
+    .content-area-wrapper {
+      overflow: visible !important;
+    }
+
+    .content-wrapper {
+      overflow: visible !important;
+    }
+
+    .content-body {
+      overflow: visible !important;
+    }
+  }
+
+  // Ensure the card allows scrolling
+  .card {
+    overflow: visible !important;
+  }
+
+  // Fix for vue-good-table container
+  .vgt-table {
+    overflow: visible !important;
+  }
 </style>
