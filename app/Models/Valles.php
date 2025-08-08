@@ -13,4 +13,9 @@ class Valles extends Model
         'nombre',
         'tipo'
     ];
+
+    public function procesos()
+    {
+        return $this->hasMany(Procesos::class, 'valle_id');
+    }
 }

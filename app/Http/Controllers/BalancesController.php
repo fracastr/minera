@@ -385,10 +385,9 @@ class BalancesController extends Controller
 
     public function get_listado()
     {
-        $listado = Balances::all();
+        $listado = Balances::with(['user', 'proceso.valle'])->get();
 
-        return ['listado' => $listado];
-
+        return response()->json(['listado' => $listado]);
     }
 
     public function correr_balance(Request $request)

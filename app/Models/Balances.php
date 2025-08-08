@@ -9,5 +9,15 @@ class Balances extends Model
 {
     use HasFactory;
 
-    public $fillable = ['nombre', 'tipo'];
+    public $fillable = ['nombre', 'tipo', 'proceso_id', 'user_id'];
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    public function proceso()
+    {
+        return $this->belongsTo(Procesos::class);
+    }
 }

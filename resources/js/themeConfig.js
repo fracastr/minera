@@ -21,17 +21,17 @@ export const $themeConfig = {
     contentWidth: 'full', // full, boxed
     menu: {
       hidden: false,
-      isCollapsed: false
+      isCollapsed: false,
     },
     navbar: {
       // ? For horizontal menu, navbar type will work for navMenu type
       type: 'floating', // static , sticky , floating, hidden
-      backgroundColor: '' // BS color options [primary, success, etc]
+      backgroundColor: '', // BS color options [primary, success, etc]
     },
     footer: {
-      type: 'static' // static, sticky, hidden
+      type: 'static', // static, sticky, hidden
     },
     customizer: false, // Cambia a false para desactivar
-    enableScrollToTop: true
-  }
+    enableScrollToTop: false,
+  },
 }
