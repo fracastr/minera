@@ -1,96 +1,159 @@
 <template>
-    <b-card-code title="Listado de balances">
-  <div>
-    <b-container>
-      <b-row cols="12">
-        <b-col
-          md="12"
-          sm="12"
-        >
-          <vue-good-table
-            :columns="listado_fields"
-            :rows="listado_data"
-            :search-options="{
-              enabled: true,
-              placeholder: 'Buscar...'
-            }"
-            :pagination-options="{
-              enabled: true,
-              perPage: 10
-            }"
-            theme="default"
-            styleClass="vgt-table"
-          />
-        </b-col>
-      </b-row>
-    </b-container>
-  </div>
-  </b-card-code>
+  <b-card title="Listado de balances">
+    <div>
+      <b-container>
+        <b-row cols="12">
+          <b-col
+            md="12"
+            sm="12"
+          >
+            <vue-good-table
+              :columns="listado_fields"
+              :rows="listado_data"
+              :search-options="{
+                enabled: true,
+                placeholder: 'Buscar...',
+                searchFn: customSearchFn
+              }"
+              :pagination-options="{
+                enabled: true,
+                perPage: 10,
+                perPageDropdown: [5, 10, 20, 50]
+              }"
+              :theme="currentTheme"
+              styleClass="vgt-table striped"
+            />
+          </b-col>
+        </b-row>
+      </b-container>
+    </div>
+  </b-card>
 </template>
 
 <script>
 import {
   BRow,
   BCol,
+  BCard,
+  BContainer,
 } from 'bootstrap-vue'
 import axios from 'axios'
 import { VueGoodTable } from 'vue-good-table'
-import BCardCode from '@core/components/b-card-code/BCardCode.vue'
+import useAppConfig from '@core/app-config/useAppConfig'
 
 export default {
   components: {
     BRow,
     BCol,
     VueGoodTable,
-    BCardCode,
+    BCard,
+    BContainer,
   },
   data() {
     return {
-      listado_fields: [],
+      listado_fields: [
+        {
+          label: 'Nombre',
+          field: 'nombre',
+          sortable: true,
+          tdClass: 'text-left',
+        },
+        {
+          label: 'Tipo',
+          field: 'tipo',
+          sortable: true,
+          tdClass: 'text-left',
+        },
+        {
+          label: 'Proceso',
+          field: this.getProcesoNombre,
+          sortable: true,
+          tdClass: 'text-left',
+        },
+        {
+          label: 'Valle',
+          field: this.getValleNombre,
+          sortable: true,
+          tdClass: 'text-left',
+        },
+        {
+          label: 'Usuario',
+          field: this.getUserName,
+          sortable: true,
+          tdClass: 'text-left',
+        },
+        {
+          label: 'Fecha Creación',
+          field: 'created_at',
+          sortable: true,
+          tdClass: 'text-left',
+          formatFn: this.formatDate,
+        },
+      ],
       listado_data: [],
+      loading: false,
     }
   },
-  mounted() {
-    axios
-      .get('get_listado')
-      .then(response => {
-        this.listado_data = response.data.listado
-      })
-      .catch(e => {
-        console.log('FAILURE!!', e)
-      }).finally(() => {
-
-      })
+  computed: {
+    currentTheme() {
+      const { skin } = useAppConfig()
+      return skin.value === 'dark' ? 'nocturnal' : 'polar-bear'
+    },
   },
-  beforeMount() {
-    this.listado_fields = [
-      {
-        label: 'Nombre',
-        field: 'nombre',
-        sortable: true,
-        tdClass: 'text-left',
-      },
-      {
-        label: 'Tipo',
-        field: 'tipo',
-        sortable: true,
-        tdClass: 'text-left',
-      },
-      {
-        label: 'Fecha',
-        field: 'created_at',
-        sortable: true,
-        tdClass: 'text-left',
-      },
-    ]
-
-    this.rowData = [
-      { make: 'Toyota', model: 'Celica', price: 35000 },
-      { make: 'Ford', model: 'Mondeo', price: 32000 },
-      { make: 'Porsche', model: 'Boxter', price: 72000 },
-    ]
+  mounted() {
+    this.loadData()
   },
   methods: {
+    loadData() {
+      this.loading = true
+      axios
+        .get('/balances/get_listado')
+        .then(response => {
+          if (response.data && response.data.listado) {
+            this.listado_data = response.data.listado
+          } else {
+            console.warn('No se encontraron datos en la respuesta')
+            this.listado_data = []
+          }
+        })
+        .catch(error => {
+          console.error('Error al cargar los datos:', error)
+          this.listado_data = []
+          // Mostrar mensaje de error al usuario si es necesario
+        })
+        .finally(() => {
+          this.loading = false
+        })
+    },
+    customSearchFn(query, row) {
+      if (!query) return true
+
+      const searchTerm = query.toLowerCase()
+      return (
+        (row.nombre && row.nombre.toLowerCase().includes(searchTerm))
+        || (row.tipo && row.tipo.toLowerCase().includes(searchTerm))
+        || (row.created_at && row.created_at.toLowerCase().includes(searchTerm))
+      )
+    },
+    formatDate(value) {
+      if (!value) return 'N/A'
+      return new Date(value).toLocaleDateString('es-ES', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+      })
+    },
+    getProcesoNombre(row) {
+      return row.proceso && row.proceso.nombre ? row.proceso.nombre : 'N/A'
+    },
+    getValleNombre(row) {
+      return row.proceso && row.proceso.valle && row.proceso.valle.nombre ? row.proceso.valle.nombre : 'N/A'
+    },
+    getUserName(row) {
+      return row.user && row.user.nombre ? row.user.nombre : 'N/A'
+    },
   },
 }
 </script>
@@ -98,7 +161,6 @@ export default {
 <style lang="scss">
   @import '~@core/scss/vue/libs/vue-good-table.scss';
 
-  // Fix for vertical scrolling issue
   html, body {
     overflow-y: auto !important;
     height: auto !important;
@@ -125,7 +187,6 @@ export default {
     overflow: visible !important;
   }
 
-  // Fix for vue-good-table container
   .vgt-table {
     overflow: visible !important;
   }
