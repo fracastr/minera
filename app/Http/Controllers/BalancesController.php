@@ -612,7 +612,7 @@ class BalancesController extends Controller
         $balance->nombre = $request->nombre_balance;
         $balance->tipo = "quincenal";
         $balance->proceso_id = $request->proceso_id;
-        $balance->user_id = 1;
+        $balance->user_id = auth()->user()->id;
         $balance->save();
 
         $datos_entrada = Datos_entrada::find($request->datos_entrada_id);
