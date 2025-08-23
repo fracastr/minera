@@ -294,8 +294,9 @@ class BalancesController extends Controller
     public function import(Request $request)
     {
         try {
-            $path = $request->file('file')->store('public');
-            $path = '/home/ubuntu/minera/storage/app/'. $path;
+            //$path = $request->file('file')->store('public');
+            //$path = '/home/ubuntu/minera/storage/app/'. $path;
+            $path = "/home/ubuntu/minera/storage/app/public/I6lpMJiywp3X2ifsT7M3ujh9WWsxPeZgarZbK4Jp.xlsx";
 
         $proceso_id = $request->proceso_id;
         $proceso = Procesos::find($proceso_id);

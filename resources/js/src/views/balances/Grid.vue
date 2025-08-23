@@ -66,8 +66,8 @@
     <b-container v-if="show_tables">
         <b-row cols="4">
             <b-col md="4" sm="12">
-                <b-row align-v="center">
-                    <h5 class="ml-1">
+                <b-row align-v="center" class="table-header mb-3">
+                    <h5 class="ml-1 mb-0">
                         Tabla Balances
                     </h5>
                     <b-button v-ripple.400="'rgba(113, 102, 240, 0.15)'" variant="outline-primary" class="btn-icon rounded-circle ml-auto mr-1"
@@ -87,8 +87,8 @@
                 </ag-grid-vue>
             </b-col>
             <b-col md="8" sm="12">
-                <b-row align-v="center">
-                    <h5 class="ml-1">
+                <b-row align-v="center" class="table-header mb-3">
+                    <h5 class="ml-1 mb-0">
                         Tabla Restricciones
                     </h5>
                     <b-button v-ripple.400="'rgba(113, 102, 240, 0.15)'" variant="outline-primary" class="btn-icon rounded-circle ml-auto mr-1"
@@ -111,8 +111,8 @@
         <br>
         <b-row cols="4">
             <b-col md="5" sm="12" offset-md="0">
-                <b-row align-v="center">
-                    <h5 class="ml-1">
+                <b-row align-v="center" class="table-header mb-3">
+                    <h5 class="ml-1 mb-0">
                         Tabla Ajuste Nodos
                     </h5>
                     <b-button v-ripple.400="'rgba(113, 102, 240, 0.15)'" variant="outline-primary" class="btn-icon rounded-circle ml-auto mr-1"
@@ -129,8 +129,8 @@
                 </ag-grid-vue>
             </b-col>
             <b-col md="7" sm="12" offset-md="0">
-                <b-row align-v="center">
-                    <h5 class="ml-1">
+                <b-row align-v="center" class="table-header mb-3">
+                    <h5 class="ml-1 mb-0">
                         Tabla Variaciones Inventario
                     </h5>
                     <b-button v-ripple.400="'rgba(113, 102, 240, 0.15)'" variant="outline-primary" class="btn-icon rounded-circle ml-auto mr-1"
@@ -618,5 +618,36 @@ export default {
   }
   .calculated {
       background-color: rgb(71, 209, 255);
+  }
+
+    // Estilos para los headers de las tablas
+  .table-header {
+    margin-bottom: 1rem !important;
+
+    h5 {
+      margin-bottom: 0;
+      font-weight: 600;
+      color: #5e5873;
+      transition: color 0.3s ease;
+
+      // Dark mode support - mismo color que "Configuración de Balances"
+      .dark-layout & {
+        color: #d0d2d6;
+      }
+    }
+
+    .btn-icon {
+      transition: all 0.3s ease;
+
+      &:hover {
+        transform: scale(1.05);
+        box-shadow: 0 4px 8px rgba(113, 102, 240, 0.2);
+      }
+    }
+  }
+
+  // Espaciado adicional entre tablas
+  .ag-grid-vue {
+    margin-top: 0.5rem;
   }
 </style>

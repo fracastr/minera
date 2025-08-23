@@ -78,8 +78,8 @@
           md="4"
           sm="12"
         >
-          <b-row align-v="center">
-            <h5 class="ml-1">
+          <b-row align-v="center" class="table-header mb-3">
+            <h5 class="ml-1 mb-0">
               {{ $t('balances.tables.balances') }}
             </h5>
             <b-button
@@ -112,8 +112,8 @@
           md="8"
           sm="12"
         >
-          <b-row align-v="center">
-            <h5 class="ml-1">
+          <b-row align-v="center" class="table-header mb-3">
+            <h5 class="ml-1 mb-0">
               {{ $t('balances.tables.restrictions') }}
             </h5>
             <b-button
@@ -149,8 +149,8 @@
           sm="12"
           offset-md="0"
         >
-          <b-row align-v="center">
-            <h5 class="ml-1">
+          <b-row align-v="center" class="table-header mb-3">
+            <h5 class="ml-1 mb-0">
               {{ $t('balances.tables.nodeAdjustment') }}
             </h5>
             <b-button
@@ -181,8 +181,8 @@
           sm="12"
           offset-md="0"
         >
-          <b-row align-v="center">
-            <h5 class="ml-1">
+          <b-row align-v="center" class="table-header mb-3">
+            <h5 class="ml-1 mb-0">
               {{ $t('balances.tables.inventoryVariations') }}
             </h5>
             <b-button
@@ -195,7 +195,7 @@
             </b-button>
           </b-row>
           <link
-            href="https://fonts.googleapis.com/css?family=Roboto"
+            href="https://fonts.googleapis.com/css?style=Roboto"
             rel="stylesheet"
           >
           <ag-grid-vue
@@ -713,4 +713,35 @@ export default {
   --ag-grid-size: 3px;
   --ag-list-item-height: 20px;
 }
+
+    // Estilos para los headers de las tablas
+  .table-header {
+    margin-bottom: 1rem !important;
+
+    h5 {
+      margin-bottom: 0;
+      font-weight: 600;
+      color: #5e5873;
+      transition: color 0.3s ease;
+
+      // Dark mode support - mismo color que "Configuración de Balances"
+      .dark-layout & {
+        color: #d0d2d6;
+      }
+    }
+
+    .btn-icon {
+      transition: all 0.3s ease;
+
+      &:hover {
+        transform: scale(1.05);
+        box-shadow: 0 4px 8px rgba(113, 102, 240, 0.2);
+      }
+    }
+  }
+
+  // Espaciado adicional entre tablas
+  .ag-grid-vue {
+    margin-top: 0.5rem;
+  }
 </style>

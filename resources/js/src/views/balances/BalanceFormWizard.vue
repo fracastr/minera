@@ -142,6 +142,7 @@
                     <b-form-select
                       v-model="proceso"
                       :options="procesos"
+                      placeholder="Seleccione un proceso"
                       class="form-select-enhanced"
                       :class="{ 'is-invalid': errors.length > 0 }"
                     />
@@ -243,15 +244,16 @@
 @import '~@core/scss/vue/libs/vue-select.scss';
 
 .balance-form-container {
-  max-width: 1200px;
-  margin: 0 auto;
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
   padding: 2rem;
-  background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+  background: #ffffff;
   transition: all 0.3s ease;
 
   // Dark mode support
   .dark-layout & {
-    background: linear-gradient(135deg, #161d31 0%, #283046 100%);
+    background: #283046;
     color: #b4b7bd;
   }
 
@@ -1172,9 +1174,9 @@ export default {
       required,
       email,
       valle: '',
-      proceso: 0,
+      proceso: '',
       valles: [],
-      procesos: [],
+      procesos: [{ value: '', text: 'Seleccione un proceso' }],
       loading: false,
       new_balance: false,
       balance_id: null,
@@ -1275,6 +1277,7 @@ export default {
     },
     valles_change(value) {
       this.show_tables = false
+      this.proceso = '' // Reset proceso selection
       console.log('cambio en valles', value, this.valle)
       this.loading = true
       this.$http
