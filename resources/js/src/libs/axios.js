@@ -6,7 +6,7 @@ import router from '@/router'
 const axiosIns = axios.create({
   // Configuración base
   baseURL: process.env.NODE_ENV === 'production'
-    ? 'http://34.229.82.49:80/'
+    ? 'https://www.sondek.cl/'
     : 'http://localhost:8000/',
   withCredentials: true,
   headers: {
