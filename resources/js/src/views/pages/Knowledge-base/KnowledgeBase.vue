@@ -116,7 +116,7 @@ export default {
     },
   },
   created() {
-    this.$http.get('/kb/data/knowledge_base').then(res => {
+    this.$http.get('/api/kb/data/knowledge_base').then(res => {
       this.kb = res.data
     })
   },

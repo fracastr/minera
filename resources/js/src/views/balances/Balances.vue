@@ -399,7 +399,7 @@ export default {
     exportar_excel() {
       this.isLoading = true
       axios
-        .get(`getExcel/${this.datos_entrada_id}/${this.proceso}`)
+        .get(`/api/balances/getExcel/${this.datos_entrada_id}/${this.proceso}`)
         .then(response => {
           this.isLoading = false
           console.log('response excel', response)
@@ -511,8 +511,8 @@ export default {
       console.log('se ha hecho click en una fila')
       console.log(event)
       // llamado al endpoint
-      axios
-        .post('paint_tables', {
+      this.$http
+        .post('/api/balances/paint_tables', {
           datos_entrada_id: this.datos_entrada_id,
           rowIndex: event.rowIndex,
         }, {
@@ -544,8 +544,8 @@ export default {
       this.isLoading = true
       event.preventDefault()
       console.log(this.datos_entrada)
-      axios
-        .post('correr_balance', {
+      this.$http
+        .post('/api/balances/correr_balance', {
           datos_entrada: this.datos_entrada,
           datos_entrada_id: this.datos_entrada_id,
           balances_table: this.balances_table,
@@ -619,8 +619,8 @@ export default {
       formData.append('file', this.file_1)
       formData.append('proceso_id', this.proceso)
 
-      axios
-        .post('import', formData, {
+      this.$http
+        .post('/api/balances/import', formData, {
           headers: {
             'Content-Type': 'multipart/form-data',
           },

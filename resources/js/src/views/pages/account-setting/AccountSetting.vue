@@ -127,7 +127,7 @@ export default {
     }
   },
   beforeCreate() {
-    this.$http.get('/account-setting/data').then(res => { this.options = res.data })
+            this.$http.get('/api/account-setting/data').then(res => { this.options = res.data })
   },
 }
 </script>

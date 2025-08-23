@@ -85,8 +85,8 @@ export default {
 
       clearTimeout(this.timeout)
       this.timeout = setTimeout(() => {
-        const photosPromise = axios.get(this.photosUrl)
-        const usersPromise = axios.get(this.usersUrl)
+        const photosPromise = this.$http.get(this.photosUrl)
+        const usersPromise = this.$http.get(this.usersUrl)
 
         Promise.all([photosPromise, usersPromise]).then(values => {
           this.suggestions = []

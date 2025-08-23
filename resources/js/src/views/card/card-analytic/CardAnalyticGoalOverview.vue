@@ -133,7 +133,7 @@ export default {
     }
   },
   created() {
-    this.$http.get('/card/card-analytics/goal-overview').then(res => { this.goal_overview = res.data })
+            this.$http.get('/api/card/card-analytics/goal-overview').then(res => { this.goal_overview = res.data })
   },
 }
 </script>

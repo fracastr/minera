@@ -100,7 +100,7 @@ export default {
     }
   },
   created() {
-    this.$http.get('/card/card-analytics/sessions-device').then(res => { this.chartData = res.data })
+            this.$http.get('/api/card/card-analytics/sessions-device').then(res => { this.chartData = res.data })
   },
 }
 </script>

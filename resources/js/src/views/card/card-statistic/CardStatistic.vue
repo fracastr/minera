@@ -283,31 +283,31 @@ export default {
   },
   created() {
     // Subscribers gained
-    this.$http.get('/card/card-statistics/subscribers')
+            this.$http.get('/api/card/card-statistics/subscribers')
       .then(response => { this.subscribersGained = response.data })
 
     // Revenue Generated
-    this.$http.get('/card/card-statistics/revenue')
+            this.$http.get('/api/card/card-statistics/revenue')
       .then(response => { this.revenueGenerated = response.data })
 
     // Sales
-    this.$http.get('/card/card-statistics/sales')
+            this.$http.get('/api/card/card-statistics/sales')
       .then(response => { this.quarterlySales = response.data })
 
     // Orders
-    this.$http.get('/card/card-statistics/orders')
+            this.$http.get('/api/card/card-statistics/orders')
       .then(response => { this.ordersRecevied = response.data })
 
     // Site Traffic gained
-    this.$http.get('/card/card-statistics/site-traffic')
+            this.$http.get('/api/card/card-statistics/site-traffic')
       .then(response => { this.siteTraffic = response.data })
 
     // Active Users
-    this.$http.get('/card/card-statistics/active-users')
+            this.$http.get('/api/card/card-statistics/active-users')
       .then(response => { this.activeUsers = response.data })
 
     // Newsletter
-    this.$http.get('/card/card-statistics/newsletter')
+            this.$http.get('/api/card/card-statistics/newsletter')
       .then(response => { this.newsletter = response.data })
   },
   methods: {

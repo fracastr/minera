@@ -92,7 +92,7 @@ export default {
     }
   },
   created() {
-    this.$http.get('/profile/data').then(res => {
+    this.$http.get('/api/profile/data').then(res => {
       this.profileData = res.data
     })
   },

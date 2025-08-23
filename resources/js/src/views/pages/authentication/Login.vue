@@ -248,8 +248,8 @@ export default {
   methods: {
     login() {
         this.isLoading = true;
-        axios.get('/sanctum/csrf-cookie').then(response => {
-        axios.post('/api/auth/login', {
+        this.$http.get('/sanctum/csrf-cookie').then(response => {
+        this.$http.post('/api/auth/login', {
               email: this.userEmail,
               password: this.password,
             }).then(response => {

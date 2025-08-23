@@ -130,7 +130,7 @@ export default {
   created() {
     // ! You have to update the below API call according to route parameter
     // * We are using fixed API call for all categories for demo purposes
-    this.$http.get('/kb/data/category').then(res => {
+    this.$http.get('/api/kb/data/category').then(res => {
       this.kb = res.data
     })
   },

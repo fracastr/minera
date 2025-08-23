@@ -96,7 +96,7 @@ export default {
   },
   created() {
     // data
-    this.$http.get('/analytics/data')
+    this.$http.get('/api/analytics/data')
       .then(response => { this.data = response.data })
   },
   methods: {

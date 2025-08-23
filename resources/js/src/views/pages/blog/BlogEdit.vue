@@ -217,7 +217,7 @@ export default {
     }
   },
   created() {
-    this.$http.get('/blog/list/data/edit').then(res => {
+    this.$http.get('/api/blog/list/data/edit').then(res => {
       this.blogEdit = res.data
     })
   },

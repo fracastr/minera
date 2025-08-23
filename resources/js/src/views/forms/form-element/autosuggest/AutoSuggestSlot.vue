@@ -55,7 +55,7 @@ export default {
     }
   },
   created() {
-    this.$http.get('/autosuggest/data')
+            this.$http.get('/api/autosuggest/data')
       .then(res => { this.datasuggest = res })
   },
   methods: {

@@ -97,7 +97,7 @@ export default {
     }
   },
   created() {
-    this.$http.get('/card/card-analytics/customers').then(res => { this.chartData = res.data })
+            this.$http.get('/api/card/card-analytics/customers').then(res => { this.chartData = res.data })
   },
 }
 </script>

@@ -329,7 +329,7 @@ export default {
     }
   },
   created() {
-    this.$http.get('/pricing/data').then(res => {
+            this.$http.get('/api/pricing/data').then(res => {
       this.pricing = res.data
     })
   },

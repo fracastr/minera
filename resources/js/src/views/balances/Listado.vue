@@ -106,8 +106,8 @@ export default {
   methods: {
     loadData() {
       this.loading = true
-      axios
-        .get('/balances/get_listado')
+      this.$http
+        .get('/api/balances/get_listado')
         .then(response => {
           if (response.data && response.data.listado) {
             this.listado_data = response.data.listado

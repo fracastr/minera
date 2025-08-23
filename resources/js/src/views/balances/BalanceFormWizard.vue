@@ -1185,8 +1185,8 @@ export default {
     console.log('mounted')
     console.log(this.valles)
     this.loading = true
-    axios
-      .get('getValles/1')
+    this.$http
+              .get('/api/balances/getValles/1')
       .then(response => {
         console.log('response', response)
         // Agregar opción placeholder al inicio
@@ -1226,8 +1226,8 @@ export default {
         return
       }
       console.log('aqui se sube le nombre del balance', this.$refs.balances_ref.datos_entrada)
-      axios
-        .post('save_balance', {
+      this.$http
+        .post('/api/balances/save_balance', {
           datos_entrada: this.$refs.balances_ref.datos_entrada,
           nombre_balance: this.nombre_balance,
           datos_entrada_id: this.$refs.balances_ref.datos_entrada_id,
@@ -1277,8 +1277,8 @@ export default {
       this.show_tables = false
       console.log('cambio en valles', value, this.valle)
       this.loading = true
-      axios
-        .get(`getProcesos/${this.valle}`)
+      this.$http
+        .get(`/api/balances/getProcesos/${this.valle}`)
         .then(response => {
           console.log('response', response)
           // Agregar opción placeholder al inicio

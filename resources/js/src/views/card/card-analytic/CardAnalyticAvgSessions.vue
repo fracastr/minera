@@ -203,7 +203,7 @@ export default {
     }
   },
   created() {
-    this.$http.get('/card/card-analytics/avg-sessions').then(res => { this.avgData = res.data })
+            this.$http.get('/api/card/card-analytics/avg-sessions').then(res => { this.avgData = res.data })
   },
   methods: {
     kFormatter,

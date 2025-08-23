@@ -112,7 +112,7 @@ class UtilsController extends Controller
             $proceso = Procesos::find($proceso_id);
             $proceso = json_decode($proceso->componentes);
             $componentes = $proceso->data;
-            $url = env('APP_URL') . '/flaskapi/get_excel';
+            $url = env('FLASK_API_URL') . '/get_excel';
             $response = Http::acceptJson()->post($url, [
                 'datos_entrada_id' => $datos_entrada_id,
                 'componentes' => $componentes

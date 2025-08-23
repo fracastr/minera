@@ -253,7 +253,7 @@ export default {
     },
   },
   created() {
-    this.$http.get('/good-table/basic')
+            this.$http.get('/api/good-table/basic')
       .then(res => { this.rows = res.data })
   },
 }

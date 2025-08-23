@@ -275,10 +275,10 @@ export default {
     }
   },
   created() {
-    this.$http.get('/blog/list/data').then(res => {
+    this.$http.get('/api/blog/list/data').then(res => {
       this.blogList = res.data
     })
-    this.$http.get('/blog/list/data/sidebar').then(res => {
+    this.$http.get('/api/blog/list/data/sidebar').then(res => {
       this.blogSidebar = res.data
     })
   },

@@ -241,7 +241,7 @@ export default {
     },
   },
   created() {
-    this.$http.get('/good-table/row-group')
+            this.$http.get('/api/good-table/row-group')
       .then(res => { this.rows = res.data })
   },
 }

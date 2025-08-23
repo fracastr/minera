@@ -182,7 +182,7 @@ export default {
   },
   methods: {
     fetchData() {
-      this.$http.get('/faq/data', { params: { q: this.faqSearchQuery } }).then(res => {
+              this.$http.get('/api/faq/data', { params: { q: this.faqSearchQuery } }).then(res => {
         this.faqData = res.data
       })
     },

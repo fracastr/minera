@@ -152,7 +152,7 @@ export default {
     }
   },
   created() {
-    this.$http.get('/card/card-analytics/support-tracker').then(res => { this.trackerData = res.data })
+            this.$http.get('/api/card/card-analytics/support-tracker').then(res => { this.trackerData = res.data })
   },
 }
 </script>

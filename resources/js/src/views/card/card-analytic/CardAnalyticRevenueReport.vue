@@ -200,7 +200,7 @@ export default {
     }
   },
   created() {
-    this.$http.get('/card/card-analytics/revenue-report').then(res => { this.revenue_report = res.data })
+            this.$http.get('/api/card/card-analytics/revenue-report').then(res => { this.revenue_report = res.data })
   },
 }
 </script>

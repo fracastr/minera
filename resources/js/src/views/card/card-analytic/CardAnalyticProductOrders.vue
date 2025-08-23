@@ -127,7 +127,7 @@ export default {
     }
   },
   created() {
-    this.$http.get('/card/card-analytics/product-orders').then(res => { this.chartInfo = res.data })
+            this.$http.get('/api/card/card-analytics/product-orders').then(res => { this.chartInfo = res.data })
   },
 }
 </script>

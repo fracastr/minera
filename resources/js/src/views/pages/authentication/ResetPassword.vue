@@ -303,8 +303,8 @@ export default {
     resetPassword() {
       this.isLoading = true;
 
-      axios.get('/sanctum/csrf-cookie').then(response => {
-        axios.post('/api/auth/reset-password', {
+              this.$http.get('/sanctum/csrf-cookie').then(response => {
+        this.$http.post('/api/auth/reset-password', {
           email: this.userEmail,
           password: this.password,
           password_confirmation: this.passwordConfirmation,

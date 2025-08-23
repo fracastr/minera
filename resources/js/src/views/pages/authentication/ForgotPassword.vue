@@ -197,8 +197,8 @@ export default {
     sendResetLink() {
       this.isLoading = true;
 
-      axios.get('/sanctum/csrf-cookie').then(response => {
-        axios.post('/api/auth/forgot-password', {
+              this.$http.get('/sanctum/csrf-cookie').then(response => {
+        this.$http.post('/api/auth/forgot-password', {
           email: this.userEmail,
         }).then(response => {
           this.$toast({
