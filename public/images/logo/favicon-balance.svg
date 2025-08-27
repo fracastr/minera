@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <!-- Fondo circular con gradiente -->
+  <defs>
+    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#7367f0;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#5e50ee;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+
+  <!-- Círculo de fondo -->
+  <circle cx="16" cy="16" r="15" fill="url(#bgGradient)" stroke="#ffffff" stroke-width="1"/>
+
+  <!-- Balanza de equilibrio -->
+  <!-- Barra horizontal -->
+  <line x1="8" y1="12" x2="24" y2="12" stroke="#ffffff" stroke-width="2" stroke-linecap="round"/>
+
+  <!-- Soporte central -->
+  <line x1="16" y1="12" x2="16" y2="20" stroke="#ffffff" stroke-width="2" stroke-linecap="round"/>
+
+  <!-- Plato izquierdo -->
+  <ellipse cx="10" cy="16" rx="3" ry="1" fill="none" stroke="#ffffff" stroke-width="1.5"/>
+
+  <!-- Plato derecho -->
+  <ellipse cx="22" cy="16" rx="3" ry="1" fill="none" stroke="#ffffff" stroke-width="1.5"/>
+
+  <!-- Puntos de equilibrio -->
+  <circle cx="10" cy="16" r="1" fill="#ffffff"/>
+  <circle cx="22" cy="16" r="1" fill="#ffffff"/>
+</svg>

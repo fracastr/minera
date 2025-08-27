@@ -4,7 +4,18 @@
 /public/js
 /public/css
 /public/fonts
-/public/images
+
+# Ignorar archivos de imágenes temporales o generados automáticamente
+/public/images/temp
+/public/images/cache
+/public/images/uploads
+/public/images/_/
+/public/images/cmp/
+
+# Permitir favicons y logos importantes
+!/public/images/logo/
+!/public/favicon.ico
+
 /storage/*.key
 /vendor
 .env
