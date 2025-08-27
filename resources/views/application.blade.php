@@ -40,8 +40,24 @@
   <!-- Styles -->
   <link rel="stylesheet" href="{{ asset(mix('css/app.css')) }}">
 
-  <!-- Favicon -->
-  <link rel="shortcut icon" href="{{ asset('images/logo/favicon.png') }}">
+  <!-- Favicon Principal - Gráfico de Análisis Financiero -->
+  <link rel="icon" type="image/svg+xml" href="{{ asset('images/logo/favicon-chart.svg') }}">
+
+  <!-- Favicons alternativos para compatibilidad -->
+  <link rel="icon" type="image/svg+xml" href="{{ asset('images/logo/favicon.svg') }}">
+  <link rel="icon" type="image/svg+xml" href="{{ asset('images/logo/favicon-balance.svg') }}">
+  <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
+
+  <!-- Favicons PNG para compatibilidad con navegadores antiguos -->
+  <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('images/logo/favicon-16x16.png') }}">
+  <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('images/logo/favicon-32x32.png') }}">
+  <link rel="icon" type="image/png" sizes="96x96" href="{{ asset('images/logo/favicon-96x96.png') }}">
+  <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('images/logo/apple-touch-icon.png') }}">
+  <link rel="icon" type="image/png" sizes="192x192" href="{{ asset('images/logo/android-chrome-192x192.png') }}">
+  <link rel="icon" type="image/png" sizes="512x512" href="{{ asset('images/logo/android-chrome-512x512.png') }}">
+
+  <!-- Manifest para PWA -->
+  <link rel="manifest" href="{{ asset('images/logo/site.webmanifest') }}">
 
   <!-- Font -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
