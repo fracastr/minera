@@ -1,15 +1,38 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 
 <head>
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width,initial-scale=1.0">
   <meta name="csrf-token" content="{{ csrf_token() }}">
+
+  <!-- SEO Meta Tags -->
+  <title>Sondek - Sistema de Gestión CMP Balances | Administración Minera</title>
+  <meta name="description" content="Sistema integral de gestión para balances mineros CMP. Administre balances, reportes y análisis financieros de manera eficiente. Plataforma web especializada en minería.">
+  <meta name="keywords" content="sistema minero, balances CMP, gestión minera, reportes financieros, administración minera, Sondek, CMP Balances">
+  <meta name="author" content="Sondek">
+  <meta name="robots" content="index, follow">
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="{{ url()->current() }}">
+  <meta property="og:title" content="Sondek - Sistema de Gestión CMP Balances">
+  <meta property="og:description" content="Sistema integral de gestión para balances mineros CMP. Administre balances, reportes y análisis financieros de manera eficiente.">
+  <meta property="og:image" content="{{ asset('images/logo/logo.png') }}">
+
+  <!-- Twitter -->
+  <meta property="twitter:card" content="summary_large_image">
+  <meta property="twitter:url" content="{{ url()->current() }}">
+  <meta property="twitter:title" content="Sondek - Sistema de Gestión CMP Balances">
+  <meta property="twitter:description" content="Sistema integral de gestión para balances mineros CMP. Administre balances, reportes y análisis financieros de manera eficiente.">
+  <meta property="twitter:image" content="{{ asset('images/logo/logo.png') }}">
+
+  <!-- Canonical URL -->
+  <link rel="canonical" href="{{ url()->current() }}">
+
   <link rel="icon" href="{{ URL::asset('favicon.ico') }}" type="image/x-icon"/>
   <!-- <link rel="icon" href="<%= BASE_URL %>favicon.ico"> -->
-
-  <title>Sondek - CMP Balances</title>
 
   <!-- Splash Screen/Loader Styles -->
   <link rel="stylesheet" type="text/css" href="{{ asset(mix('css/loader.css')) }}" />
@@ -28,8 +51,8 @@
 
 <body>
   <noscript>
-    <strong>We're sorry but Vuexy - Vuejs, HTML & Laravel Admin Dashboard Template doesn't work properly without
-      JavaScript enabled. Please enable it to continue.</strong>
+    <strong>El Sistema Sondek CMP Balances requiere JavaScript para funcionar correctamente.
+    Por favor, habilite JavaScript en su navegador para continuar.</strong>
   </noscript>
 
   <div id="loading-bg">
