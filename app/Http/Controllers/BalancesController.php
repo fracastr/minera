@@ -363,6 +363,8 @@ class BalancesController extends Controller
         $data_entrada = $balance_nodos = $data->datos_entrada;
         $datos_entrada_model = new Datos_entrada();
         $datos_entrada_model->datos_entrada = json_encode($data_entrada);
+        $datos_entrada_model->proceso_id = $proceso_id;
+        $datos_entrada_model->valle_id = $proceso->valle_id;
         $datos_entrada_model->save();
 
         $datos_entrada_id = $datos_entrada_model->id;
@@ -621,6 +623,9 @@ class BalancesController extends Controller
 
         $datos_entrada = Datos_entrada::find($request->datos_entrada_id);
         $datos_entrada->balance_id = $balance->id;
+        $datos_entrada->proceso_id = $balance->proceso_id;
+        $proceso = Procesos::find($balance->proceso_id);
+        $datos_entrada->valle_id = $proceso->valle_id;
         $datos_entrada->save();
 
         return ["balance_id" => $balance->id];

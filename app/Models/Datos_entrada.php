@@ -11,5 +11,8 @@ class Datos_entrada extends Model
 
     protected $fillable = [
         'datos_entrada',
+        'proceso_id',
+        'valle_id',
+        'balance_id',
     ];
 }
