@@ -104,14 +104,44 @@ class UtilsController extends Controller
         return ['procesos' => $procesos];
     }
 
-    public function getExcel($datos_entrada_id, $proceso_id){
+    public function getExcel($datos_entrada_id, $proceso_id, Request $request){
         try {
+            // Obtener datos_entrada con relaciones
+            $datos_entrada = Datos_entrada::with(['balance'])->find($datos_entrada_id);
+
+            if (!$datos_entrada) {
+                throw new Exception('Datos entrada no encontrado');
+            }
+
+            // Obtener valle y proceso
+            $valle = $datos_entrada->valle_id ? Valles::find($datos_entrada->valle_id) : null;
+            $proceso = Procesos::find($proceso_id);
+
+            if (!$proceso) {
+                throw new Exception('Proceso no encontrado');
+            }
+
+            // Obtener user_id del balance o del request autenticado
+            $user_id = null;
+            if ($datos_entrada->balance && $datos_entrada->balance->user_id) {
+                $user_id = $datos_entrada->balance->user_id;
+            } elseif ($request->user()) {
+                $user_id = $request->user()->id;
+            }
+
+            // Generar timestamp
+            $timestamp = now()->format('YmdHis');
+
+            // Construir nombre del archivo: valle_proceso_userid_timestamp.xlsx
+            $valle_nombre = $valle ? str_replace(' ', '_', strtolower($valle->nombre)) : 'valle';
+            $proceso_nombre = str_replace(' ', '_', strtolower($proceso->nombre));
+            $google_drive_filename = $valle_nombre . '_' . $proceso_nombre . '_' . ($user_id ?? '0') . '_' . $timestamp . '.xlsx';
 
             $filename = $datos_entrada_id . '.xlsx';
             // funcion que descarga el excel asociado a un balance
-            $proceso = Procesos::find($proceso_id);
-            $proceso = json_decode($proceso->componentes);
-            $componentes = $proceso->data;
+            $proceso_data = Procesos::find($proceso_id);
+            $proceso_data = json_decode($proceso_data->componentes);
+            $componentes = $proceso_data->data;
             $url = env('FLASK_API_URL') . '/get_excel';
             $response = Http::acceptJson()->post($url, [
                 'datos_entrada_id' => $datos_entrada_id,
@@ -154,7 +184,8 @@ class UtilsController extends Controller
             }
             else{
                 $contents = Storage::get('public/'. $datos_entrada_id.'.xlsx');
-                $move = Storage::disk('google')->put($datos_entrada_id.'.xlsx', $contents);
+                // Subir a Google Drive con el nuevo nombre
+                $move = Storage::disk('google')->put($google_drive_filename, $contents);
 
 
                 $client = new Google_Client();
@@ -163,7 +194,8 @@ class UtilsController extends Controller
                 $client->refreshToken(env('GOOGLE_DRIVE_REFRESH_TOKEN'));
                 $service = new \Google_Service_Drive($client);
 
-                $qry = "name='".$datos_entrada_id.".xlsx'";
+                // Buscar el archivo con el nuevo nombre
+                $qry = "name='".$google_drive_filename."'";
 
                 $files = $service->files->listFiles([
                     'q' => $qry,

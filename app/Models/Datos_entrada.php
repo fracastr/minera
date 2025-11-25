@@ -14,5 +14,10 @@ class Datos_entrada extends Model
         'proceso_id',
         'valle_id',
         'balance_id',
+        'file_path',
     ];
-}
+
+    public function balance()
+    {
+        return $this->belongsTo(Balances::class, 'balance_id');
+    }

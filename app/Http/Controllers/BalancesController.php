@@ -294,10 +294,27 @@ class BalancesController extends Controller
     public function import(Request $request)
     {
         try {
+            $user = $request->user();
+            $user_id = $user ? $user->id : null;
+            $timestamp = now()->format('YmdHis');
+
             if (app()->environment('local')) {
                 $path = "/home/ubuntu/minera/storage/app/public/I6lpMJiywp3X2ifsT7M3ujh9WWsxPeZgarZbK4Jp.xlsx";
+                $originalFileName = "I6lpMJiywp3X2ifsT7M3ujh9WWsxPeZgarZbK4Jp.xlsx";
             } else {
-                $path = $request->file('file')->store('public');
+                $file = $request->file('file');
+                $originalFileName = $file->getClientOriginalName();
+            }
+
+            // Construir nuevo nombre: nombre_original_timestamp_userid.extension
+            $extension = pathinfo($originalFileName, PATHINFO_EXTENSION);
+            $fileNameWithoutExtension = pathinfo($originalFileName, PATHINFO_FILENAME);
+            $newFileName = $fileNameWithoutExtension . '_' . $timestamp . '_' . $user_id . '.' . $extension;
+
+            if (!app()->environment('local')) {
+                // Guardar archivo con el nuevo nombre
+                $file = $request->file('file');
+                $path = $file->storeAs('public', $newFileName);
                 $path = '/home/ubuntu/minera/storage/app/'. $path;
             }
 
@@ -365,6 +382,10 @@ class BalancesController extends Controller
         $datos_entrada_model->datos_entrada = json_encode($data_entrada);
         $datos_entrada_model->proceso_id = $proceso_id;
         $datos_entrada_model->valle_id = $proceso->valle_id;
+
+        // Guardar el nombre del archivo con timestamp y user_id
+        $datos_entrada_model->file_path = $newFileName;
+
         $datos_entrada_model->save();
 
         $datos_entrada_id = $datos_entrada_model->id;
