@@ -125,15 +125,23 @@ export default {
           this.loading = false
         })
     },
-    customSearchFn(query, row) {
-      if (!query) return true
+    customSearchFn(row, col, cellValue, searchTerm) {
+      if (!searchTerm) return true
 
-      const searchTerm = query.toLowerCase()
-      return (
-        (row.nombre && row.nombre.toLowerCase().includes(searchTerm))
-        || (row.tipo && row.tipo.toLowerCase().includes(searchTerm))
-        || (row.created_at && row.created_at.toLowerCase().includes(searchTerm))
-      )
+      const term = String(searchTerm).toLowerCase()
+      const values = [
+        row.nombre,
+        row.tipo,
+        this.getProcesoNombre(row),
+        this.getValleNombre(row),
+        this.getUserName(row),
+        row.created_at,
+        cellValue,
+      ]
+        .filter(value => value != null && value !== '')
+        .map(value => String(value).toLowerCase())
+
+      return values.some(value => value.includes(term))
     },
     formatDate(value) {
       if (!value) return 'N/A'
