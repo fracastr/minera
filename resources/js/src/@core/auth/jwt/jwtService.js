@@ -41,25 +41,35 @@ export default class JwtService {
         const { config, response } = error
         const originalRequest = config
 
-        // if (status === 401) {
         if (response && response.status === 401) {
+          const isAuthRequest = [
+            this.jwtConfig.loginEndpoint,
+            this.jwtConfig.registerEndpoint,
+            this.jwtConfig.refreshEndpoint,
+            '/api/auth/login',
+            '/api/auth/register',
+          ].some(url => originalRequest.url?.includes(url))
+
+          if (isAuthRequest || !this.getRefreshToken()) {
+            return Promise.reject(error)
+          }
+
           if (!this.isAlreadyFetchingAccessToken) {
             this.isAlreadyFetchingAccessToken = true
-            this.refreshToken().then(r => {
-              this.isAlreadyFetchingAccessToken = false
-
-              // Update accessToken in localStorage
-              this.setToken(r.data.accessToken)
-              this.setRefreshToken(r.data.refreshToken)
-
-              this.onAccessTokenFetched(r.data.accessToken)
-            })
+            this.refreshToken()
+              .then(r => {
+                this.isAlreadyFetchingAccessToken = false
+                this.setToken(r.data.accessToken)
+                this.setRefreshToken(r.data.refreshToken)
+                this.onAccessTokenFetched(r.data.accessToken)
+              })
+              .catch(() => {
+                this.isAlreadyFetchingAccessToken = false
+                this.subscribers = []
+              })
           }
           const retryOriginalRequest = new Promise(resolve => {
             this.addSubscriber(accessToken => {
-              // Make sure to assign accessToken according to your response.
-              // Check: https://pixinvent.ticksy.com/ticket/2413870
-              // Change Authorization header
               originalRequest.headers.Authorization = `${this.jwtConfig.tokenType} ${accessToken}`
               resolve(this.axiosIns(originalRequest))
             })

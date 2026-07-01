@@ -1,4 +1,4 @@
-import useJwt from '@/auth/jwt/useJwt'
+import { AUTH_TOKEN_KEY } from '@/auth/config'
 
 /**
  * Return if user is logged in
@@ -7,7 +7,7 @@ import useJwt from '@/auth/jwt/useJwt'
  */
 // eslint-disable-next-line arrow-body-style
 export const isUserLoggedIn = () => {
-  return localStorage.getItem('userData') && localStorage.getItem(useJwt.jwtConfig.storageTokenKeyName)
+  return localStorage.getItem('userData') && localStorage.getItem(AUTH_TOKEN_KEY)
 }
 
 export const getUserData = () => JSON.parse(localStorage.getItem('userData'))

@@ -1,6 +1,7 @@
 import Vue from 'vue'
 import axios from 'axios'
 import router from '@/router'
+import { AUTH_TOKEN_KEY } from '@/auth/config'
 
 // axios
 const axiosIns = axios.create({
@@ -19,10 +20,10 @@ const axiosIns = axios.create({
 // Interceptor de request - Se ejecuta ANTES de cada petición
 axiosIns.interceptors.request.use(
   config => {
-    // Agregar token si existe
-    const token = localStorage.getItem('token')
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`
+    // Token Bearer de Sanctum
+    const accessToken = localStorage.getItem(AUTH_TOKEN_KEY)
+    if (accessToken) {
+      config.headers.Authorization = `Bearer ${accessToken}`
     }
 
     // Agregar CSRF token para Laravel
@@ -62,12 +63,18 @@ axiosIns.interceptors.response.use(
       const { status, data } = error.response
 
       switch (status) {
-        case 401: // No autorizado
-          console.log('🔒 Usuario no autorizado, redirigiendo a login...')
-          localStorage.removeItem('token')
-          localStorage.removeItem('userData')
-          router.push('/login')
+        case 401: { // No autorizado
+          const isLoginRequest = error.config?.url?.includes('/api/auth/login')
+          const isOnLoginPage = router.currentRoute.name === 'auth-login'
+
+          if (!isLoginRequest && !isOnLoginPage) {
+            console.log('🔒 Usuario no autorizado, redirigiendo a login...')
+            localStorage.removeItem(AUTH_TOKEN_KEY)
+            localStorage.removeItem('userData')
+            router.push({ name: 'auth-login' }).catch(() => {})
+          }
           break
+        }
 
         case 403: // Prohibido
           console.log('🚫 Acceso prohibido')

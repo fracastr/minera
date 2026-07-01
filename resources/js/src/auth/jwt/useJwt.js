@@ -1,5 +1,7 @@
-import useJwt from '@core/auth/jwt/useJwt'
-import axios from '@axios'
+import authConfig from '@/auth/config'
 
-const { jwt } = useJwt(axios, {})
-export default jwt
+// Sanctum: no se registran interceptores JWT del template Vuexy.
+// Solo se exporta la config de almacenamiento del token para compatibilidad.
+export default {
+  jwtConfig: authConfig,
+}

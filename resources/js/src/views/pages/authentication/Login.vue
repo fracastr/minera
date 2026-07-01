@@ -188,10 +188,10 @@ import { required, email } from '@validations'
 import { togglePasswordVisibility } from '@core/mixins/ui/forms'
 import store from '@/store/index'
 import { getHomeRouteForLoggedInUser } from '@/auth/utils'
+import { AUTH_TOKEN_KEY } from '@/auth/config'
 
 import ToastificationContent from '@core/components/toastification/ToastificationContent.vue'
 import { $themeConfig } from '@themeConfig'
-import axios from 'axios'
 export default {
   components: {
     BRow,
@@ -246,47 +246,55 @@ export default {
     },
   },
   methods: {
-    login() {
-        this.isLoading = true;
-        this.$http.get('/sanctum/csrf-cookie').then(response => {
-        this.$http.post('/api/auth/login', {
-              email: this.userEmail,
-              password: this.password,
-            }).then(response => {
-                const { userData } = response.data
-            console.log('User signed in!', userData);
-            localStorage.setItem('userData', JSON.stringify(userData))
-            this.$ability.update(userData.ability)
+    async login() {
+      this.isLoading = true
 
-            this.$router.replace(getHomeRouteForLoggedInUser(userData.role)).then(() => {
-                this.$toast({
-                  component: ToastificationContent,
-                  position: 'top-right',
-                  props: {
-                    title: `Bienvenido ${userData.fullName || userData.username}`,
-                    icon: 'CoffeeIcon',
-                    variant: 'success',
-                    text: `Has iniciado sesion correctamente`,
-                  },
-                })
-              })
-        }).catch(error => {
-            console.log(error);
-            // Mostrar alert de error cuando el login falla
-            this.$toast({
-              component: ToastificationContent,
-              position: 'top-right',
-              props: {
-                title: 'Error de autenticación',
-                icon: 'AlertTriangleIcon',
-                variant: 'danger',
-                text: 'Credenciales incorrectas. Por favor, verifica tu email y contraseña.',
-              },
-            })
-        }).finally(() => {
-            this.isLoading = false;
-        });
-    });
+      try {
+        await this.$http.get('/sanctum/csrf-cookie')
+
+        const response = await this.$http.post('/api/auth/login', {
+          email: this.userEmail,
+          password: this.password,
+        })
+
+        const { userData, accessToken } = response.data
+
+        localStorage.setItem('userData', JSON.stringify(userData))
+        localStorage.setItem(AUTH_TOKEN_KEY, accessToken)
+        this.$ability.update(userData.ability)
+
+        await this.$router.replace(getHomeRouteForLoggedInUser(userData.role))
+
+        this.$toast({
+          component: ToastificationContent,
+          position: 'top-right',
+          props: {
+            title: `Bienvenido ${userData.fullName || userData.username}`,
+            icon: 'CoffeeIcon',
+            variant: 'success',
+            text: 'Has iniciado sesion correctamente',
+          },
+        })
+      } catch (error) {
+        let errorMessage = 'Credenciales incorrectas. Por favor, verifica tu email y contraseña.'
+
+        if (error.response?.data?.message && error.response.data.message !== 'Unauthorized') {
+          errorMessage = error.response.data.message
+        }
+
+        this.$toast({
+          component: ToastificationContent,
+          position: 'top-right',
+          props: {
+            title: 'Error de autenticación',
+            icon: 'AlertTriangleIcon',
+            variant: 'danger',
+            text: errorMessage,
+          },
+        })
+      } finally {
+        this.isLoading = false
+      }
     },
   },
 }
