@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use App\Services\UserAbilityService;
+use App\Support\PasswordRules;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
@@ -25,7 +26,7 @@ class UserController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users,email',
-            'password' => 'required|string|min:8',
+            'password' => PasswordRules::requiredConfirmed(),
             'role' => ['required', Rule::in(UserAbilityService::allowedRoles())],
             'activo' => 'sometimes|boolean',
         ]);
@@ -49,7 +50,7 @@ class UserController extends Controller
         $validated = $request->validate([
             'name' => 'sometimes|string|max:255',
             'email' => ['sometimes', 'string', 'email', 'max:255', Rule::unique('users', 'email')->ignore($user->id)],
-            'password' => 'sometimes|string|min:8',
+            'password' => PasswordRules::sometimesConfirmed(),
             'role' => ['sometimes', Rule::in(UserAbilityService::allowedRoles())],
             'activo' => 'sometimes|boolean',
         ]);

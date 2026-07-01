@@ -5,13 +5,16 @@ export const validatorPositive = value => {
   return false
 }
 
-export const validatorPassword = password => {
-  /* eslint-disable no-useless-escape */
-  const regExp = /(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%&*()]).{8,}/
-  /* eslint-enable no-useless-escape */
-  const validPassword = regExp.test(password)
-  return validPassword
+export const validatorStrongPassword = password => {
+  if (!password || password.length < 12) {
+    return false
+  }
+
+  const regExp = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{12,}$/
+  return regExp.test(password)
 }
+
+export const validatorPassword = password => validatorStrongPassword(password)
 
 export const validatorCreditCard = creditnum => {
   /* eslint-disable no-useless-escape */

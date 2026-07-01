@@ -15,7 +15,7 @@ class AdminUserSeeder extends Seeder
         }
 
         $email = env('ADMIN_EMAIL', 'admin@minera.local');
-        $password = env('ADMIN_PASSWORD', 'changeme123');
+        $password = env('ADMIN_PASSWORD', 'Changeme123!');
         $name = env('ADMIN_NAME', 'Administrador');
 
         User::updateOrCreate(

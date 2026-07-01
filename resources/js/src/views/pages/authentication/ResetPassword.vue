@@ -98,7 +98,7 @@
                   #default="{ errors }"
                   name="Password"
                   vid="password"
-                  rules="required|min:8"
+                  rules="required|min:12|password_strength"
                 >
                   <b-input-group
                     class="input-group-merge"
@@ -121,6 +121,9 @@
                       />
                     </b-input-group-append>
                   </b-input-group>
+                  <small class="text-muted d-block mt-50">
+                    Mínimo 12 caracteres con mayúsculas, minúsculas, números y un carácter especial.
+                  </small>
                   <small class="text-danger">{{ errors[0] }}</small>
                 </validation-provider>
               </b-form-group>

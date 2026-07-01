@@ -103,8 +103,24 @@
             v-model="form.password"
             type="password"
             :required="!isEditing"
-            minlength="8"
-            placeholder="Mínimo 8 caracteres"
+            minlength="12"
+            placeholder="Mínimo 12 caracteres"
+          />
+          <small class="text-muted">
+            Debe incluir mayúsculas, minúsculas, números y un carácter especial.
+          </small>
+        </b-form-group>
+
+        <b-form-group
+          v-if="form.password || !isEditing"
+          :label="isEditing ? 'Confirmar nueva contraseña' : 'Confirmar contraseña'"
+        >
+          <b-form-input
+            v-model="form.password_confirmation"
+            type="password"
+            :required="!isEditing || !!form.password"
+            minlength="12"
+            placeholder="Repite la contraseña"
           />
         </b-form-group>
 
@@ -168,6 +184,7 @@ const emptyForm = () => ({
   name: '',
   email: '',
   password: '',
+  password_confirmation: '',
   role: 'viewer',
   activo: true,
 })
@@ -244,12 +261,18 @@ export default {
         name: user.nombre,
         email: user.email,
         password: '',
+        password_confirmation: '',
         role: user.role || 'viewer',
         activo: user.activo !== false,
       }
       this.showModal = true
     },
     saveUser() {
+      if (this.form.password !== this.form.password_confirmation) {
+        this.showToast('Error', 'Las contraseñas no coinciden.', 'danger')
+        return
+      }
+
       this.saving = true
 
       const payload = {
@@ -261,6 +284,11 @@ export default {
 
       if (this.form.password) {
         payload.password = this.form.password
+        payload.password_confirmation = this.form.password_confirmation
+      } else if (!this.isEditing) {
+        this.showToast('Error', 'La contraseña es obligatoria.', 'danger')
+        this.saving = false
+        return
       }
 
       const request = this.isEditing
