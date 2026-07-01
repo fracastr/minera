@@ -18,16 +18,6 @@ export default [
             target: '_blank',
           },
           {
-            title: 'Register v1',
-            route: 'auth-register-v1',
-            target: '_blank',
-          },
-          {
-            title: 'Register v2',
-            route: 'auth-register-v2',
-            target: '_blank',
-          },
-          {
             title: 'Forgot Password v1',
             route: 'auth-forgot-password-v1',
             target: '_blank',

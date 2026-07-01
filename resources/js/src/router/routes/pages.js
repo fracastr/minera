@@ -37,29 +37,15 @@ export default [
   },
   {
     path: '/register',
-    name: 'auth-register',
-    component: () => import('@/views/pages/authentication/Register.vue'),
-    meta: {
-      layout: 'full',
-      resource: 'Auth',
-      redirectIfLoggedIn: true,
-    },
+    redirect: { name: 'auth-login' },
   },
   {
     path: '/pages/authentication/register-v1',
-    name: 'auth-register-v1',
-    component: () => import('@/views/pages/authentication/Register-v1.vue'),
-    meta: {
-      layout: 'full',
-    },
+    redirect: { name: 'auth-login' },
   },
   {
     path: '/pages/authentication/register-v2',
-    name: 'auth-register-v2',
-    component: () => import('@/views/pages/authentication/Register-v2.vue'),
-    meta: {
-      layout: 'full',
-    },
+    redirect: { name: 'auth-login' },
   },
   {
     path: '/forgot-password',

@@ -9,7 +9,7 @@
         <p class="user-name font-weight-bolder mb-0">
           {{ userData.fullName || userData.username }}
         </p>
-        <span class="user-status">{{ userData.role }}</span>
+        <span class="user-status">{{ userRoleLabel }}</span>
       </div>
       <b-avatar
         size="40"
@@ -140,6 +140,15 @@ export default {
       userData: JSON.parse(localStorage.getItem('userData')),
       avatarText,
     }
+  },
+  computed: {
+    userRoleLabel() {
+      const role = this.userData?.role
+      if (!role) return ''
+
+      const key = `roles.${role}`
+      return this.$te(key) ? this.$t(key) : role
+    },
   },
   methods: {
     logout() {

@@ -154,6 +154,8 @@
   "Dashboards": "Dashboards",
   "Balances": "Balances",
   "Modulo Balances": "Balances Module",
+  "Administracion": "Administration",
+  "Usuarios": "Users",
   "Generar Balance": "Generate Balance",
   "Listado Balances": "Balances List",
   "Menú de aplicaciones": "Applications Menu",
@@ -217,6 +219,11 @@
     "pricing": "Pricing",
     "faq": "FAQ",
     "logout": "Logout"
+  },
+  "roles": {
+    "admin": "Administrator",
+    "operator": "Operator",
+    "viewer": "Viewer"
   },
   "customizer": {
     "title": "Theme Customizer",

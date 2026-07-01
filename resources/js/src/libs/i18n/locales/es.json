@@ -154,6 +154,8 @@
   "Dashboards": "Paneles de Control",
   "Balances": "Balances",
   "Modulo Balances": "Módulo Balances",
+  "Administracion": "Administración",
+  "Usuarios": "Usuarios",
   "Generar Balance": "Generar Balance",
   "Listado Balances": "Listado Balances",
   "Menú de aplicaciones": "Menú de aplicaciones",
@@ -217,6 +219,11 @@
     "pricing": "Precios",
     "faq": "Preguntas Frecuentes",
     "logout": "Cerrar Sesión"
+  },
+  "roles": {
+    "admin": "Administrador",
+    "operator": "Operador",
+    "viewer": "Visualizador"
   },
   "customizer": {
     "title": "Personalizador de Tema",

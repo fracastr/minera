@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Services\UserAbilityService;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -22,6 +23,8 @@ class User extends Authenticatable
         'nombre',
         'email',
         'password',
+        'role',
+        'activo',
     ];
 
     /**
@@ -41,7 +44,38 @@ class User extends Authenticatable
      */
     protected $casts = [
         'email_verified_at' => 'datetime',
+        'activo' => 'boolean',
     ];
+
+    public function isAdmin(): bool
+    {
+        return $this->role === 'admin';
+    }
+
+    public function isActive(): bool
+    {
+        return $this->activo !== false;
+    }
+
+    public function getAbilities(): array
+    {
+        return UserAbilityService::getAbilitiesForRole($this->role ?? 'viewer');
+    }
+
+    public function toUserData(): object
+    {
+        $userData = new \stdClass();
+        $userData->ability = array_map(function ($item) {
+            return (object) $item;
+        }, $this->getAbilities());
+        $userData->id = $this->id;
+        $userData->fullName = $this->nombre;
+        $userData->username = $this->email;
+        $userData->email = $this->email;
+        $userData->role = $this->role ?? 'viewer';
+
+        return $userData;
+    }
 
     /**
      * Send the password reset notification.
