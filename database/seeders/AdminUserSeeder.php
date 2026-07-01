@@ -14,7 +14,7 @@ class AdminUserSeeder extends Seeder
             return;
         }
 
-        $email = env('ADMIN_EMAIL', 'admin@minera.local');
+        $email = env('ADMIN_EMAIL', 'admin@sondek.cl');
         $password = env('ADMIN_PASSWORD', 'Changeme123!');
         $name = env('ADMIN_NAME', 'Administrador');
 

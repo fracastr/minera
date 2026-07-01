@@ -36,13 +36,18 @@ Route::group(['middleware' => ['auth:sanctum', 'admin']], function () {
 });
 
 // Balances Routes
-Route::group(['prefix' => 'balances', 'middleware' => 'auth:sanctum'], function () {
-    Route::post('import', [BalancesController::class, 'import']);
-    Route::get('get_listado', [BalancesController::class, 'get_listado']);
-    Route::post('correr_balance', [BalancesController::class, 'correr_balance']);
-    Route::post('paint_tables', [BalancesController::class, 'paint_tables']);
-    Route::post('save_balance', [BalancesController::class, 'save_balance']);
-    Route::get('getValles/{user_id}', [UtilsController::class, 'getValles']);
-    Route::get('getProcesos/{valle_id}', [UtilsController::class, 'getProcesos']);
-    Route::get('getExcel/{datos_entrada_id}/{proceso_id}', [UtilsController::class, 'getExcel']);
+Route::group(['prefix' => 'balances', 'middleware' => ['auth:sanctum']], function () {
+    Route::middleware('balance:read')->group(function () {
+        Route::get('get_listado', [BalancesController::class, 'get_listado']);
+        Route::get('getValles/{user_id}', [UtilsController::class, 'getValles']);
+        Route::get('getProcesos/{valle_id}', [UtilsController::class, 'getProcesos']);
+        Route::get('getExcel/{datos_entrada_id}/{proceso_id}', [UtilsController::class, 'getExcel']);
+    });
+
+    Route::middleware('balance:write')->group(function () {
+        Route::post('import', [BalancesController::class, 'import']);
+        Route::post('correr_balance', [BalancesController::class, 'correr_balance']);
+        Route::post('paint_tables', [BalancesController::class, 'paint_tables']);
+        Route::post('save_balance', [BalancesController::class, 'save_balance']);
+    });
 });

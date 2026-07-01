@@ -43,12 +43,9 @@
 
                 <!-- Header: Left Content -->
                 <div>
-                  <div class="logo-wrapper">
-                    <logo />
-                    <h3 class="text-primary invoice-logo">
-                      Vuexy
-                    </h3>
-                  </div>
+                <div class="logo-wrapper">
+                  <logo />
+                </div>
                   <b-card-text class="mb-25">
                     Office 149, 450 South Brand Brooklyn
                   </b-card-text>

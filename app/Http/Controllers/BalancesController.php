@@ -410,9 +410,33 @@ class BalancesController extends Controller
         return response()->json(['message' => 'uploaded successfully'], 200);
     }
 
-    public function get_listado()
+    public function get_listado(Request $request)
     {
-        $listado = Balances::with(['user', 'proceso.valle'])->get();
+        $listado = Balances::query()
+            ->select(['id', 'nombre', 'tipo', 'proceso_id', 'user_id', 'created_at', 'updated_at'])
+            ->with([
+                'user:id,nombre',
+                'proceso:id,nombre,valle_id',
+                'proceso.valle:id,nombre',
+            ])
+            ->orderByDesc('created_at')
+            ->get()
+            ->map(function (Balances $balance) {
+                return [
+                    'id' => $balance->id,
+                    'nombre' => $balance->nombre,
+                    'tipo' => $balance->tipo,
+                    'proceso_id' => $balance->proceso_id,
+                    'user_id' => $balance->user_id,
+                    'created_at' => $balance->created_at,
+                    'updated_at' => $balance->updated_at,
+                    'proceso' => $balance->proceso,
+                    'user' => $balance->user ? [
+                        'id' => $balance->user->id,
+                        'nombre' => $balance->user->nombre,
+                    ] : null,
+                ];
+            });
 
         return response()->json(['listado' => $listado]);
     }

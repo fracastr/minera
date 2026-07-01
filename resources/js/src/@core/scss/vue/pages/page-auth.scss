@@ -1,7 +1,10 @@
 @import '~@core/scss/base/pages/page-auth.scss';
 .brand-logo {
-  svg {
+  img,
+  .app-brand-logo {
     height: 28px;
-    width: 40.95px;
+    width: auto;
+    max-width: 140px;
+    object-fit: contain;
   }
 }
