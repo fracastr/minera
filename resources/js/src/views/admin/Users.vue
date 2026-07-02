@@ -213,6 +213,7 @@ export default {
       editingUserId: null,
       form: emptyForm(),
       tableFields: [
+        { key: 'id', label: 'ID', sortable: true, thClass: 'text-center', tdClass: 'text-center' },
         { key: 'nombre', label: 'Nombre', sortable: true },
         { key: 'email', label: 'Email', sortable: true },
         { key: 'role', label: 'Rol', sortable: true },
