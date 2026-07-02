@@ -37,7 +37,6 @@ import {
   BCard,
   BContainer,
 } from 'bootstrap-vue'
-import axios from 'axios'
 import { VueGoodTable } from 'vue-good-table'
 import useAppConfig from '@core/app-config/useAppConfig'
 
@@ -51,7 +50,24 @@ export default {
   },
   data() {
     return {
-      listado_fields: [
+      listado_data: [],
+      loading: false,
+    }
+  },
+  computed: {
+    currentTheme() {
+      const { skin } = useAppConfig()
+      return skin.value === 'dark' ? 'nocturnal' : 'polar-bear'
+    },
+    listado_fields() {
+      return [
+        {
+          label: 'N°',
+          field: 'numero',
+          sortable: false,
+          width: '70px',
+          tdClass: 'text-center',
+        },
         {
           label: 'Nombre',
           field: 'nombre',
@@ -78,7 +94,7 @@ export default {
         },
         {
           label: 'Usuario',
-          field: this.getUserName,
+          field: 'usuario_nombre',
           sortable: true,
           tdClass: 'text-left',
         },
@@ -89,15 +105,7 @@ export default {
           tdClass: 'text-left',
           formatFn: this.formatDate,
         },
-      ],
-      listado_data: [],
-      loading: false,
-    }
-  },
-  computed: {
-    currentTheme() {
-      const { skin } = useAppConfig()
-      return skin.value === 'dark' ? 'nocturnal' : 'polar-bear'
+      ]
     },
   },
   mounted() {
@@ -134,7 +142,7 @@ export default {
         row.tipo,
         this.getProcesoNombre(row),
         this.getValleNombre(row),
-        this.getUserName(row),
+        row.usuario_nombre,
         row.created_at,
         cellValue,
       ]
@@ -158,9 +166,6 @@ export default {
     },
     getValleNombre(row) {
       return row.proceso && row.proceso.valle && row.proceso.valle.nombre ? row.proceso.valle.nombre : 'N/A'
-    },
-    getUserName(row) {
-      return row.user && row.user.nombre ? row.user.nombre : 'N/A'
     },
   },
 }

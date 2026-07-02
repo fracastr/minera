@@ -20,4 +20,9 @@ class Balances extends Model
     {
         return $this->belongsTo(Procesos::class);
     }
+
+    public function datosEntrada()
+    {
+        return $this->hasOne(Datos_entrada::class, 'balance_id')->latestOfMany();
+    }
 }

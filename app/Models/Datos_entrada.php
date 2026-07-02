@@ -15,11 +15,17 @@ class Datos_entrada extends Model
         'valle_id',
         'balance_id',
         'file_path',
+        'user_id',
     ];
 
     public function balance()
     {
         return $this->belongsTo(Balances::class, 'balance_id');
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
     }
 
 

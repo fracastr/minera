@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Balances;
 use App\Models\Datos_entrada;
 use App\Models\Procesos;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 
@@ -295,7 +296,10 @@ class BalancesController extends Controller
     {
         try {
             $user = $request->user();
-            $user_id = $user ? $user->id : null;
+            if (!$user) {
+                return response()->json(['message' => 'Unauthorized'], 401);
+            }
+            $user_id = $user->id;
             $timestamp = now()->format('YmdHis');
 
             if (app()->environment('local')) {
@@ -385,6 +389,7 @@ class BalancesController extends Controller
 
         // Guardar el nombre del archivo con timestamp y user_id
         $datos_entrada_model->file_path = $newFileName;
+        $datos_entrada_model->user_id = $user_id;
 
         $datos_entrada_model->save();
 
@@ -416,29 +421,71 @@ class BalancesController extends Controller
             ->select(['id', 'nombre', 'tipo', 'proceso_id', 'user_id', 'created_at', 'updated_at'])
             ->with([
                 'user:id,nombre',
+                'datosEntrada.user:id,nombre',
                 'proceso:id,nombre,valle_id',
                 'proceso.valle:id,nombre',
             ])
             ->orderByDesc('created_at')
             ->get()
-            ->map(function (Balances $balance) {
+            ->values()
+            ->map(function (Balances $balance, int $index) {
+                $creator = $this->resolveBalanceCreator($balance);
+
                 return [
+                    'numero' => $index + 1,
                     'id' => $balance->id,
                     'nombre' => $balance->nombre,
                     'tipo' => $balance->tipo,
                     'proceso_id' => $balance->proceso_id,
-                    'user_id' => $balance->user_id,
+                    'user_id' => $creator ? $creator->id : $balance->user_id,
                     'created_at' => $balance->created_at,
                     'updated_at' => $balance->updated_at,
                     'proceso' => $balance->proceso,
-                    'user' => $balance->user ? [
-                        'id' => $balance->user->id,
-                        'nombre' => $balance->user->nombre,
+                    'usuario_nombre' => $creator ? $creator->nombre : 'Sin registrar',
+                    'user' => $creator ? [
+                        'id' => $creator->id,
+                        'nombre' => $creator->nombre,
                     ] : null,
                 ];
             });
 
         return response()->json(['listado' => $listado]);
+    }
+
+    private function resolveBalanceCreator(Balances $balance): ?User
+    {
+        $datosEntrada = $balance->datosEntrada;
+
+        if ($datosEntrada) {
+            if ($datosEntrada->user) {
+                return $datosEntrada->user;
+            }
+
+            $userIdFromFile = $this->extractUserIdFromFilePath($datosEntrada->file_path);
+            if ($userIdFromFile) {
+                $user = User::query()->select('id', 'nombre')->find($userIdFromFile);
+                if ($user) {
+                    return $user;
+                }
+            }
+        }
+
+        if ((int) $balance->user_id === 1) {
+            return null;
+        }
+
+        return $balance->user;
+    }
+
+    private function extractUserIdFromFilePath(?string $filePath): ?int
+    {
+        if (!$filePath || !preg_match('/_(\d{14})_(\d+)\.[^.]+$/', $filePath, $matches)) {
+            return null;
+        }
+
+        $userId = (int) $matches[2];
+
+        return $userId > 0 ? $userId : null;
     }
 
     public function correr_balance(Request $request)
@@ -659,16 +706,28 @@ class BalancesController extends Controller
     }
 
     public function save_balance(Request $request){
+        $user = $request->user();
+        if (!$user) {
+            return response()->json(['message' => 'Unauthorized'], 401);
+        }
+
+        $datos_entrada = Datos_entrada::find($request->datos_entrada_id);
+        if (!$datos_entrada) {
+            return response()->json(['message' => 'Datos de entrada no encontrados'], 404);
+        }
+
         $balance = new Balances();
         $balance->nombre = $request->nombre_balance;
         $balance->tipo = "quincenal";
         $balance->proceso_id = $request->proceso_id;
-        $balance->user_id = auth()->user()->id;
+        $balance->user_id = $user->id;
         $balance->save();
 
-        $datos_entrada = Datos_entrada::find($request->datos_entrada_id);
         $datos_entrada->balance_id = $balance->id;
         $datos_entrada->proceso_id = $balance->proceso_id;
+        if (!$datos_entrada->user_id) {
+            $datos_entrada->user_id = $user->id;
+        }
         $proceso = Procesos::find($balance->proceso_id);
         $datos_entrada->valle_id = $proceso->valle_id;
         $datos_entrada->save();
