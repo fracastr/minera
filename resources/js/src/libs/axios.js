@@ -66,6 +66,7 @@ axiosIns.interceptors.response.use(
         case 401: { // No autorizado
           const isLoginRequest = error.config?.url?.includes('/api/auth/login')
           const isOnLoginPage = router.currentRoute.name === 'auth-login'
+            || router.currentRoute.path === '/login'
 
           if (!isLoginRequest && !isOnLoginPage) {
             console.log('🔒 Usuario no autorizado, redirigiendo a login...')

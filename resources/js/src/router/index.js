@@ -16,6 +16,31 @@ import admin from './routes/admin'
 
 Vue.use(VueRouter)
 
+const originalPush = VueRouter.prototype.push
+const originalReplace = VueRouter.prototype.replace
+
+VueRouter.prototype.push = function push(location, onResolve, onReject) {
+  if (onResolve || onReject) {
+    return originalPush.call(this, location, onResolve, onReject)
+  }
+  return originalPush.call(this, location).catch(error => {
+    if (error.name !== 'NavigationDuplicated') {
+      throw error
+    }
+  })
+}
+
+VueRouter.prototype.replace = function replace(location, onResolve, onReject) {
+  if (onResolve || onReject) {
+    return originalReplace.call(this, location, onResolve, onReject)
+  }
+  return originalReplace.call(this, location).catch(error => {
+    if (error.name !== 'NavigationDuplicated') {
+      throw error
+    }
+  })
+}
+
 const router = new VueRouter({
   mode: 'history',
   base: process.env.BASE_URL,
@@ -41,23 +66,17 @@ const router = new VueRouter({
 })
 
 router.beforeEach((to, _, next) => {
-    console.log('beforeEach');
-    console.log('to:', to)
-    console.log('next:', next)
-    const isLoggedIn = isUserLoggedIn()
+  const isLoggedIn = isUserLoggedIn()
 
   if (!canNavigate(to)) {
-    // Redirect to login if not logged in
     if (!isLoggedIn) return next({ name: 'auth-login' })
 
-    // If logged in => not authorized
     return next({ name: 'misc-not-authorized' })
   }
 
-  // Redirect if logged in
   if (to.meta.redirectIfLoggedIn && isLoggedIn) {
     const userData = getUserData()
-    next(getHomeRouteForLoggedInUser(userData ? userData.role : null))
+    return next(getHomeRouteForLoggedInUser(userData ? userData.role : null))
   }
 
   return next()

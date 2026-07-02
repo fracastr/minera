@@ -187,7 +187,7 @@ import {
 import { required, email } from '@validations'
 import { togglePasswordVisibility } from '@core/mixins/ui/forms'
 import store from '@/store/index'
-import { getHomeRouteForLoggedInUser } from '@/auth/utils'
+import { getHomeRouteForLoggedInUser, safeRouterReplace } from '@/auth/utils'
 import { AUTH_TOKEN_KEY } from '@/auth/config'
 
 import ToastificationContent from '@core/components/toastification/ToastificationContent.vue'
@@ -263,7 +263,7 @@ export default {
         localStorage.setItem(AUTH_TOKEN_KEY, accessToken)
         this.$ability.update(userData.ability)
 
-        await this.$router.replace(getHomeRouteForLoggedInUser(userData.role))
+        await safeRouterReplace(this.$router, getHomeRouteForLoggedInUser(userData.role))
 
         this.$toast({
           component: ToastificationContent,

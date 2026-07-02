@@ -21,8 +21,25 @@ export const getUserData = () => JSON.parse(localStorage.getItem('userData'))
  * @param {String} userRole Role of user
  */
 export const getHomeRouteForLoggedInUser = userRole => {
-  if (userRole === 'admin') return '/'
+  if (userRole === 'admin') return { name: 'dashboard-balances' }
   if (userRole === 'operator' || userRole === 'viewer') return { name: 'dashboard-balances' }
   if (userRole === 'client') return { name: 'access-control' }
-  return { name: 'auth-login' }
+  return { name: 'dashboard-balances' }
+}
+
+export const isSameRoute = (router, location) => {
+  const resolved = router.resolve(location)
+  return resolved.route.fullPath === router.currentRoute.fullPath
+}
+
+export const safeRouterReplace = (router, location) => {
+  if (isSameRoute(router, location)) {
+    return Promise.resolve(router.currentRoute)
+  }
+
+  return router.replace(location).catch(error => {
+    if (error.name !== 'NavigationDuplicated') {
+      throw error
+    }
+  })
 }
