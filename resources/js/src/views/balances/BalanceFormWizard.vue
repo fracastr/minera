@@ -1130,7 +1130,6 @@ import { FormWizard, TabContent } from 'vue-form-wizard'
 import { ValidationProvider, ValidationObserver } from 'vee-validate'
 import ToastificationContent from '@core/components/toastification/ToastificationContent.vue'
 import 'vue-form-wizard/dist/vue-form-wizard.min.css'
-import axios from 'axios'
 import Balance from './Balances.vue'
 import {
   BRow,

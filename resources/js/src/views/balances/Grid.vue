@@ -192,7 +192,6 @@ import {
   BImg,
 } from "bootstrap-vue";
 import Ripple from "vue-ripple-directive";
-import axios from "axios";
 import { AgGridVue } from "ag-grid-vue";
 function decimalFormatter(params) {
     // console.log("params decimal", params.value);
@@ -284,7 +283,7 @@ export default {
   },
   methods: {
     exportar_excel(){
-        axios
+        this.$http
         .get("/api/balances/getExcel/"+ this.datos_entrada_id+"/"+this.proceso)
         .then((response) => {
             console.log("response excel", response);
