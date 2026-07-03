@@ -114,4 +114,21 @@ return [
 
     'password_timeout' => 10800,
 
+    /*
+    |--------------------------------------------------------------------------
+    | Login Rate Limiting
+    |--------------------------------------------------------------------------
+    |
+    | These values control brute-force protection for the API login endpoint.
+    | max_attempts applies per account/email and ip_max_attempts applies per
+    | source IP. Both limits share the same decay window in seconds.
+    |
+    */
+
+    'login_rate_limit' => [
+        'max_attempts' => env('LOGIN_RATE_LIMIT_MAX_ATTEMPTS', 5),
+        'ip_max_attempts' => env('LOGIN_RATE_LIMIT_IP_MAX_ATTEMPTS', 20),
+        'decay_seconds' => env('LOGIN_RATE_LIMIT_DECAY_SECONDS', 900),
+    ],
+
 ];

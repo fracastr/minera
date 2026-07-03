@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Str;
 use Illuminate\Auth\Events\PasswordReset;
 use App\Support\PasswordRules;
@@ -36,6 +37,8 @@ class AuthController extends Controller
 
         $user = $request->user();
 
+        $this->clearLoginRateLimiters($request);
+
         if (!$user->isActive()) {
             Auth::logout();
 
@@ -52,6 +55,24 @@ class AuthController extends Controller
             'token_type' => 'Bearer',
             'userData' => $user->toUserData(),
         ]);
+    }
+
+    private function clearLoginRateLimiters(Request $request): void
+    {
+        RateLimiter::clear($this->loginIpThrottleKey($request));
+        RateLimiter::clear($this->loginAccountThrottleKey($request));
+    }
+
+    private function loginIpThrottleKey(Request $request): string
+    {
+        return 'login-ip:'.$request->ip();
+    }
+
+    private function loginAccountThrottleKey(Request $request): string
+    {
+        $email = Str::lower((string) $request->input('email', ''));
+
+        return 'login-account:'.($email ?: $request->ip());
     }
 
     /**
