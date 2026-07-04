@@ -113,48 +113,7 @@
   </div>
 
   <script src="{{ asset(mix('js/app.js')) }}"></script>
-
-  <!-- Script para simular progreso de carga -->
-  <script>
-    document.addEventListener('DOMContentLoaded', function() {
-      const progressFill = document.querySelector('.progress-fill');
-      const progressText = document.querySelector('.progress-text');
-      const loadingBg = document.getElementById('loading-bg');
-
-      const messages = [
-        'Inicializando...',
-        'Cargando módulos...',
-        'Conectando servicios...',
-        'Preparando interfaz...',
-        'Sistema listo!'
-      ];
-
-      let progress = 0;
-      let messageIndex = 0;
-
-      const interval = setInterval(() => {
-        progress += Math.random() * 15;
-        if (progress > 100) progress = 100;
-
-        progressFill.style.width = progress + '%';
-
-        if (progress >= (messageIndex + 1) * 20 && messageIndex < messages.length - 1) {
-          messageIndex++;
-          progressText.textContent = messages[messageIndex];
-        }
-
-        if (progress >= 100) {
-          clearInterval(interval);
-          setTimeout(() => {
-            loadingBg.classList.add('fade-out');
-            setTimeout(() => {
-              loadingBg.style.display = 'none';
-            }, 500);
-          }, 1000);
-        }
-      }, 200);
-    });
-  </script>
+  <script src="{{ asset('js/loading-screen.js') }}"></script>
 
 </body>
 
