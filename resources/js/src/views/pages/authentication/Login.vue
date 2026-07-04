@@ -250,8 +250,6 @@ export default {
       this.isLoading = true
 
       try {
-        await this.$http.get('/sanctum/csrf-cookie')
-
         const response = await this.$http.post('/api/auth/login', {
           email: this.userEmail,
           password: this.password,

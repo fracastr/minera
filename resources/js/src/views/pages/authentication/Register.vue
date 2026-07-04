@@ -275,13 +275,12 @@ export default {
   methods: {
     register() {
       this.isLoading = true
-      this.$http.get('/sanctum/csrf-cookie').then(() => {
-        this.$http.post('/api/auth/register', {
-          name: this.username,
-          email: this.userEmail,
-          password: this.password,
-          c_password: this.password,
-        }).then(response => {
+      this.$http.post('/api/auth/register', {
+        name: this.username,
+        email: this.userEmail,
+        password: this.password,
+        c_password: this.password,
+      }).then(response => {
           console.log('Usuario registrado!', response.data)
           this.$toast({
             component: ToastificationContent,
@@ -309,7 +308,6 @@ export default {
         }).finally(() => {
           this.isLoading = false
         })
-      })
     },
   },
 }

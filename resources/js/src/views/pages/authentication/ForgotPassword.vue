@@ -197,10 +197,9 @@ export default {
     sendResetLink() {
       this.isLoading = true;
 
-              this.$http.get('/sanctum/csrf-cookie').then(response => {
-        this.$http.post('/api/auth/forgot-password', {
-          email: this.userEmail,
-        }).then(response => {
+      this.$http.post('/api/auth/forgot-password', {
+        email: this.userEmail,
+      }).then(response => {
           this.$toast({
             component: ToastificationContent,
             position: 'top-right',
@@ -237,7 +236,6 @@ export default {
         }).finally(() => {
           this.isLoading = false;
         });
-      });
     },
   },
 }

@@ -306,13 +306,12 @@ export default {
     resetPassword() {
       this.isLoading = true;
 
-              this.$http.get('/sanctum/csrf-cookie').then(response => {
-        this.$http.post('/api/auth/reset-password', {
-          email: this.userEmail,
-          password: this.password,
-          password_confirmation: this.passwordConfirmation,
-          token: this.token,
-        }).then(response => {
+      this.$http.post('/api/auth/reset-password', {
+        email: this.userEmail,
+        password: this.password,
+        password_confirmation: this.passwordConfirmation,
+        token: this.token,
+      }).then(response => {
           this.$toast({
             component: ToastificationContent,
             position: 'top-right',
@@ -350,7 +349,6 @@ export default {
         }).finally(() => {
           this.isLoading = false;
         });
-      });
     },
   },
 }
