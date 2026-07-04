@@ -7,7 +7,7 @@ import { AUTH_TOKEN_KEY } from '@/auth/config'
 const axiosIns = axios.create({
   // Configuración base
   baseURL: process.env.NODE_ENV === 'production'
-    ? 'https://www.sondek.cl/'
+    ? '/'
     : 'http://localhost:8000/',
   withCredentials: true,
   headers: {
