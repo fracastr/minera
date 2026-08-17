@@ -1,0 +1,28 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - Prod
+      - Develop
+      - NewDevelop
+
+jobs:
+  php:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup PHP 7.4
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "7.4"
+          extensions: mbstring, xml, bcmath, gd, zip, pdo_mysql, curl
+          coverage: none
+
+      - name: Install Composer dependencies
+        run: composer install --prefer-dist --no-interaction --no-progress
+
+      - name: Unit tests
+        run: vendor/bin/phpunit --testsuite=Unit
