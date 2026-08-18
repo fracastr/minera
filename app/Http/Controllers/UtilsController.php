@@ -189,9 +189,9 @@ class UtilsController extends Controller
 
 
                 $client = new Google_Client();
-                $client->setClientId(env('GOOGLE_DRIVE_CLIENT_ID'));
-                $client->setClientSecret(env('GOOGLE_DRIVE_CLIENT_SECRET'));
-                $client->refreshToken(env('GOOGLE_DRIVE_REFRESH_TOKEN'));
+                $client->setClientId(config('filesystems.disks.google.clientId'));
+                $client->setClientSecret(config('filesystems.disks.google.clientSecret'));
+                $client->refreshToken(config('filesystems.disks.google.refreshToken'));
                 $service = new \Google_Service_Drive($client);
 
                 // Buscar el archivo con el nuevo nombre
