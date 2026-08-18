@@ -142,7 +142,7 @@ class UtilsController extends Controller
             $proceso_data = Procesos::find($proceso_id);
             $proceso_data = json_decode($proceso_data->componentes);
             $componentes = $proceso_data->data;
-            $url = env('FLASK_API_URL') . '/get_excel';
+            $url = config('services.flask.url') . '/get_excel';
             $response = Http::acceptJson()->post($url, [
                 'datos_entrada_id' => $datos_entrada_id,
                 'componentes' => $componentes
@@ -174,7 +174,7 @@ class UtilsController extends Controller
             $data_extra = json_encode($data_response->data_extra);
             $command = $public . '/excelnode.js';
             $filename = '';
-            $nodepath = env('NODEPATH');
+            $nodepath = config('services.node.path');
             $process = new Process([$nodepath, $command, $data, $data_extra, $datos_entrada_id, $public, $public . '/' . $arr_files[$proceso_id], $storage]);
             $process->run();
 

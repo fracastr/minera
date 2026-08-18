@@ -325,7 +325,7 @@ class BalancesController extends Controller
         $proceso_id = $request->proceso_id;
         $proceso = Procesos::find($proceso_id);
         $nombre_proceso = $proceso->nombre;
-        $url = env('FLASK_API_URL') . '/get_balance';
+        $url = config('services.flask.url') . '/get_balance';
         $myBody['path_name'] = $path;
         $response = Http::acceptJson()->post($url, [
             'path_name' => $path,
@@ -578,7 +578,7 @@ class BalancesController extends Controller
         $datos_entrada_data->datos_entrada = json_encode($datos_entrada);
         $datos_entrada_data->save();
 
-        $url = env('FLASK_API_URL') . '/correr_balance';
+        $url = config('services.flask.url') . '/correr_balance';
         $myBody['datos_entrada_id'] = $datos_entrada_id;
         $response = Http::acceptJson()->post($url, [
             'datos_entrada_id' => $datos_entrada_id,
@@ -672,7 +672,7 @@ class BalancesController extends Controller
             $datos_entrada_id = $request->datos_entrada_id;
             $rowIndex = $request->rowIndex;
 
-            $url = env('FLASK_API_URL') . '/paint_tables';
+            $url = config('services.flask.url') . '/paint_tables';
 
             $response = Http::acceptJson()->post($url, [
                 'datos_entrada_id' => $datos_entrada_id,

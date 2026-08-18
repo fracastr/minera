@@ -31,4 +31,12 @@ return [
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
 
+    'flask' => [
+        'url' => env('FLASK_API_URL'),
+    ],
+
+    'node' => [
+        'path' => env('NODEPATH'),
+    ],
+
 ];
