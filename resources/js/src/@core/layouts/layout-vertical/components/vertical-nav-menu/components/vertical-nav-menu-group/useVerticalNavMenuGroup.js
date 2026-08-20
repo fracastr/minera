@@ -24,6 +24,15 @@ export default function useVerticalNavMenuGroup(item) {
   // isMouseHovered
   // ------------------------------------------------
   const isMouseHovered = inject('isMouseHovered')
+  const isVerticalMenuActive = inject('isVerticalMenuActive', ref(true))
+
+  watch(isVerticalMenuActive, active => {
+    if (!active) {
+      // Overlay/hamburger menu on tablet: collapse groups when the drawer closes.
+      // eslint-disable-next-line no-use-before-define
+      isOpen.value = false
+    }
+  })
 
   // Collapse menu when menu is collapsed and show on open
   watch(isMouseHovered, val => {
@@ -46,8 +55,7 @@ export default function useVerticalNavMenuGroup(item) {
 
     // If current group is not clicked group or current group is not active => Proceed with closing it
     // eslint-disable-next-line no-use-before-define
-    if (clickedGroup !== item.title && !isActive.value) {
-      // If clicked group is not child of current group
+    if (clickedGroup !== item.title) {
       // eslint-disable-next-line no-use-before-define
       if (!doesHaveChild(clickedGroup)) isOpen.value = false
     }
@@ -76,7 +84,7 @@ export default function useVerticalNavMenuGroup(item) {
       If menu is collapsed and not hovered(optional) then don't open group
     */
     if (val) {
-      if (!isVerticalMenuCollapsed.value) isOpen.value = val
+      if (!isVerticalMenuCollapsed.value && isVerticalMenuActive.value) isOpen.value = val
     } else {
       isOpen.value = val
     }

@@ -1,6 +1,7 @@
 <template>
   <li
     v-if="canViewVerticalNavMenuGroup(item)"
+    ref="groupEl"
     class="dropdown dropdown-submenu"
     :class="{
       'show': isOpen,
@@ -15,7 +16,7 @@
       class="dropdown-item"
       href="#"
       :class="{'dropdown-toggle': item.children}"
-      @click="() => updateGroupOpen(!isOpen)"
+      @click.prevent.stop="onGroupClick"
     >
       <feather-icon :icon="item.icon || 'CircleIcon'" />
       <span class="menu-title">{{ t(item.title) }}</span>
@@ -67,6 +68,7 @@ export default {
       updateGroupOpen,
       updateIsActive,
       openChildDropdownOnLeft,
+      groupEl,
     } = useHorizontalNavMenuGroup(props.item)
 
     const { t } = useI18nUtils()
@@ -80,6 +82,10 @@ export default {
       isActive,
       updateGroupOpen,
       updateIsActive,
+      groupEl,
+      onGroupClick() {
+        if (!isOpen.value) updateGroupOpen(true)
+      },
 
       // ACL
       canViewVerticalNavMenuGroup,

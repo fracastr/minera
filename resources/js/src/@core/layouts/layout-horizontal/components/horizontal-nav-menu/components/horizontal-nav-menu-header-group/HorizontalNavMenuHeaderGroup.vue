@@ -1,6 +1,7 @@
 <template>
   <li
     v-if="canViewHorizontalNavMenuHeaderGroup(item)"
+    ref="groupEl"
     class="dropdown nav-item"
     :class="{
       'sidebar-group-active active open': isActive,
@@ -9,7 +10,11 @@
     @mouseenter="() => updateGroupOpen(true)"
     @mouseleave="() => updateGroupOpen(false)"
   >
-    <b-link class="nav-link dropdown-toggle d-flex align-items-center">
+    <b-link
+      class="nav-link dropdown-toggle d-flex align-items-center"
+      href="#"
+      @click.prevent="onHeaderClick"
+    >
       <feather-icon
         size="14"
         :icon="item.icon"
@@ -57,6 +62,7 @@ export default {
       updateIsActive,
       isOpen,
       updateGroupOpen,
+      groupEl,
     } = useHorizontalNavMenuHeaderGroup(props.item)
 
     const { t } = useI18nUtils()
@@ -65,9 +71,13 @@ export default {
     return {
       isOpen,
       isActive,
+      groupEl,
       updateGroupOpen,
       updateIsActive,
       resolveHorizontalNavMenuItemComponent,
+      onHeaderClick() {
+        if (!isOpen.value) updateGroupOpen(true)
+      },
 
       // ACL
       canViewHorizontalNavMenuHeaderGroup,

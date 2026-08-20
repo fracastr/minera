@@ -2,6 +2,7 @@
 import { ref, nextTick } from '@vue/composition-api'
 // import store from '@/store'
 import { isNavGroupActive } from '@core/layouts/utils'
+import useCloseOnOutsidePress from '@core/layouts/useCloseOnOutsidePress'
 
 export default function useHorizontalNavMenuGroup(item) {
   // ------------------------------------------------
@@ -9,6 +10,7 @@ export default function useHorizontalNavMenuGroup(item) {
   // ------------------------------------------------
   const refChildDropdown = ref(null)
   const openChildDropdownOnLeft = ref(false)
+  const groupEl = ref(null)
 
   // ------------------------------------------------
   // isActive
@@ -41,6 +43,8 @@ export default function useHorizontalNavMenuGroup(item) {
     }
   }
 
+  useCloseOnOutsidePress(groupEl, isOpen, () => updateGroupOpen(false))
+
   // ------------------------------------------------
   // isActive
   // ------------------------------------------------
@@ -57,5 +61,6 @@ export default function useHorizontalNavMenuGroup(item) {
     updateIsActive,
     refChildDropdown,
     openChildDropdownOnLeft,
+    groupEl,
   }
 }
