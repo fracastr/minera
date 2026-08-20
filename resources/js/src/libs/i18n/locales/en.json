@@ -99,11 +99,16 @@
   "Form Repeater": "Form Repeater",
   "BS Table": "BS Table",
   "dashboard": {
-    "title": "CMP Balances System",
-    "subtitle": "Comprehensive Mining Balances Management",
-    "status": "System Active",
-    "welcome": "Welcome to the Balances System",
-    "description": "Comprehensive platform for the management and analysis of CMP mining balances. Access detailed reports, real-time statistics and advanced data analysis.",
+    "title": "Sondek",
+    "subtitle": "Metallurgical balance · CMP operations",
+    "status": "Plant system online",
+    "welcome": "Continue the work",
+    "description": "Import the Excel file, run the mass balance, and review what was saved. Valley and process, as on site.",
+    "tiles": {
+      "generate": "Upload the Excel file and run the model",
+      "list": "Review saved balances",
+      "analytics": "Activity by valley, process, and user"
+    },
     "stats": {
       "availability": "Availability",
       "accuracy": "Accuracy",

@@ -10,6 +10,9 @@
         class="login-atrium__photo"
       />
       <div class="login-atrium__vignette" />
+      <p class="login-atrium__photo-credit">
+        {{ heroCredit }}
+      </p>
     </div>
 
     <main class="login-atrium__stage">
@@ -108,12 +111,12 @@
 </template>
 
 <script>
-/* eslint-disable global-require */
 import { ValidationProvider, ValidationObserver } from 'vee-validate'
 import { BImg, BForm, BSpinner } from 'bootstrap-vue'
 import { required, email } from '@validations'
 import ToastificationContent from '@core/components/toastification/ToastificationContent.vue'
 import { $themeConfig } from '@themeConfig'
+import { pickMiningHero } from '@/assets/images/pages/cmp/miningHeroes'
 
 export default {
   components: {
@@ -128,9 +131,11 @@ export default {
     return { appLogoImage }
   },
   data() {
+    const hero = pickMiningHero()
     return {
       userEmail: '',
-      heroImage: require('@/assets/images/pages/cmp/cmp1.jpg'),
+      heroImage: hero.src,
+      heroCredit: hero.credit,
       isLoading: false,
       required,
       email,

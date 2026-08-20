@@ -37,6 +37,20 @@
     linear-gradient(180deg, rgba(12, 15, 20, 0.55) 0%, rgba(12, 15, 20, 0.92) 100%);
 }
 
+.login-atrium__photo-credit {
+  position: absolute;
+  right: 1rem;
+  bottom: 0.85rem;
+  z-index: 1;
+  margin: 0;
+  max-width: min(42ch, 70vw);
+  color: rgba(244, 246, 248, 0.45);
+  font-size: 0.625rem;
+  letter-spacing: 0.02em;
+  text-align: right;
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.65);
+}
+
 .login-atrium__stage {
   position: relative;
   z-index: 1;

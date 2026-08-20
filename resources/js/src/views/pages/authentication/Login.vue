@@ -10,6 +10,9 @@
         class="login-atrium__photo"
       />
       <div class="login-atrium__vignette" />
+      <p class="login-atrium__photo-credit">
+        {{ heroCredit }}
+      </p>
     </div>
 
     <main class="login-atrium__stage">
@@ -160,6 +163,7 @@ import { getHomeRouteForLoggedInUser, safeRouterReplace } from '@/auth/utils'
 import { AUTH_TOKEN_KEY } from '@/auth/config'
 import ToastificationContent from '@core/components/toastification/ToastificationContent.vue'
 import { $themeConfig } from '@themeConfig'
+import { pickMiningHero } from '@/assets/images/pages/cmp/miningHeroes'
 
 export default {
   components: {
@@ -175,11 +179,13 @@ export default {
   },
   mixins: [togglePasswordVisibility],
   data() {
+    const hero = pickMiningHero()
     return {
       status: false,
       password: '',
       userEmail: '',
-      heroImage: require('@/assets/images/pages/cmp/cmp2.jpg'),
+      heroImage: hero.src,
+      heroCredit: hero.credit,
       isLoading: false,
       required,
       email,

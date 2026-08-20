@@ -1,0 +1,27 @@
+Imágenes de minería agregadas desde Wikimedia Commons (no se scrapearon sitios de CMP).
+
+mining-los-colorados.jpg
+  Tren de mineral de hierro, ramal Mina Los Colorados (CMP), Atacama, 2017.
+  Autor: Guillermo Andre (EL GUILLE!)
+  Licencia: CC BY 2.0
+  https://commons.wikimedia.org/wiki/File:Atacama_se_tiñe_de_colores_(37259434532).jpg
+
+mining-rajo-norte.jpg
+  Rajo a cielo abierto, norte de Chile, 2015.
+  Autor: Chris Hunkeler
+  Licencia: CC BY-SA 2.0
+  https://commons.wikimedia.org/wiki/File:Large_Scale_Strip_Mining_(46125842205).jpg
+
+mining-atacama-rajo.jpg
+  Mina Escondida, Desierto de Atacama, 2009.
+  Autor: NASA Earth Observatory / Robert Simmon
+  Licencia: dominio público (NASA)
+  https://commons.wikimedia.org/wiki/File:Escondida_Copper_Mine,_Atacama_Desert,_Chile_2009-12-09_lrg.jpg
+
+mining-centinela.jpg
+  Distrito minero Centinela, 2020.
+  Autor: Sentinel Hub / Pierre Markuse
+  Licencia: CC BY-SA 2.0
+  https://commons.wikimedia.org/wiki/File:Centinela_mining_district_open_pits.jpg
+
+cmp1.jpg y cmp2.jpg ya estaban en el proyecto.

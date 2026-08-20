@@ -99,11 +99,16 @@
   "Form Repeater": "Repetidor de Formulario",
   "BS Table": "Tabla BS",
   "dashboard": {
-    "title": "Sistema Balances CMP",
-    "subtitle": "Gestión Integral de Balances Mineros",
-    "status": "Sistema Activo",
-    "welcome": "Bienvenido al Sistema de Balances",
-    "description": "Plataforma integral para la gestión y análisis de balances mineros de CMP. Acceda a reportes detallados, estadísticas en tiempo real y análisis avanzados de datos.",
+    "title": "Sondek",
+    "subtitle": "Balance metalúrgico · operación CMP",
+    "status": "Sistema en planta",
+    "welcome": "Continuar el trabajo",
+    "description": "Importa el Excel, corre el balance de masa y revisa lo guardado. Valle y proceso, como en planta.",
+    "tiles": {
+      "generate": "Sube el Excel y corre el modelo",
+      "list": "Revisa balances guardados",
+      "analytics": "Actividad por valle, proceso y usuario"
+    },
     "stats": {
       "availability": "Disponibilidad",
       "accuracy": "Precisión",
