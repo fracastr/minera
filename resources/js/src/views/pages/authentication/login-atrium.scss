@@ -1,0 +1,295 @@
+.login-atrium {
+  --atrium-card: rgba(18, 22, 28, 0.92);
+  --atrium-border: rgba(255, 255, 255, 0.1);
+  --atrium-text: #f4f6f8;
+  --atrium-muted: rgba(244, 246, 248, 0.62);
+  --atrium-accent: #e07a3a;
+  --atrium-accent-hover: #f08947;
+  --atrium-accent-glow: rgba(224, 122, 58, 0.35);
+  --atrium-input-bg: rgba(255, 255, 255, 0.04);
+  --atrium-danger: #ff7b7b;
+
+  position: relative;
+  min-height: 100vh;
+  min-height: 100dvh;
+  overflow: hidden;
+  color: var(--atrium-text);
+}
+
+.login-atrium__backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+}
+
+.login-atrium__photo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: scale(1.03);
+}
+
+.login-atrium__vignette {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 80% 70% at 50% 40%, rgba(12, 15, 20, 0.2) 0%, rgba(12, 15, 20, 0.88) 100%),
+    linear-gradient(180deg, rgba(12, 15, 20, 0.55) 0%, rgba(12, 15, 20, 0.92) 100%);
+}
+
+.login-atrium__stage {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  min-height: 100dvh;
+  padding: 2rem 1.25rem 1.5rem;
+}
+
+.login-atrium__card {
+  width: 100%;
+  max-width: 26rem;
+  padding: 2rem 1.75rem 1.75rem;
+  border: 1px solid var(--atrium-border);
+  border-radius: 1rem;
+  background: var(--atrium-card);
+  box-shadow:
+    0 24px 64px rgba(0, 0, 0, 0.45),
+    0 0 0 1px rgba(255, 255, 255, 0.03) inset;
+  animation: atrium-rise 480ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.login-atrium__card-head {
+  margin-bottom: 1.75rem;
+  text-align: center;
+}
+
+.login-atrium__logo {
+  height: 52px;
+  width: auto;
+  margin-bottom: 1rem;
+  filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.35));
+}
+
+.login-atrium__headline {
+  margin: 0;
+  font-size: clamp(1.75rem, 5vw, 2.125rem);
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  line-height: 1.05;
+}
+
+.login-atrium__subhead {
+  margin: 0.45rem 0 0;
+  color: var(--atrium-muted);
+  font-size: 0.875rem;
+  letter-spacing: 0.02em;
+}
+
+.login-atrium__field {
+  margin-bottom: 1rem;
+}
+
+.login-atrium__label {
+  display: block;
+  margin-bottom: 0.4rem;
+  color: var(--atrium-muted);
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.login-atrium__input {
+  width: 100%;
+  min-height: 2.875rem;
+  padding: 0.65rem 0.9rem;
+  border: 1px solid var(--atrium-border);
+  border-radius: 0.5rem;
+  background: var(--atrium-input-bg);
+  color: var(--atrium-text);
+  font-size: 0.9375rem;
+  transition: border-color 160ms ease-out, box-shadow 160ms ease-out, background-color 160ms ease-out;
+
+  &::placeholder {
+    color: rgba(244, 246, 248, 0.28);
+  }
+
+  &:focus {
+    outline: none;
+    border-color: rgba(224, 122, 58, 0.65);
+    background: rgba(255, 255, 255, 0.06);
+    box-shadow: 0 0 0 3px var(--atrium-accent-glow);
+  }
+
+  &--error {
+    border-color: rgba(255, 123, 123, 0.75);
+  }
+
+  &--password {
+    padding-right: 2.75rem;
+  }
+}
+
+.login-atrium__password-wrap {
+  position: relative;
+}
+
+.login-atrium__toggle {
+  position: absolute;
+  top: 50%;
+  right: 0.65rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--atrium-muted);
+  transform: translateY(-50%);
+  cursor: pointer;
+  transition: color 140ms ease-out;
+
+  &:hover,
+  &:focus {
+    color: var(--atrium-text);
+    outline: none;
+  }
+}
+
+.login-atrium__error {
+  margin: 0.35rem 0 0;
+  color: var(--atrium-danger);
+  font-size: 0.8125rem;
+}
+
+.login-atrium__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin: 0.25rem 0 1.25rem;
+}
+
+.login-atrium__remember {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin: 0;
+  color: var(--atrium-muted);
+  font-size: 0.8125rem;
+  cursor: pointer;
+
+  input {
+    width: 0.95rem;
+    height: 0.95rem;
+    accent-color: var(--atrium-accent);
+    cursor: pointer;
+  }
+}
+
+.login-atrium__link {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--atrium-accent);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: color 140ms ease-out;
+
+  &:hover,
+  &:focus {
+    color: var(--atrium-accent-hover);
+    outline: none;
+  }
+}
+
+.login-atrium__submit {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+  min-height: 3rem;
+  padding: 0 1rem;
+  border: 0;
+  border-radius: 0.5rem;
+  background: var(--atrium-accent);
+  color: #1a1008;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  cursor: pointer;
+  box-shadow: 0 10px 28px var(--atrium-accent-glow);
+  transition: background-color 140ms ease-out, transform 140ms ease-out, box-shadow 140ms ease-out;
+
+  &:hover:not(:disabled) {
+    background: var(--atrium-accent-hover);
+    box-shadow: 0 14px 32px rgba(224, 122, 58, 0.42);
+  }
+
+  &:active:not(:disabled) {
+    transform: scale(0.98);
+  }
+
+  &:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px var(--atrium-accent-glow), 0 10px 28px var(--atrium-accent-glow);
+  }
+
+  &:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
+}
+
+.login-atrium__spinner {
+  color: #1a1008 !important;
+}
+
+.login-atrium__legal {
+  margin: 1.25rem 0 0;
+  color: rgba(244, 246, 248, 0.38);
+  font-size: 0.6875rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+@keyframes atrium-rise {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 575.98px) {
+  .login-atrium__card {
+    padding: 1.5rem 1.25rem 1.35rem;
+    border-radius: 0.875rem;
+  }
+
+  .login-atrium__row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .login-atrium__card {
+    animation: none;
+  }
+
+  .login-atrium__submit {
+    transition: none;
+  }
+}

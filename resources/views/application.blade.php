@@ -81,7 +81,7 @@
     <!-- Contenido principal -->
     <div class="loading-content">
       <div class="loading-logo">
-        <img src="{{ asset('logo.png') }}" alt="CMP Logo" />
+        <img src="{{ asset('logo.png') }}" alt="Sondek" />
       </div>
 
       <div class="loading">
@@ -91,7 +91,7 @@
       </div>
 
       <div class="loading-text">
-        <span class="loading-title">Cargando Sistema CMP</span>
+        <span class="loading-title">Cargando Sondek</span>
         <div class="loading-dots">
           <span class="dot"></span>
           <span class="dot"></span>
