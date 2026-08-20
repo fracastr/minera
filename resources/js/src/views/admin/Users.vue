@@ -1,12 +1,21 @@
 <template>
   <div>
     <b-card title="Gestión de usuarios">
-      <div class="d-flex justify-content-between align-items-center mb-2">
-        <p class="text-muted mb-0">
-          Crear y administrar cuentas del sistema. Solo visible para administradores.
-        </p>
+      <p class="text-muted mb-2">
+        Crear y administrar cuentas del sistema. Solo visible para administradores.
+      </p>
+
+      <div class="d-flex flex-wrap justify-content-between align-items-center mb-2">
+        <b-form-input
+          v-model="searchQuery"
+          type="search"
+          debounce="200"
+          placeholder="Buscar por nombre, email o rol…"
+          class="users-search"
+        />
         <b-button
           variant="primary"
+          class="mt-50 mt-sm-0"
           @click="openCreateModal"
         >
           <feather-icon
@@ -18,14 +27,14 @@
       </div>
 
       <b-table
-        :items="users"
+        :items="filteredUsers"
         :fields="tableFields"
         :busy="loading"
         responsive
         striped
         hover
         show-empty
-        empty-text="No hay usuarios registrados"
+        :empty-text="searchQuery.trim() ? 'No se encontraron usuarios con esa búsqueda' : 'No hay usuarios registrados'"
       >
         <template #table-busy>
           <div class="text-center text-primary my-2">
@@ -43,6 +52,12 @@
         <template #cell(activo)="data">
           <b-badge :variant="data.item.activo !== false ? 'light-success' : 'light-danger'">
             {{ data.item.activo !== false ? 'Activo' : 'Inactivo' }}
+          </b-badge>
+        </template>
+
+        <template #cell(dashboard_access)="data">
+          <b-badge :variant="hasDashboardAccess(data.item) ? 'light-success' : 'light-danger'">
+            {{ hasDashboardAccess(data.item) ? 'Sí' : 'No' }}
           </b-badge>
         </template>
 
@@ -137,6 +152,15 @@
             Usuario activo
           </b-form-checkbox>
         </b-form-group>
+
+        <b-form-group>
+          <b-form-checkbox v-model="form.dashboard_access">
+            Acceso al dashboard de analytics
+          </b-form-checkbox>
+          <small class="text-muted">
+            Los administradores siempre tienen acceso. Para otros roles, habilita esta opción.
+          </small>
+        </b-form-group>
       </b-form>
 
       <template #modal-footer="{ ok, cancel }">
@@ -187,6 +211,7 @@ const emptyForm = () => ({
   password_confirmation: '',
   role: 'viewer',
   activo: true,
+  dashboard_access: false,
 })
 
 export default {
@@ -211,6 +236,7 @@ export default {
       showModal: false,
       isEditing: false,
       editingUserId: null,
+      searchQuery: '',
       form: emptyForm(),
       tableFields: [
         { key: 'id', label: 'ID', sortable: true, thClass: 'text-center', tdClass: 'text-center' },
@@ -218,6 +244,7 @@ export default {
         { key: 'email', label: 'Email', sortable: true },
         { key: 'role', label: 'Rol', sortable: true },
         { key: 'activo', label: 'Estado', sortable: true },
+        { key: 'dashboard_access', label: 'Dashboard', sortable: true },
         { key: 'created_at', label: 'Creado', sortable: true },
         { key: 'actions', label: 'Acciones' },
       ],
@@ -230,6 +257,24 @@ export default {
         { value: 'operator', text: this.$t('roles.operator') },
         { value: 'viewer', text: this.$t('roles.viewer') },
       ]
+    },
+    filteredUsers() {
+      const query = this.searchQuery.trim().toLowerCase()
+      if (!query) return this.users
+
+      return this.users.filter(user => {
+        const haystack = [
+          user.id,
+          user.nombre,
+          user.email,
+          user.role,
+          this.roleLabel(user.role),
+          user.activo !== false ? 'activo' : 'inactivo',
+          this.hasDashboardAccess(user) ? 'si dashboard' : 'no dashboard',
+        ].join(' ').toLowerCase()
+
+        return haystack.includes(query)
+      })
     },
   },
   mounted() {
@@ -265,6 +310,7 @@ export default {
         password_confirmation: '',
         role: user.role || 'viewer',
         activo: user.activo !== false,
+        dashboard_access: this.hasDashboardAccess(user),
       }
       this.showModal = true
     },
@@ -281,6 +327,7 @@ export default {
         email: this.form.email,
         role: this.form.role,
         activo: this.form.activo,
+        dashboard_access: this.form.dashboard_access,
       }
 
       if (this.form.password) {
@@ -344,6 +391,9 @@ export default {
       const currentUser = getUserData()
       return currentUser && currentUser.id === user.id
     },
+    hasDashboardAccess(user) {
+      return user.dashboard_access === true || user.dashboard_access === 1 || user.dashboard_access === '1'
+    },
     roleLabel(role) {
       const key = `roles.${role}`
       return this.$te(key) ? this.$t(key) : role
@@ -384,3 +434,9 @@ export default {
   },
 }
 </script>
+
+<style scoped>
+.users-search {
+  max-width: 320px;
+}
+</style>

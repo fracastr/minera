@@ -35,6 +35,13 @@ export default [
         resource: 'Balances',
         action: 'read',
       },
+      {
+        title: 'Dashboard Analytics',
+        route: 'dashboard-balance-analytics',
+        icon: 'BarChart2Icon',
+        resource: 'DashboardAnalytics',
+        action: 'read',
+      },
     ],
   },
   {

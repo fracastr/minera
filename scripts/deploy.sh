@@ -33,6 +33,9 @@ sudo -n npm run prod
 echo "==> migrate"
 php_artisan migrate --force
 
+echo "==> backfill balance events"
+php_artisan balance-events:backfill || true
+
 echo "==> caches"
 php_artisan optimize:clear
 php_artisan config:cache

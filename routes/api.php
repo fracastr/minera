@@ -3,6 +3,7 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\BalanceAnalyticsController;
 use App\Http\Controllers\BalancesController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\UtilsController;
@@ -50,4 +51,14 @@ Route::group(['prefix' => 'balances', 'middleware' => ['auth:sanctum']], functio
         Route::post('paint_tables', [BalancesController::class, 'paint_tables']);
         Route::post('save_balance', [BalancesController::class, 'save_balance']);
     });
+});
+
+Route::group(['prefix' => 'analytics', 'middleware' => ['auth:sanctum', 'dashboard']], function () {
+    Route::get('dashboard', [BalanceAnalyticsController::class, 'dashboard']);
+    Route::get('summary', [BalanceAnalyticsController::class, 'summary']);
+    Route::get('by-user', [BalanceAnalyticsController::class, 'byUser']);
+    Route::get('by-valle', [BalanceAnalyticsController::class, 'byValle']);
+    Route::get('by-proceso', [BalanceAnalyticsController::class, 'byProceso']);
+    Route::get('timeseries', [BalanceAnalyticsController::class, 'timeseries']);
+    Route::get('filter-options', [BalanceAnalyticsController::class, 'filterOptions']);
 });

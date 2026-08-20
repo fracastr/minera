@@ -14,7 +14,7 @@ class UserController extends Controller
     public function index()
     {
         $users = User::query()
-            ->select(['id', 'nombre', 'email', 'role', 'activo', 'created_at'])
+            ->select(['id', 'nombre', 'email', 'role', 'activo', 'dashboard_access', 'created_at'])
             ->orderBy('nombre')
             ->get();
 
@@ -29,6 +29,7 @@ class UserController extends Controller
             'password' => PasswordRules::requiredConfirmed(),
             'role' => ['required', Rule::in(UserAbilityService::allowedRoles())],
             'activo' => 'sometimes|boolean',
+            'dashboard_access' => 'sometimes|boolean',
         ]);
 
         $user = User::create([
@@ -37,11 +38,12 @@ class UserController extends Controller
             'password' => Hash::make($validated['password']),
             'role' => $validated['role'],
             'activo' => $validated['activo'] ?? true,
+            'dashboard_access' => $validated['dashboard_access'] ?? false,
         ]);
 
         return response()->json([
             'message' => 'Usuario creado correctamente.',
-            'user' => $user->only(['id', 'nombre', 'email', 'role', 'activo']),
+            'user' => $user->only(['id', 'nombre', 'email', 'role', 'activo', 'dashboard_access']),
         ], 201);
     }
 
@@ -53,6 +55,7 @@ class UserController extends Controller
             'password' => PasswordRules::sometimesConfirmed(),
             'role' => ['sometimes', Rule::in(UserAbilityService::allowedRoles())],
             'activo' => 'sometimes|boolean',
+            'dashboard_access' => 'sometimes|boolean',
         ]);
 
         if (isset($validated['name'])) {
@@ -75,11 +78,15 @@ class UserController extends Controller
             $user->activo = $validated['activo'];
         }
 
+        if (isset($validated['dashboard_access'])) {
+            $user->dashboard_access = $validated['dashboard_access'];
+        }
+
         $user->save();
 
         return response()->json([
             'message' => 'Usuario actualizado correctamente.',
-            'user' => $user->only(['id', 'nombre', 'email', 'role', 'activo']),
+            'user' => $user->only(['id', 'nombre', 'email', 'role', 'activo', 'dashboard_access']),
         ]);
     }
 

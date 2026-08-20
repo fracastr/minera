@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Balances;
+use App\Services\BalanceEventService;
 use App\Models\Datos_entrada;
 use App\Models\Procesos;
 use App\Models\User;
@@ -393,6 +394,8 @@ class BalancesController extends Controller
 
         $datos_entrada_model->save();
 
+        BalanceEventService::logImported($datos_entrada_model, $user);
+
         $datos_entrada_id = $datos_entrada_model->id;
 
         return [
@@ -578,6 +581,8 @@ class BalancesController extends Controller
         $datos_entrada_data->datos_entrada = json_encode($datos_entrada);
         $datos_entrada_data->save();
 
+        BalanceEventService::logCorrer($datos_entrada_data, $request->user());
+
         $url = config('services.flask.url') . '/correr_balance';
         $myBody['datos_entrada_id'] = $datos_entrada_id;
         $response = Http::acceptJson()->post($url, [
@@ -731,6 +736,8 @@ class BalancesController extends Controller
         $proceso = Procesos::find($balance->proceso_id);
         $datos_entrada->valle_id = $proceso->valle_id;
         $datos_entrada->save();
+
+        BalanceEventService::logSaved($datos_entrada, $user, $balance->id);
 
         return ["balance_id" => $balance->id];
     }

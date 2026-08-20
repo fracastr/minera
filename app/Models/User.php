@@ -25,6 +25,7 @@ class User extends Authenticatable
         'password',
         'role',
         'activo',
+        'dashboard_access',
     ];
 
     /**
@@ -45,6 +46,7 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
         'activo' => 'boolean',
+        'dashboard_access' => 'boolean',
     ];
 
     public function isAdmin(): bool
@@ -59,7 +61,18 @@ class User extends Authenticatable
 
     public function getAbilities(): array
     {
-        return UserAbilityService::getAbilitiesForRole($this->role ?? 'viewer');
+        $abilities = UserAbilityService::getAbilitiesForRole($this->role ?? 'viewer');
+
+        if ($this->hasDashboardAccess()) {
+            $abilities[] = ['action' => 'read', 'subject' => 'DashboardAnalytics'];
+        }
+
+        return $abilities;
+    }
+
+    public function hasDashboardAccess(): bool
+    {
+        return $this->isAdmin() || $this->dashboard_access === true;
     }
 
     public function toUserData(): object

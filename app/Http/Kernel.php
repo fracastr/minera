@@ -67,5 +67,6 @@ class Kernel extends HttpKernel
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
         'admin' => \App\Http\Middleware\EnsureUserIsAdmin::class,
         'balance' => \App\Http\Middleware\EnsureUserHasBalancePermission::class,
+        'dashboard' => \App\Http\Middleware\EnsureUserHasDashboardAccess::class,
     ];
 }
