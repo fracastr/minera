@@ -3,11 +3,11 @@
 namespace App\Providers;
 
 use Google_Client;
-use Hypweb\Flysystem\GoogleDrive\GoogleDriveAdapter;
+use Illuminate\Filesystem\FilesystemAdapter;
 use Illuminate\Support\ServiceProvider;
 use League\Flysystem\Filesystem;
 use Illuminate\Support\Facades\Storage;
-//use Storage;
+use Masbug\Flysystem\GoogleDriveAdapter;
 
 class GoogleDriveServiceProvider extends ServiceProvider
 {
@@ -25,14 +25,15 @@ class GoogleDriveServiceProvider extends ServiceProvider
             $client->refreshToken($config['refreshToken']);
             $service = new \Google_Service_Drive($client);
 
-            $options = [];
+            // folderId is a Drive folder ID, not a display path.
+            $options = ['useDisplayPaths' => false];
             if(isset($config['teamDriveId'])) {
                 $options['teamDriveId'] = $config['teamDriveId'];
             }
 
             $adapter = new GoogleDriveAdapter($service, $config['folderId'], $options);
 
-            return new Filesystem($adapter);
+            return new FilesystemAdapter(new Filesystem($adapter), $adapter, $config);
         });
     }
 
