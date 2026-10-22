@@ -22,6 +22,18 @@ class TokenInactivityTest extends TestCase
         $this->withToken($token)->getJson('/api/auth/user')->assertUnauthorized();
     }
 
+    public function testLoginDeletesOnlyExpiredTokens()
+    {
+        $user = User::factory()->create();
+        $user->createToken('expired');
+        $this->travel(config('session.lifetime') + 1)->minutes();
+        $user->createToken('still-valid');
+
+        $this->postJson('/api/auth/login', ['email' => $user->email, 'password' => 'password'])->assertOk();
+
+        $this->assertEqualsCanonicalizing(['still-valid', 'Personal Access Token'], $user->tokens()->pluck('name')->all());
+    }
+
     public function testActivityKeepsTokenAlive()
     {
         $token = User::factory()->create()->createToken('test')->plainTextToken;

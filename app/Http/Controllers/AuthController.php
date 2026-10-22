@@ -47,6 +47,11 @@ class AuthController extends Controller
             ], 403);
         }
 
+        // Drop this user's tokens that already expired by inactivity so they don't pile up.
+        $user->tokens()
+            ->whereRaw('COALESCE(last_used_at, created_at) < ?', [now()->subMinutes(config('session.lifetime'))])
+            ->delete();
+
         $tokenResult = $user->createToken('Personal Access Token');
         $token = $tokenResult->plainTextToken;
 
