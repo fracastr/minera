@@ -4,6 +4,7 @@ namespace App\Console;
 
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
+use Laravel\Sanctum\PersonalAccessToken;
 
 class Kernel extends ConsoleKernel
 {
@@ -24,7 +25,10 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        // $schedule->command('inspire')->hourly();
+        // sanctum:prune-expired ignores idle tokens (no sanctum.expiration), so prune them with the same rule as AuthServiceProvider.
+        $schedule->call(fn () => PersonalAccessToken::whereRaw('COALESCE(last_used_at, created_at) < ?', [now()->subMinutes(config('session.lifetime'))])->delete())
+            ->daily()
+            ->name('prune-idle-tokens');
     }
 
     /**

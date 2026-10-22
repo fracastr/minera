@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\User;
+use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -32,6 +33,19 @@ class TokenInactivityTest extends TestCase
         $this->postJson('/api/auth/login', ['email' => $user->email, 'password' => 'password'])->assertOk();
 
         $this->assertEqualsCanonicalizing(['still-valid', 'Personal Access Token'], $user->tokens()->pluck('name')->all());
+    }
+
+    public function testScheduledPruneDeletesOnlyIdleTokens()
+    {
+        $user = User::factory()->create();
+        $user->createToken('expired');
+        $this->travel(config('session.lifetime') + 1)->minutes();
+        $user->createToken('still-valid');
+
+        $event = collect(app(Schedule::class)->events())->firstWhere('description', 'prune-idle-tokens');
+        $event->run($this->app);
+
+        $this->assertSame(['still-valid'], $user->tokens()->pluck('name')->all());
     }
 
     public function testActivityKeepsTokenAlive()
