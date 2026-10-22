@@ -1,150 +1,169 @@
+// Login, in the homepage's language: framed video panel beside an assay-paper form,
+// light serif headline, pill controls and the ore orange as the only bright accent.
+@import '../home/tokens';
+
 .login-atrium {
-  --atrium-card: rgba(18, 22, 28, 0.92);
-  --atrium-border: rgba(255, 255, 255, 0.1);
-  --atrium-text: #f4f6f8;
-  --atrium-muted: rgba(244, 246, 248, 0.62);
-  --atrium-accent: #e07a3a;
-  --atrium-accent-hover: #f08947;
-  --atrium-accent-glow: rgba(224, 122, 58, 0.35);
-  --atrium-input-bg: rgba(255, 255, 255, 0.04);
-  --atrium-danger: #ff7b7b;
+  @include sondek-tokens;
+  --danger: #b4371f;
 
-  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+  gap: 8px;
   min-height: 100vh;
-  min-height: 100dvh;
+  min-height: 100svh;
+  padding: 8px;
+  background: var(--assay);
+  color: var(--text);
+  font-family: var(--sans);
+  font-size: 16px;
+  letter-spacing: normal;
+}
+
+// Video panel
+.login-atrium__media {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 0;
+  padding: 28px 32px 36px;
   overflow: hidden;
-  color: var(--atrium-text);
+  border-radius: 20px;
+  background: var(--ink);
+  color: var(--on-ink);
+  animation: atrium-reveal 900ms var(--ease-out) both;
+
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(23, 32, 36, 0.55) 0%, rgba(23, 32, 36, 0.1) 40%, rgba(23, 32, 36, 0.85) 100%);
+  }
 }
 
-.login-atrium__backdrop {
-  position: fixed;
+.login-atrium__video {
+  position: absolute;
   inset: 0;
-  z-index: 0;
-}
-
-.login-atrium__photo {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transform: scale(1.03);
+  filter: saturate(0.75) contrast(1.05);
 }
 
-.login-atrium__vignette {
-  position: absolute;
-  inset: 0;
-  background:
-    radial-gradient(ellipse 80% 70% at 50% 40%, rgba(12, 15, 20, 0.2) 0%, rgba(12, 15, 20, 0.88) 100%),
-    linear-gradient(180deg, rgba(12, 15, 20, 0.55) 0%, rgba(12, 15, 20, 0.92) 100%);
-}
-
-.login-atrium__photo-credit {
-  position: absolute;
-  right: 1rem;
-  bottom: 0.85rem;
-  z-index: 1;
-  margin: 0;
-  max-width: min(42ch, 70vw);
-  color: rgba(244, 246, 248, 0.45);
-  font-size: 0.625rem;
-  letter-spacing: 0.02em;
-  text-align: right;
-  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.65);
-}
-
-.login-atrium__stage {
+.login-atrium__brand {
   position: relative;
   z-index: 1;
+  display: inline-flex;
+  align-self: flex-start;
+  align-items: center;
+  gap: 10px;
+  color: var(--on-ink);
+  font-size: 19px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+
+  &:hover {
+    color: var(--on-ink);
+  }
+}
+
+.login-atrium__mark {
+  width: 12px;
+  height: 12px;
+  background: var(--ore);
+  transform: rotate(45deg);
+}
+
+.login-atrium__tagline {
+  position: relative;
+  z-index: 1;
+  max-width: 12ch;
+  margin: 0;
+  font-family: var(--serif);
+  font-size: clamp(40px, 5.2vw, 76px);
+  font-weight: 300;
+  letter-spacing: -0.03em;
+  line-height: 1;
+}
+
+// Form panel
+.login-atrium__panel {
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
-  min-height: 100vh;
-  min-height: 100dvh;
-  padding: 2rem 1.25rem 1.5rem;
+  padding: 48px 24px;
 }
 
 .login-atrium__card {
   width: 100%;
-  max-width: 26rem;
-  padding: 2rem 1.75rem 1.75rem;
-  border: 1px solid var(--atrium-border);
-  border-radius: 1rem;
-  background: var(--atrium-card);
-  box-shadow:
-    0 24px 64px rgba(0, 0, 0, 0.45),
-    0 0 0 1px rgba(255, 255, 255, 0.03) inset;
-  animation: atrium-rise 480ms cubic-bezier(0.16, 1, 0.3, 1) both;
-}
+  max-width: 380px;
 
-.login-atrium__card-head {
-  margin-bottom: 1.75rem;
-  text-align: center;
-}
+  > * {
+    animation: atrium-rise 700ms var(--ease-out) both;
+  }
 
-.login-atrium__logo {
-  height: 52px;
-  width: auto;
-  margin-bottom: 1rem;
-  filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.35));
+  > :nth-child(2) { animation-delay: 80ms; }
+  > :nth-child(3) { animation-delay: 160ms; }
+  > :nth-child(4) { animation-delay: 240ms; }
 }
 
 .login-atrium__headline {
-  margin: 0;
-  font-size: clamp(1.75rem, 5vw, 2.125rem);
-  font-weight: 700;
-  letter-spacing: -0.04em;
-  line-height: 1.05;
+  margin: 0 0 10px;
+  color: var(--text);
+  font-family: var(--serif);
+  font-size: clamp(36px, 4vw, 48px);
+  font-weight: 300;
+  letter-spacing: -0.02em;
+  line-height: 1.04;
 }
 
 .login-atrium__subhead {
-  margin: 0.45rem 0 0;
-  color: var(--atrium-muted);
-  font-size: 0.875rem;
-  letter-spacing: 0.02em;
+  margin: 0 0 36px;
+  color: var(--text-muted);
+  font-size: 16px;
+  line-height: 1.5;
 }
 
 .login-atrium__field {
-  margin-bottom: 1rem;
+  margin-bottom: 18px;
 }
 
 .login-atrium__label {
   display: block;
-  margin-bottom: 0.4rem;
-  color: var(--atrium-muted);
-  font-size: 0.75rem;
+  margin-bottom: 8px;
+  color: var(--text);
+  font-size: 14px;
   font-weight: 500;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
 }
 
 .login-atrium__input {
   width: 100%;
-  min-height: 2.875rem;
-  padding: 0.65rem 0.9rem;
-  border: 1px solid var(--atrium-border);
-  border-radius: 0.5rem;
-  background: var(--atrium-input-bg);
-  color: var(--atrium-text);
-  font-size: 0.9375rem;
-  transition: border-color 160ms ease-out, box-shadow 160ms ease-out, background-color 160ms ease-out;
+  min-height: 50px;
+  padding: 0 20px;
+  border: 1px solid rgba(27, 35, 38, 0.18);
+  border-radius: 999px;
+  background: var(--paper);
+  color: var(--text);
+  font-size: 16px;
+  transition: border-color 160ms ease, box-shadow 160ms ease, background-color 160ms ease;
 
   &::placeholder {
-    color: rgba(244, 246, 248, 0.28);
+    color: rgba(27, 35, 38, 0.4);
   }
 
   &:focus {
     outline: none;
-    border-color: rgba(224, 122, 58, 0.65);
-    background: rgba(255, 255, 255, 0.06);
-    box-shadow: 0 0 0 3px var(--atrium-accent-glow);
+    border-color: var(--ore);
+    background: #fff;
+    box-shadow: 0 0 0 3px rgba(224, 122, 58, 0.25);
   }
 
   &--error {
-    border-color: rgba(255, 123, 123, 0.75);
+    border-color: var(--danger);
   }
 
   &--password {
-    padding-right: 2.75rem;
+    padding-right: 52px;
   }
 }
 
@@ -155,143 +174,168 @@
 .login-atrium__toggle {
   position: absolute;
   top: 50%;
-  right: 0.65rem;
+  right: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
+  width: 36px;
+  height: 36px;
   padding: 0;
   border: 0;
+  border-radius: 999px;
   background: transparent;
-  color: var(--atrium-muted);
+  color: var(--text-muted);
   transform: translateY(-50%);
   cursor: pointer;
-  transition: color 140ms ease-out;
+  transition: color 140ms ease, background-color 140ms ease;
 
-  &:hover,
-  &:focus {
-    color: var(--atrium-text);
-    outline: none;
+  &:hover {
+    background: rgba(27, 35, 38, 0.06);
+    color: var(--text);
   }
 }
 
 .login-atrium__error {
-  margin: 0.35rem 0 0;
-  color: var(--atrium-danger);
-  font-size: 0.8125rem;
+  margin: 6px 0 0 20px;
+  color: var(--danger);
+  font-size: 13px;
 }
 
 .login-atrium__row {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 0.75rem;
-  margin: 0.25rem 0 1.25rem;
+  gap: 12px;
+  margin: 4px 0 24px;
 }
 
 .login-atrium__remember {
   display: inline-flex;
   align-items: center;
-  gap: 0.45rem;
+  gap: 8px;
   margin: 0;
-  color: var(--atrium-muted);
-  font-size: 0.8125rem;
+  color: var(--text-muted);
+  font-size: 14px;
   cursor: pointer;
 
   input {
-    width: 0.95rem;
-    height: 0.95rem;
-    accent-color: var(--atrium-accent);
+    width: 16px;
+    height: 16px;
+    accent-color: var(--ore);
     cursor: pointer;
   }
 }
 
-.login-atrium__link {
+.login-atrium__link,
+.login-atrium__back {
   padding: 0;
   border: 0;
   background: none;
-  color: var(--atrium-accent);
-  font-size: 0.8125rem;
+  color: var(--text);
+  font-size: 14px;
   font-weight: 500;
+  text-decoration: underline;
+  text-decoration-color: rgba(27, 35, 38, 0.3);
+  text-underline-offset: 3px;
   white-space: nowrap;
   cursor: pointer;
-  transition: color 140ms ease-out;
+  transition: text-decoration-color 140ms ease;
 
-  &:hover,
-  &:focus {
-    color: var(--atrium-accent-hover);
-    outline: none;
+  &:hover {
+    color: var(--text);
+    text-decoration-color: var(--ore);
   }
+}
+
+.login-atrium__back {
+  display: inline-block;
+  margin-top: 28px;
+  color: var(--text-muted);
 }
 
 .login-atrium__submit {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.5rem;
+  gap: 8px;
   width: 100%;
-  min-height: 3rem;
-  padding: 0 1rem;
+  min-height: 52px;
+  padding: 0 24px;
   border: 0;
-  border-radius: 0.5rem;
-  background: var(--atrium-accent);
-  color: #1a1008;
-  font-size: 0.9375rem;
+  border-radius: 999px;
+  background: var(--ore);
+  color: var(--ink);
+  font-size: 15px;
   font-weight: 600;
-  letter-spacing: 0.01em;
   cursor: pointer;
-  box-shadow: 0 10px 28px var(--atrium-accent-glow);
-  transition: background-color 140ms ease-out, transform 140ms ease-out, box-shadow 140ms ease-out;
+  transition: background-color 160ms ease, transform 160ms var(--ease-out);
 
   &:hover:not(:disabled) {
-    background: var(--atrium-accent-hover);
-    box-shadow: 0 14px 32px rgba(224, 122, 58, 0.42);
+    background: var(--ore-hover);
   }
 
   &:active:not(:disabled) {
-    transform: scale(0.98);
-  }
-
-  &:focus {
-    outline: none;
-    box-shadow: 0 0 0 3px var(--atrium-accent-glow), 0 10px 28px var(--atrium-accent-glow);
+    transform: scale(0.97);
   }
 
   &:disabled {
-    opacity: 0.55;
+    opacity: 0.5;
     cursor: not-allowed;
   }
 }
 
-.login-atrium__spinner {
-  color: #1a1008 !important;
+.login-atrium__submit--spaced {
+  margin-top: 8px;
 }
 
-.login-atrium__legal {
-  margin: 1.25rem 0 0;
-  color: rgba(244, 246, 248, 0.38);
-  font-size: 0.6875rem;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
+.login-atrium__spinner {
+  color: var(--ink) !important;
+}
+
+.login-atrium a:focus-visible,
+.login-atrium button:focus-visible,
+.login-atrium input[type='checkbox']:focus-visible {
+  outline: 2px solid var(--ore);
+  outline-offset: 3px;
 }
 
 @keyframes atrium-rise {
   from {
     opacity: 0;
-    transform: translateY(18px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
+    transform: translateY(16px);
   }
 }
 
-@media (max-width: 575.98px) {
-  .login-atrium__card {
-    padding: 1.5rem 1.25rem 1.35rem;
-    border-radius: 0.875rem;
+@keyframes atrium-reveal {
+  from {
+    opacity: 0;
+    transform: scale(0.985);
+  }
+}
+
+// Narrow screens: the video becomes a short framed band above the form.
+@media (max-width: 991px) {
+  .login-atrium {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto 1fr;
   }
 
+  .login-atrium__media {
+    min-height: 34vh;
+    padding: 20px 22px 24px;
+  }
+
+  .login-atrium__tagline {
+    font-size: clamp(32px, 8vw, 44px);
+  }
+
+  .login-atrium__panel {
+    align-items: flex-start;
+    padding: 36px 16px 32px;
+  }
+}
+
+@media (max-width: 400px) {
   .login-atrium__row {
     flex-direction: column;
     align-items: flex-start;
@@ -299,11 +343,8 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .login-atrium__card {
+  .login-atrium__media,
+  .login-atrium__card > * {
     animation: none;
-  }
-
-  .login-atrium__submit {
-    transition: none;
   }
 }

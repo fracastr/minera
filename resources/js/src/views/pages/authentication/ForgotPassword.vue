@@ -1,41 +1,21 @@
 <template>
   <div class="login-atrium">
-    <div
-      class="login-atrium__backdrop"
-      aria-hidden="true"
-    >
-      <b-img
-        :src="heroImage"
-        alt=""
-        class="login-atrium__photo"
-      />
-      <div class="login-atrium__vignette" />
-      <p class="login-atrium__photo-credit">
-        {{ heroCredit }}
-      </p>
-    </div>
+    <auth-media />
 
-    <main class="login-atrium__stage">
+    <main class="login-atrium__panel">
       <section
         class="login-atrium__card"
         aria-labelledby="forgot-heading"
       >
-        <header class="login-atrium__card-head">
-          <b-img
-            :src="appLogoImage"
-            alt="Sondek"
-            class="login-atrium__logo"
-          />
-          <h1
-            id="forgot-heading"
-            class="login-atrium__headline"
-          >
-            Recuperar acceso
-          </h1>
-          <p class="login-atrium__subhead">
-            Te enviaremos un enlace para restablecer tu contraseña
-          </p>
-        </header>
+        <h1
+          id="forgot-heading"
+          class="login-atrium__headline"
+        >
+          Recuperar acceso
+        </h1>
+        <p class="login-atrium__subhead">
+          Escribe tu correo y te enviaremos un enlace para restablecer la contraseña.
+        </p>
 
         <validation-observer
           ref="forgotPasswordForm"
@@ -77,7 +57,7 @@
 
             <button
               type="submit"
-              class="login-atrium__submit"
+              class="login-atrium__submit login-atrium__submit--spaced"
               :disabled="invalid || isLoading"
             >
               <b-spinner
@@ -87,55 +67,38 @@
               />
               <span>{{ isLoading ? 'Enviando…' : 'Enviar enlace' }}</span>
             </button>
-
-            <button
-              type="button"
-              class="login-atrium__back"
-              @click="$router.push('/login')"
-            >
-              <feather-icon
-                icon="ArrowLeftIcon"
-                size="16"
-              />
-              Volver al login
-            </button>
           </b-form>
         </validation-observer>
-      </section>
 
-      <p class="login-atrium__legal">
-        sondek.cl · gestión de balances metalúrgicos
-      </p>
+        <router-link
+          :to="{ name: 'auth-login' }"
+          class="login-atrium__back"
+        >
+          Volver al login
+        </router-link>
+      </section>
     </main>
   </div>
 </template>
 
 <script>
 import { ValidationProvider, ValidationObserver } from 'vee-validate'
-import { BImg, BForm, BSpinner } from 'bootstrap-vue'
+import { BForm, BSpinner } from 'bootstrap-vue'
 import { required, email } from '@validations'
 import ToastificationContent from '@core/components/toastification/ToastificationContent.vue'
-import { $themeConfig } from '@themeConfig'
-import { pickMiningHero } from '@/assets/images/pages/cmp/miningHeroes'
+import AuthMedia from './AuthMedia.vue'
 
 export default {
   components: {
-    BImg,
+    AuthMedia,
     BForm,
     BSpinner,
     ValidationProvider,
     ValidationObserver,
   },
-  setup() {
-    const { appLogoImage } = $themeConfig.app
-    return { appLogoImage }
-  },
   data() {
-    const hero = pickMiningHero()
     return {
       userEmail: '',
-      heroImage: hero.src,
-      heroCredit: hero.credit,
       isLoading: false,
       required,
       email,
@@ -185,27 +148,4 @@ export default {
 
 <style lang="scss">
 @import './login-atrium.scss';
-
-.login-atrium__back {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.35rem;
-  width: 100%;
-  margin-top: 1rem;
-  padding: 0.5rem;
-  border: 0;
-  background: none;
-  color: var(--atrium-muted);
-  font-size: 0.8125rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: color 140ms ease-out;
-
-  &:hover,
-  &:focus {
-    color: var(--atrium-text);
-    outline: none;
-  }
-}
 </style>

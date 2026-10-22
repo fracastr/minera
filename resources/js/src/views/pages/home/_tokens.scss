@@ -1,0 +1,18 @@
+// Sondek public-surface tokens, shared by the homepage and the login.
+@mixin sondek-tokens {
+  --ink: #172024;
+  --ink-2: #212c31;
+  --ink-line: rgba(227, 232, 230, 0.14);
+  --assay: #e2e5e1;
+  --paper: #f1f2ee;
+  --text: #1b2326;
+  --text-muted: #4f5a5e;
+  --on-ink: #eef1ef;
+  --on-ink-muted: rgba(238, 241, 239, 0.7);
+  --ore: #e07a3a;
+  --ore-hover: #ec8a4b;
+  --hematite: #dcc1b5;
+  --serif: 'Newsreader', Georgia, 'Times New Roman', serif;
+  --sans: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+}

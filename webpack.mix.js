@@ -40,6 +40,12 @@ mix
           ]
         },
         {
+          // Lenis ships ES2022 (class fields, optional chaining) that webpack 4 can't parse.
+          test: /\.m?js$/,
+          include: /node_modules[\\/]lenis[\\/]/,
+          use: { loader: 'babel-loader', options: { babelrc: false, configFile: false, presets: ['@babel/preset-env'] } }
+        },
+        {
           test: /(\.(png|jpe?g|gif|webp)$|^((?!font).)*\.svg$)/,
           loaders: {
             loader: 'file-loader',

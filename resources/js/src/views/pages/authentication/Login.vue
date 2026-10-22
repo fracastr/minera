@@ -1,35 +1,21 @@
 <template>
   <div class="login-atrium">
-    <div
-      class="login-atrium__backdrop"
-      aria-hidden="true"
-    >
-      <b-img
-        :src="heroImage"
-        alt=""
-        class="login-atrium__photo"
-      />
-      <div class="login-atrium__vignette" />
-      <p class="login-atrium__photo-credit">
-        {{ heroCredit }}
-      </p>
-    </div>
+    <auth-media />
 
-    <main class="login-atrium__stage">
+    <main class="login-atrium__panel">
       <section
         class="login-atrium__card"
         aria-labelledby="login-heading"
       >
-        <header class="login-atrium__card-head">
-          <b-img
-            :src="appLogoImage"
-            alt="Sondek"
-            class="login-atrium__logo"
-          />
-          <p class="login-atrium__subhead">
-            Balance metalúrgico · operación CMP
-          </p>
-        </header>
+        <h1
+          id="login-heading"
+          class="login-atrium__headline"
+        >
+          Ingresa a Sondek
+        </h1>
+        <p class="login-atrium__subhead">
+          Balance metalúrgico de la operación CMP.
+        </p>
 
         <validation-observer
           ref="loginForm"
@@ -144,48 +130,42 @@
             </button>
           </b-form>
         </validation-observer>
-      </section>
 
-      <p class="login-atrium__legal">
-        sondek.cl · gestión de balances metalúrgicos
-      </p>
+        <router-link
+          :to="{ name: 'home' }"
+          class="login-atrium__back"
+        >
+          Volver al inicio
+        </router-link>
+      </section>
     </main>
   </div>
 </template>
 
 <script>
-/* eslint-disable global-require */
 import { ValidationProvider, ValidationObserver } from 'vee-validate'
-import { BImg, BForm, BSpinner } from 'bootstrap-vue'
+import { BForm, BSpinner } from 'bootstrap-vue'
 import { required, email } from '@validations'
 import { togglePasswordVisibility } from '@core/mixins/ui/forms'
 import { getHomeRouteForLoggedInUser, safeRouterReplace } from '@/auth/utils'
 import { AUTH_TOKEN_KEY } from '@/auth/config'
 import ToastificationContent from '@core/components/toastification/ToastificationContent.vue'
-import { $themeConfig } from '@themeConfig'
-import { pickMiningHero } from '@/assets/images/pages/cmp/miningHeroes'
+import AuthMedia from './AuthMedia.vue'
 
 export default {
   components: {
-    BImg,
+    AuthMedia,
     BForm,
     BSpinner,
     ValidationProvider,
     ValidationObserver,
   },
-  setup() {
-    const { appLogoImage } = $themeConfig.app
-    return { appLogoImage }
-  },
   mixins: [togglePasswordVisibility],
   data() {
-    const hero = pickMiningHero()
     return {
       status: false,
       password: '',
       userEmail: '',
-      heroImage: hero.src,
-      heroCredit: hero.credit,
       isLoading: false,
       required,
       email,
