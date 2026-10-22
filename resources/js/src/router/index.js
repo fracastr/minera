@@ -44,11 +44,20 @@ VueRouter.prototype.replace = function replace(location, onResolve, onReject) {
 const router = new VueRouter({
   mode: 'history',
   base: process.env.BASE_URL,
-  scrollBehavior() {
-    return { x: 0, y: 0 }
+  scrollBehavior(to) {
+    return to.hash ? { selector: to.hash } : { x: 0, y: 0 }
   },
   routes: [
-    { path: '/', redirect: { name: 'dashboard-balances' } },
+    {
+      path: '/',
+      name: 'home',
+      component: () => import('@/views/pages/home/Home.vue'),
+      meta: {
+        layout: 'full',
+        resource: 'Auth',
+        redirectIfLoggedIn: true,
+      },
+    },
     ...apps,
     ...dashboard,
     ...pages,
