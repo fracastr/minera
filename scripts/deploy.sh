@@ -42,8 +42,8 @@ php_artisan config:cache
 php_artisan route:cache
 php_artisan view:cache
 
-echo "==> reload Apache (mod_php opcache)"
-sudo -n apachectl graceful
+echo "==> reload PHP-FPM (opcache)"
+sudo -n systemctl reload php8.3-fpm
 
 echo "==> maintenance off"
 php_artisan up
