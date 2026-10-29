@@ -4,6 +4,7 @@ import VueRouter from 'vue-router'
 // Routes
 import { canNavigate } from '@/libs/acl/routeProtection'
 import { isUserLoggedIn, getUserData, getHomeRouteForLoggedInUser } from '@/auth/utils'
+import { validateSessionWithServer } from '@/auth/session'
 import apps from './routes/apps'
 import dashboard from './routes/dashboard'
 import uiElements from './routes/ui-elements/index'
@@ -74,11 +75,21 @@ const router = new VueRouter({
   ],
 })
 
-router.beforeEach((to, _, next) => {
-  const isLoggedIn = isUserLoggedIn()
+router.beforeEach(async (to, _, next) => {
+  let isLoggedIn = isUserLoggedIn()
+
+  const mustValidate = isLoggedIn && (
+    to.meta.redirectIfLoggedIn
+    || (to.meta.resource && to.meta.resource !== 'Auth')
+  )
+  if (mustValidate) {
+    isLoggedIn = await validateSessionWithServer()
+  }
 
   if (!canNavigate(to)) {
-    if (!isLoggedIn) return next({ name: 'auth-login' })
+    if (!isLoggedIn) {
+      return next(to.name === 'auth-login' ? undefined : { name: 'auth-login', query: { sesion: 'expirada' } })
+    }
 
     return next({ name: 'misc-not-authorized' })
   }

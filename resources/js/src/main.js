@@ -7,6 +7,7 @@ import i18nPlugin from '@/libs/i18n/plugin'
 import router from './router'
 import store from './store'
 import App from './App.vue'
+import { bindSessionIdleWatch } from '@/auth/session'
 
 // Global Components
 import './global-components'
@@ -45,6 +46,8 @@ require('@core/scss/core.scss')
 require('@/assets/scss/style.scss')
 
 Vue.config.productionTip = false
+
+bindSessionIdleWatch()
 
 // Function to fix vertical scrolling
 function fixVerticalScroll() {

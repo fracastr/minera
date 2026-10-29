@@ -2,6 +2,7 @@ import Vue from 'vue'
 import axios from 'axios'
 import router from '@/router'
 import { AUTH_TOKEN_KEY } from '@/auth/config'
+import { clearSession, touchSessionActivity } from '@/auth/session'
 
 // axios
 const axiosIns = axios.create({
@@ -48,6 +49,9 @@ axiosIns.interceptors.request.use(
 // Interceptor de response - Se ejecuta DESPUÉS de cada respuesta
 axiosIns.interceptors.response.use(
   response => {
+    if (localStorage.getItem(AUTH_TOKEN_KEY)) {
+      touchSessionActivity()
+    }
     // Log de respuestas exitosas en desarrollo
     if (process.env.NODE_ENV === 'development') {
       console.log(`✅ ${response.config.method?.toUpperCase()} ${response.config.url}`, response.data)
@@ -70,9 +74,8 @@ axiosIns.interceptors.response.use(
 
           if (!isLoginRequest && !isOnLoginPage) {
             console.log('🔒 Usuario no autorizado, redirigiendo a login...')
-            localStorage.removeItem(AUTH_TOKEN_KEY)
-            localStorage.removeItem('userData')
-            router.push({ name: 'auth-login' }).catch(() => {})
+            clearSession()
+            router.push({ name: 'auth-login', query: { sesion: 'expirada' } }).catch(() => {})
           }
           break
         }

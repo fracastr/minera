@@ -149,6 +149,7 @@ import { required, email } from '@validations'
 import { togglePasswordVisibility } from '@core/mixins/ui/forms'
 import { getHomeRouteForLoggedInUser, safeRouterReplace } from '@/auth/utils'
 import { AUTH_TOKEN_KEY } from '@/auth/config'
+import { touchSessionActivity } from '@/auth/session'
 import ToastificationContent from '@core/components/toastification/ToastificationContent.vue'
 import AuthMedia from './AuthMedia.vue'
 
@@ -176,6 +177,20 @@ export default {
       return this.passwordFieldType === 'password' ? 'EyeIcon' : 'EyeOffIcon'
     },
   },
+  mounted() {
+    if (this.$route.query.sesion === 'expirada') {
+      this.$toast({
+        component: ToastificationContent,
+        position: 'top-right',
+        props: {
+          title: 'Sesión expirada',
+          text: 'Por inactividad debes ingresar de nuevo.',
+          icon: 'ClockIcon',
+          variant: 'warning',
+        },
+      })
+    }
+  },
   methods: {
     async login() {
       this.isLoading = true
@@ -187,6 +202,7 @@ export default {
         const { userData, accessToken } = response.data
         localStorage.setItem('userData', JSON.stringify(userData))
         localStorage.setItem(AUTH_TOKEN_KEY, accessToken)
+        touchSessionActivity()
         this.$ability.update(userData.ability)
         await safeRouterReplace(this.$router, getHomeRouteForLoggedInUser(userData.role))
         this.$toast({
