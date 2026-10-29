@@ -323,9 +323,16 @@
       "nodeAdjustmentDetail": "Detalle Tabla Ajuste Nodos",
       "inventoryVariationsDetail": "Detalle Tabla Variaciones Inventario"
     },
+    "editDecision": {
+      "title": "Balance guardado",
+      "message": "Estás modificando un balance ya guardado. ¿Querés guardar los cambios como un balance nuevo o sobreescribir el original?",
+      "saveAsNew": "Guardar como nuevo",
+      "overwrite": "Sobreescribir original"
+    },
     "toast": {
       "runError": "Ocurrio un error al correr el balance",
-      "importError": "Ocurrio un error al importar el archivo"
+      "importError": "Ocurrio un error al importar el archivo",
+      "cloneError": "No se pudo preparar una copia del balance"
     }
   }
 }

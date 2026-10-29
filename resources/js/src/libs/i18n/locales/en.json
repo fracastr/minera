@@ -323,9 +323,16 @@
       "nodeAdjustmentDetail": "Node Adjustment Table Detail",
       "inventoryVariationsDetail": "Inventory Variations Table Detail"
     },
+    "editDecision": {
+      "title": "Saved balance",
+      "message": "You are modifying a saved balance. Save the changes as a new balance, or overwrite the original?",
+      "saveAsNew": "Save as new",
+      "overwrite": "Overwrite original"
+    },
     "toast": {
       "runError": "An error occurred while running the balance",
-      "importError": "An error occurred while importing the file"
+      "importError": "An error occurred while importing the file",
+      "cloneError": "Could not prepare a copy of the balance"
     }
   }
 }

@@ -40,6 +40,7 @@ Route::group(['middleware' => ['auth:sanctum', 'admin']], function () {
 Route::group(['prefix' => 'balances', 'middleware' => ['auth:sanctum']], function () {
     Route::middleware('balance:read')->group(function () {
         Route::get('get_listado', [BalancesController::class, 'get_listado']);
+        Route::get('load_balance/{id}', [BalancesController::class, 'load_balance']);
         Route::get('getValles/{user_id}', [UtilsController::class, 'getValles']);
         Route::get('getProcesos/{valle_id}', [UtilsController::class, 'getProcesos']);
         Route::get('getExcel/{datos_entrada_id}/{proceso_id}', [UtilsController::class, 'getExcel']);
@@ -49,6 +50,7 @@ Route::group(['prefix' => 'balances', 'middleware' => ['auth:sanctum']], functio
         Route::post('import', [BalancesController::class, 'import']);
         Route::post('correr_balance', [BalancesController::class, 'correr_balance']);
         Route::post('paint_tables', [BalancesController::class, 'paint_tables']);
+        Route::post('clone_session', [BalancesController::class, 'clone_session']);
         Route::post('save_balance', [BalancesController::class, 'save_balance']);
     });
 });

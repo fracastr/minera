@@ -22,7 +22,25 @@
               }"
               :theme="currentTheme"
               styleClass="vgt-table striped"
-            />
+            >
+              <template slot="table-row" slot-scope="props">
+                <span v-if="props.column.field === 'acciones'">
+                  <b-button
+                    size="sm"
+                    variant="outline-primary"
+                    @click="abrirBalance(props.row)"
+                  >
+                    Abrir
+                  </b-button>
+                </span>
+                <span v-else-if="typeof props.column.field === 'function'">
+                  {{ props.column.field(props.row) }}
+                </span>
+                <span v-else>
+                  {{ props.formattedRow[props.column.field] }}
+                </span>
+              </template>
+            </vue-good-table>
           </b-col>
         </b-row>
       </b-container>
@@ -36,6 +54,7 @@ import {
   BCol,
   BCard,
   BContainer,
+  BButton,
 } from 'bootstrap-vue'
 import { VueGoodTable } from 'vue-good-table'
 import useAppConfig from '@core/app-config/useAppConfig'
@@ -47,6 +66,7 @@ export default {
     VueGoodTable,
     BCard,
     BContainer,
+    BButton,
   },
   data() {
     return {
@@ -105,6 +125,13 @@ export default {
           tdClass: 'text-left',
           formatFn: this.formatDate,
         },
+        {
+          label: 'Acciones',
+          field: 'acciones',
+          sortable: false,
+          tdClass: 'text-center',
+          width: '110px',
+        },
       ]
     },
   },
@@ -112,6 +139,12 @@ export default {
     this.loadData()
   },
   methods: {
+    abrirBalance(row) {
+      this.$router.push({
+        name: 'balances-BalanceFormWizard',
+        query: { balance_id: row.id },
+      })
+    },
     loadData() {
       this.loading = true
       this.$http
