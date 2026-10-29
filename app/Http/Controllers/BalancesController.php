@@ -382,7 +382,9 @@ class BalancesController extends Controller
         $inventarios_fields = $this->createTableInventariosFields($componentes);
         $inventarios_data = $this->createTableInventariosData($data, $componentes);
 
-        $data_entrada = $balance_nodos = $data->datos_entrada;
+        $data_entrada = $data->datos_entrada;
+        $data_entrada['desviaciones'] = $data->desviaciones;
+        $data_entrada['nodos_data'] = $data->nodos_data;
         $datos_entrada_model = new Datos_entrada();
         $datos_entrada_model->datos_entrada = json_encode($data_entrada);
         $datos_entrada_model->proceso_id = $proceso_id;
@@ -605,9 +607,11 @@ class BalancesController extends Controller
         $balances_finales = $data->balances_finales;
         $mediciones = $balances_finales;
 
-        //update el json en la tabla de la base de datos
+        //update el json en la tabla de la base de datos (incluye extras para reabrir)
         $datos_entrada_data = Datos_entrada::find($datos_entrada_id);
         $data->datos_entrada['mediciones'] = $data->balances_finales;
+        $data->datos_entrada['desviaciones'] = $data->desviaciones;
+        $data->datos_entrada['nodos_data'] = $data->nodos_data;
         $datos_entrada_data->datos_entrada = json_encode($data->datos_entrada);
         $datos_entrada_data->save();
 
@@ -710,6 +714,51 @@ class BalancesController extends Controller
         }
     }
 
+    public function load_balance($id)
+    {
+        $balance = Balances::query()
+            ->with(['proceso:id,nombre,valle_id', 'proceso.valle:id,nombre', 'datosEntrada'])
+            ->find($id);
+
+        if (!$balance) {
+            return response()->json(['message' => 'Balance no encontrado'], 404);
+        }
+
+        if (!$balance->datosEntrada) {
+            return response()->json(['message' => 'El balance no tiene datos asociados'], 404);
+        }
+
+        $payload = $this->buildTablesFromDatosEntrada($balance->datosEntrada, $balance->proceso_id);
+        $payload['balance'] = [
+            'id' => $balance->id,
+            'nombre' => $balance->nombre,
+            'proceso_id' => $balance->proceso_id,
+            'valle_id' => optional($balance->proceso)->valle_id,
+        ];
+
+        return response()->json($payload);
+    }
+
+    public function clone_session(Request $request)
+    {
+        $user = $request->user();
+        if (!$user) {
+            return response()->json(['message' => 'Unauthorized'], 401);
+        }
+
+        $original = Datos_entrada::find($request->datos_entrada_id);
+        if (!$original) {
+            return response()->json(['message' => 'Datos de entrada no encontrados'], 404);
+        }
+
+        $clone = $original->replicate();
+        $clone->balance_id = null;
+        $clone->user_id = $user->id;
+        $clone->save();
+
+        return response()->json(['datos_entrada_id' => $clone->id]);
+    }
+
     public function save_balance(Request $request){
         $user = $request->user();
         if (!$user) {
@@ -721,12 +770,26 @@ class BalancesController extends Controller
             return response()->json(['message' => 'Datos de entrada no encontrados'], 404);
         }
 
-        $balance = new Balances();
-        $balance->nombre = $request->nombre_balance;
-        $balance->tipo = "quincenal";
-        $balance->proceso_id = $request->proceso_id;
-        $balance->user_id = $user->id;
-        $balance->save();
+        $overwrite = filter_var($request->overwrite, FILTER_VALIDATE_BOOLEAN);
+        if ($overwrite && $request->balance_id) {
+            $balance = Balances::find($request->balance_id);
+            if (!$balance) {
+                return response()->json(['message' => 'Balance no encontrado'], 404);
+            }
+
+            $balance->nombre = $request->nombre_balance;
+            if ($request->proceso_id) {
+                $balance->proceso_id = $request->proceso_id;
+            }
+            $balance->save();
+        } else {
+            $balance = new Balances();
+            $balance->nombre = $request->nombre_balance;
+            $balance->tipo = "quincenal";
+            $balance->proceso_id = $request->proceso_id;
+            $balance->user_id = $user->id;
+            $balance->save();
+        }
 
         $datos_entrada->balance_id = $balance->id;
         $datos_entrada->proceso_id = $balance->proceso_id;
@@ -740,5 +803,77 @@ class BalancesController extends Controller
         BalanceEventService::logSaved($datos_entrada, $user, $balance->id);
 
         return ["balance_id" => $balance->id];
+    }
+
+    private function decodeDatosEntradaPayload(Datos_entrada $datosEntrada): array
+    {
+        $raw = $datosEntrada->datos_entrada;
+        if (is_array($raw)) {
+            return $raw;
+        }
+        if (is_string($raw)) {
+            $decoded = json_decode($raw, true);
+            return is_array($decoded) ? $decoded : [];
+        }
+
+        return [];
+    }
+
+    private function buildTablesFromDatosEntrada(Datos_entrada $datosEntrada, $procesoId = null): array
+    {
+        $datos = $this->decodeDatosEntradaPayload($datosEntrada);
+        $procesoId = $procesoId ?: $datosEntrada->proceso_id;
+        $proceso = Procesos::find($procesoId);
+        $componentes = json_decode($proceso->componentes)->data;
+
+        $mediciones = $datos['mediciones'] ?? [];
+        $flujos = $datos['flujos'] ?? [];
+        $restricciones = $datos['restricciones'] ?? [];
+        $jerarquia = $datos['jerarquia'] ?? [];
+        $nodos = $datos['nodos'] ?? [];
+        $matriz = $datos['matriz'] ?? [];
+
+        $desviaciones = $datos['desviaciones'] ?? null;
+        if ($desviaciones === null) {
+            $desviaciones = [];
+            foreach ($restricciones as $restriccion) {
+                $desviaciones[] = array_fill(0, is_array($restriccion) ? count($restriccion) : 0, 0);
+            }
+        }
+
+        $nodos_data = $datos['nodos_data'] ?? null;
+        if ($nodos_data === null) {
+            $nodos_data = [];
+            foreach ($matriz as $index => $_) {
+                $nodos_data[$index] = array_fill(0, count($componentes) + 1, 0);
+            }
+        }
+
+        $nodos_data_formatted = $nodos_data;
+        foreach ($nodos_data_formatted as &$value_nodos_data) {
+            foreach ($value_nodos_data as &$value_nodos_data_item) {
+                if (is_numeric($value_nodos_data_item)) {
+                    $value_nodos_data_item = number_format((float) $value_nodos_data_item, 2, ',', '.');
+                }
+            }
+        }
+        unset($value_nodos_data, $value_nodos_data_item);
+
+        $data = (object) ['datos_entrada' => $datos];
+
+        return [
+            'data' => $data,
+            'balances_table' => $this->createTableMediciones($mediciones, $flujos),
+            'balances_fields' => $this->createTableMedicionesFields($mediciones, $flujos),
+            'nodos_data' => $nodos_data_formatted,
+            'restricciones_table' => $this->createTableRestriccionesData($restricciones, $jerarquia, $desviaciones, $flujos),
+            'balance_nodos' => $this->createTableBalanceNodos($matriz, $nodos_data_formatted, $nodos, $componentes),
+            'restricciones_fields' => $this->createTableRestriccionesFields($restricciones, $jerarquia),
+            'balance_nodos_fields' => $this->createTableBalanceNodosFields($componentes),
+            'inventarios_fields' => $this->createTableInventariosFields($componentes),
+            'inventarios_data' => $this->createTableInventariosData($data, $componentes),
+            'path' => '',
+            'datos_entrada_id' => $datosEntrada->id,
+        ];
     }
 }

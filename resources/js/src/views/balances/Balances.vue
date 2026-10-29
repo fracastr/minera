@@ -340,6 +340,14 @@ export default {
       type: Boolean,
       default: false,
     },
+    sourceBalanceId: {
+      type: Number,
+      default: null,
+    },
+    editMode: {
+      type: String,
+      default: null,
+    },
   },
   data() {
     return {
@@ -395,6 +403,99 @@ export default {
     }
   },
   methods: {
+    applyBalancePayload(response) {
+      const data = response.data || response
+      this.balances_table = data.balances_table
+      this.restricciones_table = data.restricciones_table
+      this.balance_nodos = data.balance_nodos
+      this.balance_nodos_fields = data.balance_nodos_fields
+      this.restricciones_fields = data.restricciones_fields
+      this.balances_fields = data.balances_fields
+      this.datos_entrada = data.data.datos_entrada
+      this.datos_entrada_id = data.datos_entrada_id
+      this.inventarios_fields = data.inventarios_fields
+      this.inventarios_data = data.inventarios_data
+      this.correr_button = true
+      this.exportar_button = true
+      this.show_tables = true
+
+      this.balances_fields.map((value, index) => {
+        if (index === 2 || index === 3) {
+          value.valueFormatter = intFormatter
+        }
+        if (index === 4 || index === 5) {
+          value.valueFormatter = decimalFormatter
+        }
+      })
+      const data_restricciones = this.restricciones_fields
+      this.restricciones_fields.map((value, index) => {
+        if (index != data_restricciones.length - 1 && index > 1) {
+          value.valueFormatter = decimalFormatter
+        }
+      })
+      this.inventarios_fields.map((value, index) => {
+        if (![0, 4, 8, 9].includes(index)) {
+          value.valueFormatter = intFormatter2
+        } else if ([4, 8, 9].includes(index)) {
+          value.valueFormatter = decimalFormatter2
+        }
+      })
+      this.balance_nodos_fields.map(value => {
+        value.cellStyle = nodosCellStyle
+      })
+    },
+    async ensureEditDecision() {
+      if (!this.sourceBalanceId || this.editMode) {
+        return true
+      }
+
+      const choice = await this.$bvModal.msgBoxConfirm(
+        this.$t('balances.editDecision.message'),
+        {
+          title: this.$t('balances.editDecision.title'),
+          size: 'md',
+          okVariant: 'primary',
+          okTitle: this.$t('balances.editDecision.saveAsNew'),
+          cancelTitle: this.$t('balances.editDecision.overwrite'),
+          centered: true,
+          noCloseOnBackdrop: true,
+          noCloseOnEsc: true,
+          hideHeaderClose: true,
+        },
+      )
+
+      if (choice === null) {
+        return false
+      }
+
+      if (choice === true) {
+        this.isLoading = true
+        try {
+          const response = await this.$http.post('/api/balances/clone_session', {
+            datos_entrada_id: this.datos_entrada_id,
+          })
+          this.datos_entrada_id = response.data.datos_entrada_id
+          this.$emit('edit-mode-chosen', 'new')
+          return true
+        } catch (e) {
+          console.log('FAILURE!! clone_session', e)
+          this.$toast({
+            component: ToastificationContent,
+            props: {
+              title: this.$t('balances.toast.cloneError'),
+              icon: 'AlertTriangleIcon',
+              variant: 'danger',
+            },
+          })
+          return false
+        } finally {
+          this.isLoading = false
+        }
+      }
+
+      this.$emit('edit-mode-chosen', 'overwrite')
+      return true
+    },
     exportar_excel() {
       this.isLoading = true
       this.$http
@@ -539,10 +640,14 @@ export default {
           })
         })
     },
-    correr_tables(event) {
-      this.isLoading = true
+    async correr_tables(event) {
       event.preventDefault()
-      console.log(this.datos_entrada)
+      const canModify = await this.ensureEditDecision()
+      if (!canModify) {
+        return
+      }
+
+      this.isLoading = true
       this.$http
         .post('/api/balances/correr_balance', {
           datos_entrada: this.datos_entrada,
@@ -558,62 +663,22 @@ export default {
           },
         })
         .then(response => {
-          this.balances_table = response.data.balances_table
-          this.restricciones_table = response.data.restricciones_table
-          // this.resultado_restricciones = response.data.resultado_restricciones;
-          this.balance_nodos = response.data.balance_nodos
-          this.balance_nodos_fields = response.data.balance_nodos_fields
-          this.restricciones_fields = response.data.restricciones_fields
-          this.balances_fields = response.data.balances_fields
-          this.datos_entrada = response.data.data.datos_entrada
-          this.datos_entrada_id = response.data.datos_entrada_id
-          this.inventarios_fields = response.data.inventarios_fields
-          this.inventarios_data = response.data.inventarios_data
-          // console.log("response", response);
-          // armar formateo dinamico de numeros
-          this.balances_fields.map((value, index) => {
-            //   console.log("index y value");
-            if (index === 2 || index === 3) {
-              value.valueFormatter = intFormatter
-            }
-            if (index === 4 || index === 5) {
-              value.valueFormatter = decimalFormatter
-            }
-          })
-          const data_restricciones = this.restricciones_fields
-          // armar formateo dinamico de numeros tabla 2
-          this.restricciones_fields.map((value, index) => {
-            console.log('index y value', index, value, data_restricciones.length)
-            if (index != data_restricciones.length - 1 && index > 1) {
-              console.log(index)
-              value.valueFormatter = decimalFormatter
-            }
-          })
-
-          this.inventarios_fields.map((value, index) => {
-            // console.log("index y value", index, value, data_restricciones.length);
-            if (![0, 4, 8, 9].includes(index)) {
-              value.valueFormatter = intFormatter2
-            } else if ([4, 8, 9].includes(index)) {
-              value.valueFormatter = decimalFormatter2
-            }
-          })
-
-          this.balance_nodos_fields.map((value, index) => {
-            value.cellStyle = nodosCellStyle
-          })
-          this.exportar_button = true
+          this.applyBalancePayload(response)
           this.isLoading = false
-          this.show_tables = true
         })
-        .catch(function (e) {
+        .catch(e => {
           this.isLoading = false
           console.log('FAILURE!! correr_balance', e)
         })
     },
-    onSubmit(event) {
-      this.isLoading = true
+    async onSubmit(event) {
       event.preventDefault()
+      const canModify = await this.ensureEditDecision()
+      if (!canModify) {
+        return
+      }
+
+      this.isLoading = true
       const formData = new FormData()
       formData.append('file', this.file_1)
       formData.append('proceso_id', this.proceso)
@@ -625,59 +690,7 @@ export default {
           },
         })
         .then(response => {
-          this.balances_table = response.data.balances_table
-          this.restricciones_table = response.data.restricciones_table
-          // this.resultado_restricciones = response.data.resultado_restricciones;
-          this.balance_nodos = response.data.balance_nodos
-          this.balance_nodos_fields = response.data.balance_nodos_fields
-          this.restricciones_fields = response.data.restricciones_fields
-          this.balances_fields = response.data.balances_fields
-          this.datos_entrada = response.data.data.datos_entrada
-          this.datos_entrada_id = response.data.datos_entrada_id
-          this.inventarios_fields = response.data.inventarios_fields
-          this.inventarios_data = response.data.inventarios_data
-          this.correr_button = true
-          // console.log("items after call");
-          //   console.log(this.datos_entrada);
-
-          // armar formateo dinamico de numeros
-          this.balances_fields.map((value, index) => {
-            //   console.log("index y value");
-            if (index === 2 || index === 3) {
-              value.valueFormatter = intFormatter
-            }
-            if (index === 4 || index === 5) {
-              value.valueFormatter = decimalFormatter
-            }
-          })
-
-          //   this.balances_table.map(function(value, index) {
-          //     value.Flujos = index + 1 + "-" + value.Flujos
-          //   })
-          const data_restricciones = this.restricciones_fields
-          // armar formateo dinamico de numeros tabla 2
-          this.restricciones_fields.map((value, index) => {
-            // console.log("index y value", index, value, data_restricciones.length);
-            if (index != data_restricciones.length - 1 && index > 1) {
-              //   console.log(index);
-              value.valueFormatter = decimalFormatter
-            }
-          })
-
-          this.inventarios_fields.map((value, index) => {
-            // console.log("index y value", index, value, data_restricciones.length);
-            if (![0, 4, 8, 9].includes(index)) {
-              value.valueFormatter = intFormatter2
-            } else if ([4, 8, 9].includes(index)) {
-              value.valueFormatter = decimalFormatter2
-            }
-          })
-
-          this.balance_nodos_fields.map((value, index) => {
-            value.cellStyle = nodosCellStyle
-          })
-
-          this.show_tables = true
+          this.applyBalancePayload(response)
           this.isLoading = false
         })
         .catch(e => {

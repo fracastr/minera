@@ -41,10 +41,12 @@
     </div>
 
     <form-wizard
+      ref="wizard"
       color="#7367F0"
       :title="null"
       :subtitle="null"
       shape="square"
+      :start-index="wizardStartIndex"
       :finish-button-text="$t('balanceFormWizard.finishButton')"
       :back-button-text="$t('balanceFormWizard.backButton')"
       :next-button-text="$t('balanceFormWizard.nextButton')"
@@ -175,7 +177,15 @@
             </div>
 
             <div class="balance-content">
-              <balance v-if="true" ref="balances_ref" :proceso="proceso" :show_tables="show_tables"/>
+              <balance
+                v-if="true"
+                ref="balances_ref"
+                :proceso="proceso"
+                :show_tables="show_tables"
+                :source-balance-id="sourceBalanceId"
+                :edit-mode="editMode"
+                @edit-mode-chosen="onEditModeChosen"
+              />
             </div>
           </div>
         </div>
@@ -1179,24 +1189,26 @@ export default {
       loading: false,
       new_balance: false,
       balance_id: null,
+      sourceBalanceId: null,
+      editMode: null,
+      wizardStartIndex: 0,
       show_tables: false,
     }
   },
   mounted() {
-    console.log('mounted')
-    console.log(this.valles)
     this.loading = true
     this.$http
-              .get('/api/balances/getValles/1')
-      .then(response => {
-        console.log('response', response)
-        // Agregar opción placeholder al inicio
+      .get('/api/balances/getValles/1')
+      .then(async response => {
         this.valles = [
           { value: '', text: 'Seleccione un valle' },
           ...response.data.valles,
         ]
 
-        console.log('valles', this.valles)
+        const reopenId = Number(this.$route.query.balance_id)
+        if (reopenId) {
+          await this.reopenBalance(reopenId)
+        }
       })
       .catch(e => {
         console.log('FAILURE!!', e)
@@ -1206,6 +1218,39 @@ export default {
       })
   },
   methods: {
+    onEditModeChosen(mode) {
+      this.editMode = mode
+      if (mode === 'new') {
+        this.sourceBalanceId = null
+        this.balance_id = null
+      }
+    },
+    async reopenBalance(balanceId) {
+      const response = await this.$http.get(`/api/balances/load_balance/${balanceId}`)
+      const { balance } = response.data
+      this.sourceBalanceId = balance.id
+      this.balance_id = balance.id
+      this.nombre_balance = balance.nombre
+      this.valle = balance.valle_id
+      this.editMode = null
+      this.wizardStartIndex = 2
+
+      const procesosResponse = await this.$http.get(`/api/balances/getProcesos/${this.valle}`)
+      this.procesos = [
+        { value: '', text: 'Seleccione un proceso' },
+        ...procesosResponse.data.procesos,
+      ]
+      this.proceso = balance.proceso_id
+      this.show_tables = true
+
+      await this.$nextTick()
+      if (this.$refs.balances_ref) {
+        this.$refs.balances_ref.applyBalancePayload(response)
+      }
+      if (this.$refs.wizard && this.$refs.wizard.changeTab) {
+        this.$refs.wizard.changeTab(0, 2)
+      }
+    },
     checkFormValidity() {
       const valid = this.$refs.form.checkValidity()
       this.nameState = valid
@@ -1221,18 +1266,27 @@ export default {
       // Trigger submit handler
       this.handleSubmit()
     },
-    handleSubmit() {
-      // Exit when the form isn't valid
+    async handleSubmit() {
       if (!this.checkFormValidity()) {
         return
       }
-      console.log('aqui se sube le nombre del balance', this.$refs.balances_ref.datos_entrada)
+
+      if (this.$refs.balances_ref) {
+        const canModify = await this.$refs.balances_ref.ensureEditDecision()
+        if (!canModify) {
+          return
+        }
+      }
+
+      const overwrite = this.editMode === 'overwrite' && !!this.sourceBalanceId
       this.$http
         .post('/api/balances/save_balance', {
           datos_entrada: this.$refs.balances_ref.datos_entrada,
           nombre_balance: this.nombre_balance,
           datos_entrada_id: this.$refs.balances_ref.datos_entrada_id,
           proceso_id: this.proceso,
+          overwrite,
+          balance_id: overwrite ? this.sourceBalanceId : null,
         }, {
           headers: {
             'Content-Type': 'application/json',
@@ -1240,6 +1294,8 @@ export default {
         })
         .then(response => {
           this.balance_id = response.data.balance_id
+          this.sourceBalanceId = response.data.balance_id
+          this.editMode = null
           this.$toast({
             component: ToastificationContent,
             props: {
@@ -1263,9 +1319,6 @@ export default {
           this.$refs['my-modal'].hide()
         })
 
-      // Push the name to submitted names
-      // this.submittedNames.push(this.nombre_balance)
-      // Hide the modal manually
       this.$nextTick(() => {
         this.$bvModal.hide('modal-prevent-closing')
       })
