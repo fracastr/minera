@@ -68,7 +68,7 @@
         >concentradora</text>
       </svg>
       <figcaption class="recon__note">
-        Simulación ilustrativa con valores de ejemplo. Se calcula en tu navegador con un método simplificado y no usa el motor de cálculo del sistema.
+        Simulación ilustrativa con valores de ejemplo. Se calcula en tu navegador con un método simplificado y no usa el motor de cálculo de Sondek.
       </figcaption>
     </figure>
 

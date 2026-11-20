@@ -3,7 +3,7 @@
     <!--
       THESIS: Home after login is a plant control desk on the operation photo, not a SaaS marketing dashboard.
       OWN-WORLD: Atrium — dark panel, copper #e07a3a, mining still, quiet type. Same grammar as login.
-      STORY: Operator knows this is the CMP balances system, and the next job is generate or review a balance.
+      STORY: Operator knows this is Sondek, CMP is the site, and the next job is generate or review a balance.
       FIRST VIEWPORT: Full-bleed photo; centered wide desk with title and three task tiles spanning the scene.
       FORM: Login atrium extended into Operate. FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, and DESIGN.md
     -->
@@ -27,7 +27,7 @@
         <header class="dashboard-home__head">
           <b-img
             :src="appLogoImage"
-            alt="CMP"
+            alt="Sondek"
             class="dashboard-home__logo"
           />
           <p class="dashboard-home__live">

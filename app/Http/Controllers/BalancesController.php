@@ -2,16 +2,13 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\BalanceCorrida;
 use App\Models\Balances;
 use App\Services\BalanceEventService;
 use App\Models\Datos_entrada;
 use App\Models\Procesos;
 use App\Models\User;
-use Illuminate\Http\Client\HttpClientException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Log;
 
 class BalancesController extends Controller
 {
@@ -298,11 +295,6 @@ class BalancesController extends Controller
 
     public function import(Request $request)
     {
-        $request->validate([
-            'proceso_id' => 'required|integer|exists:procesos,id',
-            'file' => app()->environment('local') ? 'nullable' : 'required|file|mimes:xlsx,xls|max:20480',
-        ]);
-
         try {
             $user = $request->user();
             if (!$user) {
@@ -339,7 +331,7 @@ class BalancesController extends Controller
         $response = Http::acceptJson()->post($url, [
             'path_name' => $path,
             'nombre_proceso' => $nombre_proceso
-        ])->throw();
+        ]);
 
         $data = json_decode($response->getBody()->getContents());
         foreach ($data as $key => &$value) {
@@ -405,7 +397,6 @@ class BalancesController extends Controller
         $datos_entrada_model->save();
 
         BalanceEventService::logImported($datos_entrada_model, $user);
-        BalanceCorrida::record($datos_entrada_model, $user, BalanceCorrida::TIPO_IMPORTACION);
 
         $datos_entrada_id = $datos_entrada_model->id;
 
@@ -422,58 +413,17 @@ class BalancesController extends Controller
         'inventarios_data' => $inventarios_data,
         'path' => $path,
         'datos_entrada_id' => $datos_entrada_id];
-        } catch (HttpClientException $e) {
-            return $this->solverError('import', $e);
-        }
-    }
-
-    private function solverError(string $action, \Throwable $e)
-    {
-        Log::error("Balance solver failed on {$action}", ['error' => $e->getMessage()]);
-
-        return response()->json(['message' => 'El servicio de cálculo no respondió correctamente.'], 502);
-    }
-
-    /**
-     * Writes the edited inventory grid rows back into datos_entrada so the solver sees them.
-     * Only keys that already exist in datos_entrada are touched.
-     */
-    public static function applyInventariosTable(array $datosEntrada, $inventariosTable, array $componentes): array
-    {
-        $columns = [
-            'tmh_ini' => 'TMH INI',
-            'tmh_fin' => 'TMH FIN',
-            'tmh_delta' => 'TMH Delta',
-            'humedad_inventario' => 'Humedad [%]',
-            'tms_ini' => 'TMS INI',
-            'tms_fin' => 'TMS FIN',
-            'tms_delta' => 'TMS Delta',
-        ];
-        $toNumber = fn ($v) => floatval(str_replace(',', '', (string) $v));
-
-        foreach ((array) $inventariosTable as $i => $row) {
-            $row = (array) $row;
-            foreach ($columns as $key => $field) {
-                if (array_key_exists($field, $row) && isset($datosEntrada[$key]) && array_key_exists($i, $datosEntrada[$key])) {
-                    $datosEntrada[$key][$i] = $toNumber($row[$field]);
-                }
-            }
-            foreach ($componentes as $k => $componente) {
-                $field = $componente . ' [%]';
-                if (array_key_exists($field, $row) && isset($datosEntrada['componentes_inventario'][$i])
-                    && array_key_exists($k, $datosEntrada['componentes_inventario'][$i])) {
-                    $datosEntrada['componentes_inventario'][$i][$k] = $toNumber($row[$field]);
-                }
-            }
+        } catch (\GuzzleHttp\Exception\BadResponseException $e) {
+            return "ERROR";
         }
 
-        return $datosEntrada;
+        return response()->json(['message' => 'uploaded successfully'], 200);
     }
 
     public function get_listado(Request $request)
     {
         $listado = Balances::query()
-            ->select(['id', 'nombre', 'tipo', 'periodo_inicio', 'periodo_fin', 'proceso_id', 'user_id', 'created_at', 'updated_at'])
+            ->select(['id', 'nombre', 'tipo', 'proceso_id', 'user_id', 'created_at', 'updated_at'])
             ->with([
                 'user:id,nombre',
                 'datosEntrada.user:id,nombre',
@@ -491,8 +441,6 @@ class BalancesController extends Controller
                     'id' => $balance->id,
                     'nombre' => $balance->nombre,
                     'tipo' => $balance->tipo,
-                    'periodo_inicio' => optional($balance->periodo_inicio)->format('Y-m-d'),
-                    'periodo_fin' => optional($balance->periodo_fin)->format('Y-m-d'),
                     'proceso_id' => $balance->proceso_id,
                     'user_id' => $creator ? $creator->id : $balance->user_id,
                     'created_at' => $balance->created_at,
@@ -556,9 +504,42 @@ class BalancesController extends Controller
         $proceso_id = $request->proceso_id;
         $inventarios_table = $request->inventarios_table;
 
-        $proceso = Procesos::find($proceso_id);
-        $componentes = json_decode($proceso->componentes)->data;
-        $datos_entrada = self::applyInventariosTable($datos_entrada, $inventarios_table, $componentes);
+        $tmh_ini = array();
+        $tmh_fin = array();
+        $tmh_delta = array();
+        $tms_ini = array();
+        $tms_fin = array();
+        $tms_delta = array();
+        $humedad = array();
+        foreach ($inventarios_table as $key_inventarios_table => $value_inventarios_table) {
+            switch ($key_inventarios_table) {
+                case 'TMH INI':
+                    array_push($tmh_ini, $value_inventarios_table);
+                    break;
+                case 'TMH FIN':
+                    array_push($tmh_fin, $value_inventarios_table);
+                    break;
+                case 'TMH Delta':
+                    array_push($tmh_fin, $value_inventarios_table);
+                    break;
+                case 'TMS INI':
+                    array_push($tms_ini, $value_inventarios_table);
+                    break;
+                case 'TMS FIN':
+                    array_push($tms_fin, $value_inventarios_table);
+                    break;
+                case 'TMS Delta':
+                    array_push($tms_fin, $value_inventarios_table);
+                    break;
+                case 'Humedad [%]':
+                    array_push($humedad, $value_inventarios_table);
+                    break;
+
+                default:
+                    # code...
+                    break;
+            }
+        }
 
         $new_mediciones = array();
 
@@ -608,7 +589,7 @@ class BalancesController extends Controller
         $myBody['datos_entrada_id'] = $datos_entrada_id;
         $response = Http::acceptJson()->post($url, [
             'datos_entrada_id' => $datos_entrada_id,
-        ])->throw();
+        ]);
 
         $data = json_decode($response->getBody()->getContents());
 
@@ -633,7 +614,6 @@ class BalancesController extends Controller
         $data->datos_entrada['nodos_data'] = $data->nodos_data;
         $datos_entrada_data->datos_entrada = json_encode($data->datos_entrada);
         $datos_entrada_data->save();
-        BalanceCorrida::record($datos_entrada_data, $request->user(), BalanceCorrida::TIPO_CORRIDA);
 
         $table_mediciones_fields = $this->createTableMedicionesFields($mediciones, $flujos);
         $array_mediciones = $this->createTableMediciones($mediciones, $flujos);
@@ -662,6 +642,10 @@ class BalancesController extends Controller
 
 
 
+        $proceso = Procesos::find($proceso_id);
+        $componentes = json_decode($proceso->componentes);
+        $componentes = $componentes->data;
+
         $balance_nodos_fields = $this->createTableBalanceNodosFields($componentes);
         $array_balance_nodos = $this->createTableBalanceNodos($balance_nodos, $nodos_data, $nodos, $componentes);
 
@@ -684,9 +668,11 @@ class BalancesController extends Controller
         'inventarios_data' => $inventarios_data,
         'path' => "",
         'datos_entrada_id' => $datos_entrada_id];
-        } catch (HttpClientException $e) {
-            return $this->solverError('correr_balance', $e);
+        } catch (\GuzzleHttp\Exception\BadResponseException $e) {
+            return "ERROR";
         }
+
+        return response()->json(['message' => 'uploaded successfully'], 200);
     }
 
     public function paint_tables(Request $request)
@@ -700,7 +686,7 @@ class BalancesController extends Controller
             $response = Http::acceptJson()->post($url, [
                 'datos_entrada_id' => $datos_entrada_id,
                 'rowIndex' => $rowIndex
-            ])->throw();
+            ]);
 
             $data = json_decode($response->getBody()->getContents());
             foreach ($data as $key => &$value) {
@@ -724,7 +710,7 @@ class BalancesController extends Controller
                 "green" => $green
             ];
         } catch (\Throwable $th) {
-            return $this->solverError('paint_tables', $th);
+            return "ERROR";
         }
     }
 
@@ -746,9 +732,6 @@ class BalancesController extends Controller
         $payload['balance'] = [
             'id' => $balance->id,
             'nombre' => $balance->nombre,
-            'tipo' => $balance->tipo,
-            'periodo_inicio' => optional($balance->periodo_inicio)->format('Y-m-d'),
-            'periodo_fin' => optional($balance->periodo_fin)->format('Y-m-d'),
             'proceso_id' => $balance->proceso_id,
             'valle_id' => optional($balance->proceso)->valle_id,
         ];
@@ -772,46 +755,8 @@ class BalancesController extends Controller
         $clone->balance_id = null;
         $clone->user_id = $user->id;
         $clone->save();
-        BalanceCorrida::copyHistory($original->id, $clone->id);
 
         return response()->json(['datos_entrada_id' => $clone->id]);
-    }
-
-    public function corridas($datos_entrada_id)
-    {
-        $corridas = BalanceCorrida::query()
-            ->select(['id', 'tipo', 'user_id', 'created_at'])
-            ->with('user:id,nombre')
-            ->where('datos_entrada_id', $datos_entrada_id)
-            ->orderByDesc('id')
-            ->get()
-            ->map(fn (BalanceCorrida $c) => [
-                'id' => $c->id,
-                'tipo' => $c->tipo,
-                'usuario_nombre' => optional($c->user)->nombre,
-                'created_at' => $c->created_at,
-            ]);
-
-        return response()->json(['corridas' => $corridas]);
-    }
-
-    public function restaurar_corrida(Request $request, $corrida_id)
-    {
-        $request->validate(['datos_entrada_id' => 'required|integer|exists:datos_entradas,id']);
-
-        $corrida = BalanceCorrida::with('datosEntrada:id,proceso_id')->findOrFail($corrida_id);
-        $target = Datos_entrada::findOrFail($request->datos_entrada_id);
-
-        // The target may be a clone of the corrida's session; only the process must match.
-        if ((int) $corrida->datosEntrada->proceso_id !== (int) $target->proceso_id) {
-            return response()->json(['message' => 'La versión pertenece a otro proceso.'], 422);
-        }
-
-        $target->datos_entrada = $corrida->snapshot;
-        $target->save();
-        BalanceCorrida::record($target, $request->user(), BalanceCorrida::TIPO_RESTAURACION);
-
-        return response()->json($this->buildTablesFromDatosEntrada($target));
     }
 
     public function save_balance(Request $request){
@@ -819,14 +764,6 @@ class BalancesController extends Controller
         if (!$user) {
             return response()->json(['message' => 'Unauthorized'], 401);
         }
-
-        $request->validate([
-            'nombre_balance' => 'required|string|max:255',
-            'tipo' => 'required|in:' . implode(',', Balances::TIPOS),
-            'periodo_inicio' => 'required|date',
-            'periodo_fin' => 'required|date|after_or_equal:periodo_inicio',
-        ]);
-        $periodo = $request->only(['tipo', 'periodo_inicio', 'periodo_fin']);
 
         $datos_entrada = Datos_entrada::find($request->datos_entrada_id);
         if (!$datos_entrada) {
@@ -841,7 +778,6 @@ class BalancesController extends Controller
             }
 
             $balance->nombre = $request->nombre_balance;
-            $balance->fill($periodo);
             if ($request->proceso_id) {
                 $balance->proceso_id = $request->proceso_id;
             }
@@ -849,7 +785,7 @@ class BalancesController extends Controller
         } else {
             $balance = new Balances();
             $balance->nombre = $request->nombre_balance;
-            $balance->fill($periodo);
+            $balance->tipo = "quincenal";
             $balance->proceso_id = $request->proceso_id;
             $balance->user_id = $user->id;
             $balance->save();
