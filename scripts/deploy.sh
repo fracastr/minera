@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
-# Production deploy for /home/ubuntu/minera on the sondek EC2.
-# Assumes the tree is already at origin/Prod (GitHub Actions does git reset first).
+# Deploy for the sondek EC2: /home/ubuntu/minera (www, branch Prod) or /home/ubuntu/minera-v2 (v2, branch next).
+# Assumes the tree is already reset to its branch (GitHub Actions does git reset first).
 set -euo pipefail
 
-APP_DIR="/home/ubuntu/minera"
+APP_DIR="${APP_DIR:-/home/ubuntu/minera}"
 
 cd "$APP_DIR"
 
@@ -40,6 +40,7 @@ find public/js/chunks -type f -mtime +7 -print0 | while IFS= read -r -d '' f; do
   sudo -n rm -f "$f"
 done
 
+if [ -d frontend-v3 ]; then
 echo "==> frontend v3 (Vite / Node 22 from /opt/node22; system Node 10 stays for Mix and Excel)"
 V3_PATH="/opt/node22/bin:$PATH"
 (
@@ -61,6 +62,7 @@ find public/v3-build/assets -type f -mtime +7 -print0 | while IFS= read -r -d ''
   fi
   sudo -n rm -f "$f"
 done
+fi
 
 echo "==> migrate"
 php_artisan migrate --force
