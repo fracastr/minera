@@ -51,8 +51,7 @@
   <!-- Manifest para PWA -->
   <link rel="manifest" href="{{ asset('images/logo/site.webmanifest') }}">
 
-  <!-- Match the splash to the user's saved skin before anything paints. -->
-  <script>try { if (localStorage.getItem('vuexy-skin') === 'dark') document.documentElement.classList.add('loader-dark') } catch (e) {}</script>
+  <script src="{{ asset('loader-theme.js') }}"></script>
 
   <!-- Splash Screen/Loader Styles -->
   <link rel="stylesheet" type="text/css" href="{{ asset(mix('css/loader.css')) }}" />
