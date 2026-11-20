@@ -30,11 +30,12 @@
       :to="{ name: 'home' }"
       class="login-atrium__brand"
     >
-      <span
-        class="login-atrium__mark"
-        aria-hidden="true"
-      />
-      <span>Sondek</span>
+      <img
+        class="login-atrium__logo"
+        src="/brand/cmp-logo-white.svg"
+        alt="CMP, Compañía Minera del Pacífico"
+      >
+      <span class="login-atrium__product">Balances</span>
     </router-link>
     <p
       class="login-atrium__tagline"

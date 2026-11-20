@@ -11,7 +11,7 @@
           id="login-heading"
           class="login-atrium__headline"
         >
-          Ingresa a Sondek
+          Ingresa a Balances CMP
         </h1>
         <p class="login-atrium__subhead">
           Balance metalúrgico de la operación CMP.

@@ -5,10 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="robots" content="noindex, nofollow" />
   <meta name="session-lifetime" content="{{ (int) config('session.lifetime') }}">
-  <title>Sondek - CMP Balances</title>
+  <title>Balances CMP</title>
   <link rel="icon" type="image/x-icon" href="{{ url('/favicon.ico') }}">
-  {{-- Fonts of the public landing (pages/index.vue), same as the current app. --}}
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Newsreader:opsz,wght@6..72,300;6..72,400&display=swap" rel="stylesheet">
+  {{-- Fonts of the public landing (pages/index.vue): CMP's Work Sans, Archivo expanded for display. --}}
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@125,600&family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet">
   <script src="{{ asset('loader-theme.js') }}"></script>
   <style>
     #loading-bg { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1.5rem; background: #f8f7fa; }
@@ -16,7 +16,7 @@
     #loading-bg img { width: 150px; }
     .loader-dark #loading-bg img { filter: brightness(0) invert(1); opacity: .9; }
     #loading-bg .bar { position: relative; width: 160px; height: 3px; border-radius: 3px; background: rgba(0,0,0,.08); overflow: hidden; }
-    #loading-bg .bar::after { content: ''; position: absolute; inset: 0 auto 0 0; width: 40%; border-radius: 3px; background: #1d4f9c; animation: v3-slide 1.1s cubic-bezier(.65,0,.35,1) infinite; }
+    #loading-bg .bar::after { content: ''; position: absolute; inset: 0 auto 0 0; width: 40%; border-radius: 3px; background: #1c68c9; animation: v3-slide 1.1s cubic-bezier(.65,0,.35,1) infinite; }
     @keyframes v3-slide { from { transform: translateX(-100%); } to { transform: translateX(250%); } }
   </style>
   {{-- Vue 3 / Vuexy v10 app (frontend-v3/), built by its own Vite into public/v3-build. --}}
@@ -24,7 +24,7 @@
 </head>
 <body>
   <div id="app">
-    <div id="loading-bg" role="status"><img src="{{ asset('logo.png') }}" alt="CMP"><div class="bar"></div></div>
+    <div id="loading-bg" role="status"><img src="{{ asset('brand/cmp-logo.svg') }}" alt="CMP"><div class="bar"></div></div>
   </div>
 </body>
 </html>
