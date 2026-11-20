@@ -1,9 +1,9 @@
 // Login, in the homepage's language: framed video panel beside an assay-paper form,
-// expanded display headline, pill controls and CMP blue as the only bright accent.
+// light serif headline, pill controls and the ore orange as the only bright accent.
 @import '../home/tokens';
 
 .login-atrium {
-  @include cmp-tokens;
+  @include sondek-tokens;
   --danger: #b4371f;
 
   display: grid;
@@ -67,18 +67,11 @@
   }
 }
 
-.login-atrium__logo {
-  display: block;
-  width: auto;
-  height: 30px;
-}
-
-.login-atrium__product {
-  padding-left: 12px;
-  border-left: 1px solid var(--ink-line);
-  font-family: var(--serif);
-  font-size: 15px;
-  font-stretch: 125%;
+.login-atrium__mark {
+  width: 12px;
+  height: 12px;
+  background: var(--ore);
+  transform: rotate(45deg);
 }
 
 .login-atrium__tagline {
@@ -87,9 +80,8 @@
   max-width: 12ch;
   margin: 0;
   font-family: var(--serif);
-  font-stretch: 125%;
-  font-size: clamp(32px, 4vw, 58px);
-  font-weight: 600;
+  font-size: clamp(40px, 5.2vw, 76px);
+  font-weight: 300;
   letter-spacing: -0.03em;
   line-height: 1;
 }
@@ -119,9 +111,8 @@
   margin: 0 0 10px;
   color: var(--text);
   font-family: var(--serif);
-  font-stretch: 125%;
-  font-size: clamp(28px, 2.8vw, 38px);
-  font-weight: 600;
+  font-size: clamp(36px, 4vw, 48px);
+  font-weight: 300;
   letter-spacing: -0.02em;
   line-height: 1.04;
 }
@@ -273,7 +264,7 @@
   border: 0;
   border-radius: 999px;
   background: var(--ore);
-  color: #fff;
+  color: var(--ink);
   font-size: 15px;
   font-weight: 600;
   cursor: pointer;
@@ -298,7 +289,7 @@
 }
 
 .login-atrium__spinner {
-  color: #fff !important;
+  color: var(--ink) !important;
 }
 
 .login-atrium a:focus-visible,

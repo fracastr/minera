@@ -6,9 +6,9 @@ on:
       - Prod
   workflow_dispatch:
 
-# One deploy at a time on the box; never cancel one mid-build, the newest queued run wins.
+# One deploy at a time on the box (shared with Deploy v2); never cancel one mid-build.
 concurrency:
-  group: deploy-prod
+  group: deploy-box
   cancel-in-progress: false
 
 jobs:

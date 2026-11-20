@@ -1,6 +1,6 @@
 // Illustrative two-product reconciliation (feed = concentrate + tails) for the homepage demo.
 // shortcut: two-stage weighted least squares (mass, then fines) with closed-form projection;
-// The real engine solves the full network with bounds in the Python/GEKKO service.
+// Sondek's real engine solves the full network with bounds in the Python/GEKKO service.
 
 const STREAMS = ['feed', 'conc', 'tails']
 

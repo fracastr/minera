@@ -6,7 +6,6 @@
   .modal-header {
     background-color: $body-bg;
     border-bottom: none;
-    align-items: center;
     border-bottom-left-radius: 0;
     border-bottom-right-radius: 0;
     // close button
@@ -19,8 +18,7 @@
       opacity: 1;
       transition: all 0.23s ease 0.1s;
       position: relative;
-      // Keep the X inside the header (Vuexy floats it outside the corner).
-      margin: 0 0 0 auto;
+      transform: translate(8px, -2px);
 
       // For hover effect of close btn
       &:hover,
@@ -28,6 +26,7 @@
       &:active {
         opacity: 1;
         outline: none;
+        transform: translate(5px, 3px);
         box-shadow: none;
       }
     }

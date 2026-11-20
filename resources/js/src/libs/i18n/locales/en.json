@@ -99,7 +99,7 @@
   "Form Repeater": "Form Repeater",
   "BS Table": "BS Table",
   "dashboard": {
-    "title": "Balances CMP",
+    "title": "Sondek",
     "subtitle": "Metallurgical balance · CMP operations",
     "status": "Plant system online",
     "welcome": "Continue the work",
@@ -288,11 +288,6 @@
       "label": "Balance Name",
       "placeholder": "Ex: Balance Q1 2024",
       "invalidFeedback": "Name is required",
-      "tipo": "Period type",
-      "tipos": { "quincenal": "Fortnightly", "mensual": "Monthly" },
-      "periodoInicio": "From",
-      "periodoFin": "To",
-      "periodoInvalid": "The end date must be on or after the start date",
       "cancel": "Cancel",
       "save": "Save Balance"
     },
@@ -314,9 +309,7 @@
       "load": "Load",
       "reset": "Reset",
       "run": "Run",
-      "generateExcel": "Generate Excel Results",
-      "history": "History",
-      "diagram": "View diagram"
+      "generateExcel": "Generate Excel Results"
     },
     "tables": {
       "balances": "Balances Table",
@@ -339,63 +332,7 @@
     "toast": {
       "runError": "An error occurred while running the balance",
       "importError": "An error occurred while importing the file",
-      "cloneError": "Could not prepare a copy of the balance",
-      "exportError": "Could not generate the Excel file",
-      "restoreSuccess": "Version restored",
-      "restoreError": "Could not restore the version",
-      "historyError": "Could not load the history"
-    },
-    "quality": {
-      "title": "Reconciliation quality",
-      "hint": "Tolerance usage: how much of the margin allowed in Restrictions the adjustment used. Close to 100% usually points to a doubtful measurement.",
-      "flowsAtLimit": "Variables near the limit",
-      "flowsOutside": "Outside tolerance",
-      "maxTmsAdjustment": "Largest TMS adjustment",
-      "nodesOpen": "Unclosed nodes",
-      "nodesOpenList": "Unclosed nodes:",
-      "flow": "Flow",
-      "variable": "Variable",
-      "adjustment": "Adjustment",
-      "tolerance": "Tolerance",
-      "usage": "Usage",
-      "noTolerance": "Hierarchy ≠ 1",
-      "showAll": "Show all ({n})",
-      "showLess": "Show less",
-      "status": { "ok": "OK", "limite": "At limit", "fuera": "Outside", "sin-tolerancia": "No tolerance" }
-    },
-    "history": {
-      "title": "Run history",
-      "empty": "No versions recorded yet",
-      "date": "Date",
-      "type": "Type",
-      "user": "User",
-      "current": "Current",
-      "restore": "Restore",
-      "types": { "importacion": "Import", "corrida": "Run", "restauracion": "Restore" }
-    },
-    "sankey": {
-      "title": "Flow diagram (balanced TMS)",
-      "empty": "There are no flows with TMS to draw.",
-      "explain": "How the period's dry tonnes (balanced TMS) move between the process nodes. Each band is a flow and its width is proportional to the tonnes; read it left to right: inputs, nodes and outputs. A stock variation enters the process when the stock goes down (draw) and leaves it when it goes up (build-up). Hover a band or a node for details.",
-      "kpi": {
-        "entradas": "Inputs",
-        "salidas": "Outputs",
-        "stock": "Stock: draw / build-up",
-        "cierre": "Closure difference (inputs + draw − outputs − build-up)"
-      },
-      "legend": {
-        "entrada": "Input",
-        "proceso": "Process node",
-        "salida": "Output",
-        "stock": "Stock variation"
-      },
-      "animate": "Animate flows",
-      "ofInput": "of total input",
-      "recirculations": "Recirculations",
-      "recirculationsHint": "Flows that return to an earlier node; they are not drawn in the diagram.",
-      "flow": "Flow",
-      "from": "From",
-      "to": "To"
+      "cloneError": "Could not prepare a copy of the balance"
     }
   }
 }

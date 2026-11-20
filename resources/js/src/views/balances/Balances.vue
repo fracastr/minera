@@ -61,26 +61,6 @@
           >
             {{ $t('balances.buttons.generateExcel') }}
           </b-button>
-          <b-button
-            v-show="exportar_button"
-            type="button"
-            variant="outline-primary"
-            class="ml-1"
-            @click="abrirHistorial"
-          >
-            <feather-icon icon="ClockIcon" class="mr-50" />
-            {{ $t('balances.buttons.history') }}
-          </b-button>
-          <b-button
-            v-show="exportar_button"
-            type="button"
-            variant="outline-primary"
-            class="ml-1"
-            @click="$refs['sankey-modal'].show()"
-          >
-            <feather-icon icon="ShareIcon" class="mr-50" />
-            {{ $t('balances.buttons.diagram') }}
-          </b-button>
         </b-col>
       </b-row>
     </b-form>
@@ -93,102 +73,6 @@
     </div> -->
     <hr>
     <b-container v-if="show_tables">
-      <section
-        v-if="calidad.flows.length"
-        class="calidad-panel mb-3"
-      >
-        <div class="d-flex align-items-baseline flex-wrap mb-1">
-          <h5 class="mb-0 mr-1">
-            {{ $t('balances.quality.title') }}
-          </h5>
-          <small class="text-muted">{{ $t('balances.quality.hint') }}</small>
-        </div>
-
-        <b-row class="calidad-kpis mb-1">
-          <b-col
-            v-for="kpi in calidadKpis"
-            :key="kpi.label"
-            cols="6"
-            lg="3"
-          >
-            <div :class="['calidad-kpi', `calidad-kpi--${kpi.variant}`]">
-              <div class="calidad-kpi__value">
-                {{ kpi.value }}
-              </div>
-              <div class="calidad-kpi__label">
-                {{ kpi.label }}
-              </div>
-              <div
-                v-if="kpi.detail"
-                class="calidad-kpi__detail"
-              >
-                {{ kpi.detail }}
-              </div>
-            </div>
-          </b-col>
-        </b-row>
-
-        <p
-          v-if="calidad.summary.nodosSinCerrar"
-          class="text-danger small mb-1"
-        >
-          {{ $t('balances.quality.nodesOpenList') }}
-          {{ calidad.nodes.filter(n => !n.cierra).map(n => `${n.nodo} (${formatPct(n.cierrePct)})`).join(', ') }}
-        </p>
-
-        <b-table
-          :items="calidadFilas"
-          :fields="calidadFields"
-          small
-          responsive
-          class="calidad-table mb-0"
-        >
-          <template #cell(ajustePct)="{ value }">
-            <span class="text-nowrap">{{ value > 0 ? '+' : '' }}{{ formatPct(value) }}</span>
-          </template>
-          <template #cell(tolerancia)="{ item }">
-            <span
-              v-if="item.usoPct === null"
-              class="text-muted"
-            >{{ $t('balances.quality.noTolerance') }}</span>
-            <span
-              v-else
-              class="text-nowrap"
-            >−{{ item.tolInf }}% / +{{ item.tolSup }}%</span>
-          </template>
-          <template #cell(usoPct)="{ item }">
-            <div
-              v-if="item.usoPct !== null"
-              class="d-flex align-items-center"
-            >
-              <b-progress
-                :value="Math.min(item.usoPct, 100)"
-                :variant="estadoVariant(item.estado)"
-                height="6px"
-                class="flex-grow-1 mr-50"
-              />
-              <span class="text-nowrap small">{{ Math.round(item.usoPct) }}%</span>
-            </div>
-          </template>
-          <template #cell(estado)="{ value }">
-            <b-badge
-              :variant="estadoVariant(value)"
-              pill
-            >
-              {{ $t(`balances.quality.status.${value}`) }}
-            </b-badge>
-          </template>
-        </b-table>
-        <b-button
-          v-if="calidad.flows.length > calidadLimite"
-          variant="link"
-          size="sm"
-          class="px-0"
-          @click="calidadVerTodo = !calidadVerTodo"
-        >
-          {{ calidadVerTodo ? $t('balances.quality.showLess') : $t('balances.quality.showAll', { n: calidad.flows.length }) }}
-        </b-button>
-      </section>
       <b-row cols="4">
         <b-col
           md="4"
@@ -356,62 +240,6 @@
         />
       </b-modal>
     </b-container>
-    <b-modal
-      ref="sankey-modal"
-      :title="$t('balances.sankey.title')"
-      size="xl"
-      hide-footer
-      @shown="sankeyOpen = true"
-      @hidden="sankeyOpen = false"
-    >
-      <balance-sankey
-        v-if="sankeyOpen"
-        :graph="flowGraph"
-      />
-    </b-modal>
-    <b-modal
-      ref="historial-modal"
-      :title="$t('balances.history.title')"
-      size="lg"
-      centered
-      hide-footer
-    >
-      <b-table
-        :items="corridas"
-        :fields="corridasFields"
-        :busy="corridasLoading"
-        :empty-text="$t('balances.history.empty')"
-        show-empty
-        small
-        responsive
-      >
-        <template #table-busy>
-          <div class="text-center my-1">
-            <b-spinner small />
-          </div>
-        </template>
-        <template #cell(created_at)="{ value }">
-          {{ formatFecha(value) }}
-        </template>
-        <template #cell(tipo)="{ value }">
-          {{ $t(`balances.history.types.${value}`) }}
-        </template>
-        <template #cell(acciones)="{ item, index }">
-          <span
-            v-if="index === 0"
-            class="text-muted"
-          >{{ $t('balances.history.current') }}</span>
-          <b-button
-            v-else-if="canWrite"
-            size="sm"
-            variant="outline-primary"
-            @click="restaurarCorrida(item)"
-          >
-            {{ $t('balances.history.restore') }}
-          </b-button>
-        </template>
-      </b-table>
-    </b-modal>
     <loading
       :active.sync="isLoading"
       :can-cancel="false"
@@ -444,16 +272,10 @@ import {
   BSpinner,
   BImg,
   BContainer,
-  BProgress,
-  BBadge,
 } from 'bootstrap-vue'
 import Ripple from 'vue-ripple-directive'
 import { AgGridVue } from 'ag-grid-vue'
 import ToastificationContent from '@core/components/toastification/ToastificationContent.vue'
-import { getUserData } from '@/auth/utils'
-import { computeQuality } from './reconciliationQuality'
-import { buildFlowGraph } from './flowGraph'
-import BalanceSankey from './BalanceSankey.vue'
 
 function decimalFormatter(params) {
   // console.log("params decimal", params.value);
@@ -482,11 +304,9 @@ function nodosCellStyle(params) {
   // console.log("nodosStyle", params);
   // console.log(!isNaN(params.value));
   // console.log(parseFloat(params.value));
-  if (!isNaN(params.value) && Math.abs(parseFloat(params.value)) > 0.001) {
+  if (!isNaN(params.value) && parseFloat(params.value) > 0.001) {
     return {
-      backgroundColor: 'rgba(234, 84, 85, 0.16)',
-      color: '#ea5455',
-      fontWeight: 600,
+      backgroundColor: 'red',
     }
   }
 }
@@ -510,9 +330,6 @@ export default {
     BSpinner,
     BImg,
     BContainer,
-    BProgress,
-    BBadge,
-    BalanceSankey,
   },
   directives: {
     Ripple,
@@ -569,74 +386,7 @@ export default {
       proceso_id: '',
       modalTitle: '',
       defaultColDef: null,
-      corridas: [],
-      corridasLoading: false,
-      calidadVerTodo: false,
-      calidadLimite: 8,
-      sankeyOpen: false,
     }
-  },
-  computed: {
-    canWrite() {
-      const user = getUserData()
-      return !!user && ['admin', 'operator'].includes(user.role)
-    },
-    corridasFields() {
-      return [
-        { key: 'created_at', label: this.$t('balances.history.date') },
-        { key: 'tipo', label: this.$t('balances.history.type') },
-        { key: 'usuario_nombre', label: this.$t('balances.history.user') },
-        { key: 'acciones', label: '', class: 'text-right' },
-      ]
-    },
-    calidad() {
-      return computeQuality({
-        balancesTable: this.balances_table,
-        restriccionesTable: this.restricciones_table,
-        balanceNodos: this.balance_nodos,
-        matriz: (this.datos_entrada && this.datos_entrada.matriz) || [],
-      })
-    },
-    flowGraph() {
-      return buildFlowGraph({
-        matriz: (this.datos_entrada && this.datos_entrada.matriz) || [],
-        balanceNodos: this.balance_nodos,
-        balancesTable: this.balances_table,
-        indicesStock: (this.datos_entrada && this.datos_entrada.indices_stock) || [],
-      })
-    },
-    calidadFilas() {
-      return this.calidadVerTodo ? this.calidad.flows : this.calidad.flows.slice(0, this.calidadLimite)
-    },
-    calidadFields() {
-      return [
-        { key: 'flujo', label: this.$t('balances.quality.flow') },
-        { key: 'variable', label: this.$t('balances.quality.variable') },
-        { key: 'ajustePct', label: this.$t('balances.quality.adjustment'), class: 'text-right' },
-        { key: 'tolerancia', label: this.$t('balances.quality.tolerance') },
-        { key: 'usoPct', label: this.$t('balances.quality.usage'), thStyle: { minWidth: '140px' } },
-        { key: 'estado', label: '' },
-      ]
-    },
-    calidadKpis() {
-      const s = this.calidad.summary
-      const max = s.mayorAjusteTms
-      return [
-        { label: this.$t('balances.quality.flowsAtLimit'), value: s.enLimite, variant: s.enLimite ? 'warning' : 'success' },
-        { label: this.$t('balances.quality.flowsOutside'), value: s.fuera, variant: s.fuera ? 'danger' : 'success' },
-        {
-          label: this.$t('balances.quality.maxTmsAdjustment'),
-          value: max ? `${max.ajustePct > 0 ? '+' : ''}${this.formatPct(max.ajustePct)}` : '—',
-          detail: max ? max.flujo : null,
-          variant: 'neutral',
-        },
-        {
-          label: this.$t('balances.quality.nodesOpen'),
-          value: `${s.nodosSinCerrar} / ${s.totalNodos}`,
-          variant: s.nodosSinCerrar ? 'danger' : 'success',
-        },
-      ]
-    },
   },
   mounted() {
     console.log('mounted')
@@ -759,76 +509,8 @@ export default {
         .catch(e => {
           this.isLoading = false
           console.log('FAILURE!!', e)
-          this.$toast({
-            component: ToastificationContent,
-            props: {
-              title: this.$t('balances.toast.exportError'),
-              icon: 'AlertTriangleIcon',
-              variant: 'danger',
-            },
-          })
+        }).finally(() => {
         })
-    },
-    showToast(titleKey, variant) {
-      this.$toast({
-        component: ToastificationContent,
-        props: {
-          title: this.$t(titleKey),
-          icon: variant === 'danger' ? 'AlertTriangleIcon' : 'CheckIcon',
-          variant,
-        },
-      })
-    },
-    formatPct(value) {
-      if (value === null || value === undefined) return '—'
-      return `${value.toLocaleString('es-CL', { maximumFractionDigits: 2, minimumFractionDigits: 2 })}%`
-    },
-    estadoVariant(estado) {
-      return {
-        ok: 'success', limite: 'warning', fuera: 'danger', 'sin-tolerancia': 'secondary',
-      }[estado]
-    },
-    formatFecha(value) {
-      return new Date(value).toLocaleString('es-CL', { dateStyle: 'medium', timeStyle: 'short' })
-    },
-    async cargarCorridas() {
-      this.corridasLoading = true
-      try {
-        const { data } = await this.$http.get(`/api/balances/corridas/${this.datos_entrada_id}`)
-        this.corridas = data.corridas
-      } catch (e) {
-        this.corridas = []
-        this.showToast('balances.toast.historyError', 'danger')
-      } finally {
-        this.corridasLoading = false
-      }
-    },
-    abrirHistorial() {
-      this.$refs['historial-modal'].show()
-      this.cargarCorridas()
-    },
-    async restaurarCorrida(corrida) {
-      // A reopened saved balance must first choose overwrite vs. copy, like a run.
-      const canModify = await this.ensureEditDecision()
-      if (!canModify) {
-        return
-      }
-
-      this.isLoading = true
-      try {
-        const response = await this.$http.post(`/api/balances/corridas/${corrida.id}/restaurar`, {
-          datos_entrada_id: this.datos_entrada_id,
-        })
-        this.applyBalancePayload(response)
-        this.yellow = []
-        this.green = []
-        this.showToast('balances.toast.restoreSuccess', 'success')
-        await this.cargarCorridas()
-      } catch (e) {
-        this.showToast('balances.toast.restoreError', 'danger')
-      } finally {
-        this.isLoading = false
-      }
     },
     tbl_expand(table) {
       this.modal_var = table
@@ -894,7 +576,7 @@ export default {
           // console.log(params.node.rowIndex, value);
           if (params.node.rowIndex === value) {
             console.log('valido')
-            resp = { background: 'rgba(250, 178, 25, 0.28)' }
+            resp = { background: 'yellow' }
           }
         })
       }
@@ -903,7 +585,7 @@ export default {
           // console.log(params.node.rowIndex, value);
           if (params.node.rowIndex === value) {
             console.log('valido')
-            resp = { background: 'rgba(40, 199, 111, 0.24)' }
+            resp = { background: 'green' }
           }
         })
       }
@@ -987,14 +669,6 @@ export default {
         .catch(e => {
           this.isLoading = false
           console.log('FAILURE!! correr_balance', e)
-          this.$toast({
-            component: ToastificationContent,
-            props: {
-              title: this.$t('balances.toast.runError'),
-              icon: 'AlertTriangleIcon',
-              variant: 'danger',
-            },
-          })
         })
     },
     async onSubmit(event) {
@@ -1040,84 +714,17 @@ export default {
   @import "~ag-grid-community/styles/ag-grid.css";
   @import "~ag-grid-community/styles/ag-theme-alpine.css";
 
-  // Tables: Alpine theme tuned through its CSS variables (look only, no grid behavior changes).
+  .balance {
+      background-color: rgb(71, 209, 255);
+  }
+  .calculated {
+      background-color: rgb(71, 209, 255);
+  }
+
   .ag-theme-alpine {
-    --ag-grid-size: 4px;
-    --ag-list-item-height: 20px;
-    --ag-font-family: Montserrat, Helvetica, Arial, sans-serif;
-    --ag-font-size: 12.5px;
-    --ag-foreground-color: #5e5873;
-    --ag-secondary-foreground-color: #6e6b7b;
-    --ag-background-color: #fff;
-    --ag-header-background-color: #f3f2f7;
-    --ag-header-foreground-color: #5e5873;
-    --ag-odd-row-background-color: #fafafc;
-    --ag-row-hover-color: rgba(42, 120, 214, 0.07);
-    --ag-selected-row-background-color: rgba(42, 120, 214, 0.12);
-    --ag-border-color: #ebe9f1;
-    --ag-row-border-color: #f0eff4;
-    --ag-secondary-border-color: #ebe9f1;
-    --ag-header-column-separator-display: block;
-    --ag-header-column-separator-color: #e3e1ea;
-    --ag-input-focus-border-color: #2a78d6;
-    --ag-range-selection-border-color: #2a78d6;
-    --ag-borders: solid 1px;
-    --ag-border-radius: 6px;
-
-    .ag-header-cell-text {
-      font-weight: 600;
-      font-size: 11.5px;
-      letter-spacing: 0.02em;
-    }
-
-    .ag-cell {
-      font-variant-numeric: tabular-nums;
-    }
-
-    // Numbers line up on the right; the pinned name column stays left-aligned.
-    .ag-center-cols-container .ag-cell {
-      text-align: right;
-    }
-    .ag-header-viewport .ag-header-cell-label {
-      justify-content: flex-end;
-      text-align: right;
-    }
-
-    .ag-pinned-left-cols-container .ag-cell {
-      font-weight: 500;
-    }
-  }
-
-  .dark-layout .ag-theme-alpine {
-    --ag-foreground-color: #d0d2d6;
-    --ag-secondary-foreground-color: #b4b7bd;
-    --ag-background-color: #283046;
-    --ag-header-background-color: #343d55;
-    --ag-header-foreground-color: #d0d2d6;
-    --ag-odd-row-background-color: #2b3450;
-    --ag-row-hover-color: rgba(57, 135, 229, 0.12);
-    --ag-selected-row-background-color: rgba(57, 135, 229, 0.18);
-    --ag-border-color: #3b4253;
-    --ag-row-border-color: #343d55;
-    --ag-secondary-border-color: #3b4253;
-    --ag-header-column-separator-color: #404656;
-    --ag-input-focus-border-color: #3987e5;
-    --ag-modal-overlay-background-color: rgba(40, 48, 70, 0.66);
-    --ag-control-panel-background-color: #283046;
-  }
-
-  // Computed by the solver (balance) or derived from tolerances (calculated): soft tint, same meaning.
-  .ag-theme-alpine .balance,
-  .ag-theme-alpine .calculated {
-    background-color: rgba(0, 207, 232, 0.12);
-    color: #0b7d8c;
-    font-weight: 600;
-  }
-  .dark-layout .ag-theme-alpine .balance,
-  .dark-layout .ag-theme-alpine .calculated {
-    background-color: rgba(0, 207, 232, 0.14);
-    color: #5fdcec;
-  }
+  --ag-grid-size: 3px;
+  --ag-list-item-height: 20px;
+}
 
     // Estilos para los headers de las tablas
   .table-header {
@@ -1148,52 +755,5 @@ export default {
   // Espaciado adicional entre tablas
   .ag-grid-vue {
     margin-top: 0.5rem;
-  }
-
-  // Calidad de la reconciliación
-  .calidad-kpis > [class*='col'] {
-    margin-bottom: 0.75rem;
-  }
-
-  .calidad-kpi {
-    height: 100%;
-    padding: 0.75rem 1rem;
-    border-radius: 0.5rem;
-    border-left: 4px solid currentColor;
-    background: rgba(130, 134, 139, 0.08);
-
-    &--success { color: #28c76f; }
-    &--warning { color: #ff9f43; }
-    &--danger { color: #ea5455; }
-    &--neutral { color: #82868b; }
-
-    &__value {
-      font-size: 1.5rem;
-      font-weight: 600;
-      line-height: 1.2;
-      font-variant-numeric: tabular-nums;
-    }
-
-    &__label,
-    &__detail {
-      color: #6e6b7b;
-      font-size: 0.8rem;
-    }
-
-    &__detail {
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-  }
-
-  .dark-layout .calidad-kpi__label,
-  .dark-layout .calidad-kpi__detail {
-    color: #b4b7bd;
-  }
-
-  .calidad-table td {
-    vertical-align: middle;
-    font-variant-numeric: tabular-nums;
   }
 </style>

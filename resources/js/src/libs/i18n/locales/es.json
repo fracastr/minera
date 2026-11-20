@@ -99,7 +99,7 @@
   "Form Repeater": "Repetidor de Formulario",
   "BS Table": "Tabla BS",
   "dashboard": {
-    "title": "Balances CMP",
+    "title": "Sondek",
     "subtitle": "Balance metalúrgico · operación CMP",
     "status": "Sistema en planta",
     "welcome": "Continuar el trabajo",
@@ -288,11 +288,6 @@
       "label": "Nombre Balance",
       "placeholder": "Ej: Balance Q1 2024",
       "invalidFeedback": "Nombre es requerido",
-      "tipo": "Tipo de período",
-      "tipos": { "quincenal": "Quincenal", "mensual": "Mensual" },
-      "periodoInicio": "Desde",
-      "periodoFin": "Hasta",
-      "periodoInvalid": "La fecha final debe ser igual o posterior a la inicial",
       "cancel": "Cancelar",
       "save": "Guardar Balance"
     },
@@ -314,9 +309,7 @@
       "load": "Cargar",
       "reset": "Reset",
       "run": "Correr",
-      "generateExcel": "Generar Excel Resultados",
-      "history": "Historial",
-      "diagram": "Ver diagrama"
+      "generateExcel": "Generar Excel Resultados"
     },
     "tables": {
       "balances": "Tabla Balances",
@@ -339,63 +332,7 @@
     "toast": {
       "runError": "Ocurrio un error al correr el balance",
       "importError": "Ocurrio un error al importar el archivo",
-      "cloneError": "No se pudo preparar una copia del balance",
-      "exportError": "No se pudo generar el Excel",
-      "restoreSuccess": "Versión restaurada",
-      "restoreError": "No se pudo restaurar la versión",
-      "historyError": "No se pudo cargar el historial"
-    },
-    "quality": {
-      "title": "Calidad de la reconciliación",
-      "hint": "Uso de tolerancia: cuánto del margen permitido en Restricciones consumió el ajuste. Cerca de 100% suele indicar una medición dudosa.",
-      "flowsAtLimit": "Variables cerca del límite",
-      "flowsOutside": "Fuera de tolerancia",
-      "maxTmsAdjustment": "Mayor ajuste TMS",
-      "nodesOpen": "Nodos sin cerrar",
-      "nodesOpenList": "Nodos sin cerrar:",
-      "flow": "Flujo",
-      "variable": "Variable",
-      "adjustment": "Ajuste",
-      "tolerance": "Tolerancia",
-      "usage": "Uso",
-      "noTolerance": "Jerarquía ≠ 1",
-      "showAll": "Ver todas ({n})",
-      "showLess": "Ver menos",
-      "status": { "ok": "OK", "limite": "Al límite", "fuera": "Fuera", "sin-tolerancia": "Sin tolerancia" }
-    },
-    "history": {
-      "title": "Historial de corridas",
-      "empty": "Aún no hay versiones registradas",
-      "date": "Fecha",
-      "type": "Tipo",
-      "user": "Usuario",
-      "current": "Actual",
-      "restore": "Restaurar",
-      "types": { "importacion": "Importación", "corrida": "Corrida", "restauracion": "Restauración" }
-    },
-    "sankey": {
-      "title": "Diagrama de flujo (TMS balance)",
-      "empty": "No hay flujos con TMS para dibujar.",
-      "explain": "Cómo se mueven las toneladas secas (TMS balance) del período entre los nodos del proceso. Cada banda es un flujo y su ancho es proporcional a las toneladas; se lee de izquierda a derecha: entradas, nodos y salidas. Una variación de stock entra al proceso cuando el stock baja (consumo) y sale cuando sube (acumulación). Pase el cursor sobre una banda o un nodo para ver el detalle.",
-      "kpi": {
-        "entradas": "Entradas",
-        "salidas": "Salidas",
-        "stock": "Stock: consumo / acumulación",
-        "cierre": "Diferencia de cierre (entradas + consumo − salidas − acumulación)"
-      },
-      "legend": {
-        "entrada": "Entrada",
-        "proceso": "Nodo de proceso",
-        "salida": "Salida",
-        "stock": "Variación de stock"
-      },
-      "animate": "Animar flujos",
-      "ofInput": "de lo que entra",
-      "recirculations": "Recirculaciones",
-      "recirculationsHint": "Flujos que vuelven a un nodo anterior; no se dibujan en el diagrama.",
-      "flow": "Flujo",
-      "from": "Desde",
-      "to": "Hacia"
+      "cloneError": "No se pudo preparar una copia del balance"
     }
   }
 }

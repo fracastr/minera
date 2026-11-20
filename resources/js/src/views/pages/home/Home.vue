@@ -7,11 +7,8 @@
       class="home-loader"
       aria-hidden="true"
     >
-      <img
-        class="home-loader__logo"
-        src="/brand/cmp-logo-white.svg"
-        alt=""
-      >
+      <span class="home-nav__mark" />
+      <span>Sondek</span>
     </div>
 
     <header
@@ -23,12 +20,11 @@
           :to="{ name: 'home' }"
           class="home-nav__brand"
         >
-          <img
-            class="home-nav__logo"
-            src="/brand/cmp-logo-white.svg"
-            alt="CMP, Compañía Minera del Pacífico"
-          >
-          <span class="home-nav__product">Balances</span>
+          <span
+            class="home-nav__mark"
+            aria-hidden="true"
+          />
+          <span>Sondek</span>
         </router-link>
         <nav
           class="home-nav__links"
@@ -38,7 +34,6 @@
           <a href="#simulador">Simulador</a>
           <a href="#flujo">Cómo se usa</a>
           <a href="#motor">Motor de cálculo</a>
-          <a href="#cmp">CMP</a>
         </nav>
         <router-link
           :to="{ name: 'auth-login' }"
@@ -95,14 +90,14 @@
               Balances metalúrgicos que cierran.
             </h1>
             <p class="home-hero__lede">
-              Conciliamos las toneladas y leyes medidas en cada corriente de las plantas de CMP, para que masa y finos cuadren en cada nodo dentro de las tolerancias que defines.
+              Sondek concilia las toneladas y leyes medidas en cada corriente de tu planta, para que masa y finos cuadren en cada nodo dentro de las tolerancias que defines.
             </p>
             <div class="home-hero__actions">
               <router-link
                 :to="{ name: 'auth-login' }"
                 class="home-btn home-btn--ore"
               >
-                Ingresar
+                Ingresar a Sondek
               </router-link>
               <a
                 href="#simulador"
@@ -163,7 +158,7 @@
 
       <div
         class="home-strip"
-        aria-label="Lo que maneja el sistema"
+        aria-label="Lo que maneja Sondek"
       >
         <ul
           v-for="copy in 2"
@@ -210,7 +205,7 @@
               Pesómetros, muestreos y análisis químicos tienen error. Al sumar las corrientes de un proceso, lo que entra casi nunca coincide con lo que sale, ni en toneladas ni en metal fino.
             </p>
             <p>
-              El sistema busca el conjunto de valores más cercano a lo medido que respeta la conservación de masa y de finos, y te muestra cuánto se ajustó cada medición.
+              Sondek busca el conjunto de valores más cercano a lo medido que respeta la conservación de masa y de finos, y te muestra cuánto se ajustó cada medición.
             </p>
           </div>
         </div>
@@ -343,51 +338,6 @@
       </section>
 
       <section
-        id="cmp"
-        class="home-cmp"
-        aria-labelledby="cmp-title"
-      >
-        <div class="home-wrap">
-          <div
-            class="home-cmp__head"
-            data-reveal
-          >
-            <p class="home-cmp__eyebrow">
-              Compañía Minera del Pacífico
-            </p>
-            <h2
-              id="cmp-title"
-              class="home-display"
-            >
-              Creamos una minería diferente, para el desarrollo sostenible del territorio y su gente.
-            </h2>
-            <p>
-              Cerca de 100 años de tradición minera y el principal exportador de hierro de Chile. Una empresa del grupo CAP, con operaciones en tres valles de las regiones de Atacama y Coquimbo.
-            </p>
-          </div>
-          <ul class="home-cmp__valleys">
-            <li
-              v-for="valle in valles"
-              :key="valle.name"
-              class="home-cmp__valley"
-              :style="{ '--valle': valle.color }"
-              data-reveal
-            >
-              <h3>{{ valle.name }}</h3>
-              <ul>
-                <li
-                  v-for="op in valle.ops"
-                  :key="op"
-                >
-                  {{ op }}
-                </li>
-              </ul>
-            </li>
-          </ul>
-        </div>
-      </section>
-
-      <section
         class="home-cta"
         aria-labelledby="cta-title"
       >
@@ -417,7 +367,7 @@
                 :to="{ name: 'auth-login' }"
                 class="home-btn home-btn--ore"
               >
-                Ingresar
+                Ingresar a Sondek
               </router-link>
               <router-link
                 to="/forgot-password"
@@ -433,14 +383,7 @@
 
     <footer class="home-footer">
       <div class="home-wrap home-footer__inner">
-        <p>
-          CMP, Compañía Minera del Pacífico · Una empresa del grupo CAP ·
-          <a
-            href="https://www.cmp.cl"
-            rel="noopener"
-            target="_blank"
-          >cmp.cl</a>
-        </p>
+        <p>Sondek, gestión de balances metalúrgicos.</p>
         <p>
           Videos de
           <a
@@ -480,12 +423,6 @@ export default {
         { title: 'Revisa las tolerancias', text: 'Ajusta cuánto puede moverse cada medición antes de conciliar.', media: 'step3' },
         { title: 'Concilia y guarda', text: 'Compara lo medido con lo conciliado y guarda el balance con un nombre reconocible.', media: 'step4' },
         { title: 'Exporta y sigue la actividad', text: 'Descarga los resultados en Excel y revisa los balances corridos por valle y proceso en el dashboard.', media: 'step5' },
-      ],
-      // Operations and valley colors as listed on cmp.cl (2026-11).
-      valles: [
-        { name: 'Valle de Copiapó', color: 'var(--valle-copiapo)', ops: ['Mina Cerro Negro Norte', 'Planta Magnetita', 'Puerto Punta Totoralillo'] },
-        { name: 'Valle del Huasco', color: 'var(--valle-huasco)', ops: ['Mina Los Colorados', 'Planta de Pellets', 'Puerto Guacolda II', 'Depósito de Relaves Filtrados'] },
-        { name: 'Valle del Elqui', color: 'var(--valle-elqui)', ops: ['Minas El Romeral', 'Mina de Pleito', 'Puerto Guayacán'] },
       ],
       specs: [
         { term: 'Varios componentes', text: 'Concilia toneladas y todas las leyes de cada corriente en un mismo cálculo.' },

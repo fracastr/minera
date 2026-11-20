@@ -101,13 +101,6 @@ export default {
           tdClass: 'text-left',
         },
         {
-          label: 'Período',
-          field: this.getPeriodo,
-          sortable: true,
-          sortFn: (x, y, col, rowX, rowY) => String(rowX.periodo_inicio || '').localeCompare(String(rowY.periodo_inicio || '')),
-          tdClass: 'text-left',
-        },
-        {
           label: 'Proceso',
           field: this.getProcesoNombre,
           sortable: true,
@@ -180,7 +173,6 @@ export default {
       const values = [
         row.nombre,
         row.tipo,
-        this.getPeriodo(row),
         this.getProcesoNombre(row),
         this.getValleNombre(row),
         row.usuario_nombre,
@@ -201,15 +193,6 @@ export default {
         hour: '2-digit',
         minute: '2-digit',
       })
-    },
-    getPeriodo(row) {
-      if (!row.periodo_inicio || !row.periodo_fin) return 'Sin período'
-      // Parse as local dates: new Date('YYYY-MM-DD') is UTC and shifts a day back in Chile.
-      const fmt = iso => {
-        const [y, m, d] = iso.split('-').map(Number)
-        return new Date(y, m - 1, d).toLocaleDateString('es-CL', { day: '2-digit', month: 'short', year: 'numeric' })
-      }
-      return `${fmt(row.periodo_inicio)} – ${fmt(row.periodo_fin)}`
     },
     getProcesoNombre(row) {
       return row.proceso && row.proceso.nombre ? row.proceso.nombre : 'N/A'
