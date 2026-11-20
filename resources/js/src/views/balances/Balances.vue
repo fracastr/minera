@@ -484,7 +484,9 @@ function nodosCellStyle(params) {
   // console.log(parseFloat(params.value));
   if (!isNaN(params.value) && Math.abs(parseFloat(params.value)) > 0.001) {
     return {
-      backgroundColor: 'red',
+      backgroundColor: 'rgba(234, 84, 85, 0.16)',
+      color: '#ea5455',
+      fontWeight: 600,
     }
   }
 }
@@ -892,7 +894,7 @@ export default {
           // console.log(params.node.rowIndex, value);
           if (params.node.rowIndex === value) {
             console.log('valido')
-            resp = { background: 'yellow' }
+            resp = { background: 'rgba(250, 178, 25, 0.28)' }
           }
         })
       }
@@ -901,7 +903,7 @@ export default {
           // console.log(params.node.rowIndex, value);
           if (params.node.rowIndex === value) {
             console.log('valido')
-            resp = { background: 'green' }
+            resp = { background: 'rgba(40, 199, 111, 0.24)' }
           }
         })
       }
@@ -1038,17 +1040,84 @@ export default {
   @import "~ag-grid-community/styles/ag-grid.css";
   @import "~ag-grid-community/styles/ag-theme-alpine.css";
 
-  .balance {
-      background-color: rgb(71, 209, 255);
-  }
-  .calculated {
-      background-color: rgb(71, 209, 255);
+  // Tables: Alpine theme tuned through its CSS variables (look only, no grid behavior changes).
+  .ag-theme-alpine {
+    --ag-grid-size: 4px;
+    --ag-list-item-height: 20px;
+    --ag-font-family: Montserrat, Helvetica, Arial, sans-serif;
+    --ag-font-size: 12.5px;
+    --ag-foreground-color: #5e5873;
+    --ag-secondary-foreground-color: #6e6b7b;
+    --ag-background-color: #fff;
+    --ag-header-background-color: #f3f2f7;
+    --ag-header-foreground-color: #5e5873;
+    --ag-odd-row-background-color: #fafafc;
+    --ag-row-hover-color: rgba(42, 120, 214, 0.07);
+    --ag-selected-row-background-color: rgba(42, 120, 214, 0.12);
+    --ag-border-color: #ebe9f1;
+    --ag-row-border-color: #f0eff4;
+    --ag-secondary-border-color: #ebe9f1;
+    --ag-header-column-separator-display: block;
+    --ag-header-column-separator-color: #e3e1ea;
+    --ag-input-focus-border-color: #2a78d6;
+    --ag-range-selection-border-color: #2a78d6;
+    --ag-borders: solid 1px;
+    --ag-border-radius: 6px;
+
+    .ag-header-cell-text {
+      font-weight: 600;
+      font-size: 11.5px;
+      letter-spacing: 0.02em;
+    }
+
+    .ag-cell {
+      font-variant-numeric: tabular-nums;
+    }
+
+    // Numbers line up on the right; the pinned name column stays left-aligned.
+    .ag-center-cols-container .ag-cell {
+      text-align: right;
+    }
+    .ag-header-viewport .ag-header-cell-label {
+      justify-content: flex-end;
+      text-align: right;
+    }
+
+    .ag-pinned-left-cols-container .ag-cell {
+      font-weight: 500;
+    }
   }
 
-  .ag-theme-alpine {
-  --ag-grid-size: 3px;
-  --ag-list-item-height: 20px;
-}
+  .dark-layout .ag-theme-alpine {
+    --ag-foreground-color: #d0d2d6;
+    --ag-secondary-foreground-color: #b4b7bd;
+    --ag-background-color: #283046;
+    --ag-header-background-color: #343d55;
+    --ag-header-foreground-color: #d0d2d6;
+    --ag-odd-row-background-color: #2b3450;
+    --ag-row-hover-color: rgba(57, 135, 229, 0.12);
+    --ag-selected-row-background-color: rgba(57, 135, 229, 0.18);
+    --ag-border-color: #3b4253;
+    --ag-row-border-color: #343d55;
+    --ag-secondary-border-color: #3b4253;
+    --ag-header-column-separator-color: #404656;
+    --ag-input-focus-border-color: #3987e5;
+    --ag-modal-overlay-background-color: rgba(40, 48, 70, 0.66);
+    --ag-control-panel-background-color: #283046;
+  }
+
+  // Computed by the solver (balance) or derived from tolerances (calculated): soft tint, same meaning.
+  .ag-theme-alpine .balance,
+  .ag-theme-alpine .calculated {
+    background-color: rgba(0, 207, 232, 0.12);
+    color: #0b7d8c;
+    font-weight: 600;
+  }
+  .dark-layout .ag-theme-alpine .balance,
+  .dark-layout .ag-theme-alpine .calculated {
+    background-color: rgba(0, 207, 232, 0.14);
+    color: #5fdcec;
+  }
 
     // Estilos para los headers de las tablas
   .table-header {
