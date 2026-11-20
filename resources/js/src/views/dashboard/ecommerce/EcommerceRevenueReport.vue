@@ -131,7 +131,7 @@ export default {
               style: {
                 colors: '#6E6B7B',
                 fontSize: '0.86rem',
-                fontFamily: 'Montserrat',
+                fontFamily: 'Work Sans',
               },
             },
             axisTicks: {
@@ -160,7 +160,7 @@ export default {
               style: {
                 colors: '#6E6B7B',
                 fontSize: '0.86rem',
-                fontFamily: 'Montserrat',
+                fontFamily: 'Work Sans',
               },
             },
           },
