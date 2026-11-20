@@ -315,7 +315,8 @@
       "reset": "Reset",
       "run": "Run",
       "generateExcel": "Generate Excel Results",
-      "history": "History"
+      "history": "History",
+      "diagram": "View diagram"
     },
     "tables": {
       "balances": "Balances Table",
@@ -371,6 +372,15 @@
       "current": "Current",
       "restore": "Restore",
       "types": { "importacion": "Import", "corrida": "Run", "restauracion": "Restore" }
+    },
+    "sankey": {
+      "title": "Flow diagram (balanced TMS)",
+      "empty": "There are no flows with TMS to draw.",
+      "recirculations": "Recirculations",
+      "recirculationsHint": "Flows that return to an earlier node; they are not drawn in the diagram.",
+      "flow": "Flow",
+      "from": "From",
+      "to": "To"
     }
   }
 }

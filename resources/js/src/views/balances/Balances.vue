@@ -71,6 +71,16 @@
             <feather-icon icon="ClockIcon" class="mr-50" />
             {{ $t('balances.buttons.history') }}
           </b-button>
+          <b-button
+            v-show="exportar_button"
+            type="button"
+            variant="outline-primary"
+            class="ml-1"
+            @click="$refs['sankey-modal'].show()"
+          >
+            <feather-icon icon="ShareIcon" class="mr-50" />
+            {{ $t('balances.buttons.diagram') }}
+          </b-button>
         </b-col>
       </b-row>
     </b-form>
@@ -347,6 +357,19 @@
       </b-modal>
     </b-container>
     <b-modal
+      ref="sankey-modal"
+      :title="$t('balances.sankey.title')"
+      size="xl"
+      hide-footer
+      @shown="sankeyOpen = true"
+      @hidden="sankeyOpen = false"
+    >
+      <balance-sankey
+        v-if="sankeyOpen"
+        :graph="flowGraph"
+      />
+    </b-modal>
+    <b-modal
       ref="historial-modal"
       :title="$t('balances.history.title')"
       size="lg"
@@ -429,6 +452,8 @@ import { AgGridVue } from 'ag-grid-vue'
 import ToastificationContent from '@core/components/toastification/ToastificationContent.vue'
 import { getUserData } from '@/auth/utils'
 import { computeQuality } from './reconciliationQuality'
+import { buildFlowGraph } from './flowGraph'
+import BalanceSankey from './BalanceSankey.vue'
 
 function decimalFormatter(params) {
   // console.log("params decimal", params.value);
@@ -485,6 +510,7 @@ export default {
     BContainer,
     BProgress,
     BBadge,
+    BalanceSankey,
   },
   directives: {
     Ripple,
@@ -545,6 +571,7 @@ export default {
       corridasLoading: false,
       calidadVerTodo: false,
       calidadLimite: 8,
+      sankeyOpen: false,
     }
   },
   computed: {
@@ -566,6 +593,13 @@ export default {
         restriccionesTable: this.restricciones_table,
         balanceNodos: this.balance_nodos,
         matriz: (this.datos_entrada && this.datos_entrada.matriz) || [],
+      })
+    },
+    flowGraph() {
+      return buildFlowGraph({
+        matriz: (this.datos_entrada && this.datos_entrada.matriz) || [],
+        balanceNodos: this.balance_nodos,
+        balancesTable: this.balances_table,
       })
     },
     calidadFilas() {
