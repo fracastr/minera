@@ -3,9 +3,13 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="robots" content="noindex, nofollow" />
+  <meta name="robots" content="index, follow" />
+  <meta name="description" content="Sistema de balances metalúrgicos de CMP, Compañía Minera del Pacífico: concilia toneladas y leyes por corriente y valle.">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Balances CMP | Compañía Minera del Pacífico">
+  <meta property="og:image" content="{{ asset('brand/cmp-logo.svg') }}">
   <meta name="session-lifetime" content="{{ (int) config('session.lifetime') }}">
-  <title>Balances CMP</title>
+  <title>Balances CMP | Compañía Minera del Pacífico</title>
   <link rel="icon" type="image/x-icon" href="{{ url('/favicon.ico') }}">
   {{-- Fonts of the public landing (pages/index.vue): CMP's Work Sans, Archivo expanded for display. --}}
   <link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@125,600&family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet">

@@ -16,15 +16,19 @@ use App\Http\Controllers\ApplicationController;
 
 // Password Reset Routes
 Route::get('reset-password/{token}', function ($token) {
-    return view('application');
+    return view('application-v3');
 })->name('password.reset');
 
 Route::get('forgot-password', function () {
-    return view('application');
+    return view('application-v3');
 })->name('password.request');
 
-// Vue 3 migration shell (frontend-v3/), served side by side with the current app.
-Route::get('/v3/{any?}', fn () => view('application-v3'))->where('any', '.*');
+// The Vue 3 app used to live under /v3: keep old links working.
+Route::get('/v3/{any?}', function (\Illuminate\Http\Request $request, $any = '') {
+    $query = $request->getQueryString();
+
+    return redirect('/' . $any . ($query ? '?' . $query : ''), 301);
+})->where('any', '.*');
 
 Route::get('/{any}', [ApplicationController::class, 'index'])->where('any', '.*');
 
