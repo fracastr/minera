@@ -14,7 +14,7 @@ function recursiveLayouts(route) {
 }
 
 const router = createRouter({
-  history: createWebHistory('/v3/'), // served by Laravel under /v3 (see routes/web.php)
+  history: createWebHistory('/'),
   scrollBehavior(to) {
     if (to.hash)
       return { el: to.hash, behavior: 'smooth', top: 60 }
@@ -23,6 +23,12 @@ const router = createRouter({
   },
   extendRoutes: pages => [
     ...[...pages].map(route => recursiveLayouts(route)),
+
+    // Paths of the retired Vue 2 app that people may have bookmarked.
+    { path: '/dashboard/balances', redirect: '/balances/Listado' },
+    { path: '/balances/Balances', redirect: '/balances/Listado' },
+    { path: '/pages/miscellaneous/not-authorized', redirect: '/not-authorized' },
+    { path: '/register', redirect: '/login' },
   ],
 })
 

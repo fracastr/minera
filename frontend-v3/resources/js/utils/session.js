@@ -45,6 +45,6 @@ export const clearSession = () => {
 
 export const expireSession = () => {
   clearSession()
-  if (!window.location.pathname.startsWith('/v3/login'))
-    window.location.assign('/v3/login?sesion=expirada')
+  if (!window.location.pathname.startsWith('/login'))
+    window.location.assign('/login?sesion=expirada')
 }
