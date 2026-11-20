@@ -155,12 +155,12 @@ const authThemeMask = useGenerateImageVariant(authV2MaskLight, authV2MaskDark)
                     v-model="form.remember"
                     label="Recordarme"
                   />
-                  <a
+                  <RouterLink
                     class="text-primary"
-                    href="/forgot-password"
+                    to="/forgot-password"
                   >
                     ¿Olvidaste tu contraseña?
-                  </a>
+                  </RouterLink>
                 </div>
 
                 <VBtn
