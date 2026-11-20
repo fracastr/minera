@@ -30,6 +30,16 @@ sudo -n composer install \
 echo "==> frontend (Laravel Mix / Node 10 on this box)"
 sudo -n npm run prod
 
+echo "==> prune JS chunks older than 7 days"
+# Keep anything the live app.js still references: a silent Mix failure leaves the old bundle serving.
+find public/js/chunks -type f -mtime +7 -print0 | while IFS= read -r -d '' f; do
+  hash="$(basename "$f" | cut -d. -f2)"
+  if grep -qF "$hash" public/js/app.js; then
+    continue
+  fi
+  sudo -n rm -f "$f"
+done
+
 echo "==> migrate"
 php_artisan migrate --force
 
