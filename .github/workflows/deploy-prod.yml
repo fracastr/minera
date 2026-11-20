@@ -6,6 +6,11 @@ on:
       - Prod
   workflow_dispatch:
 
+# One deploy at a time on the box; never cancel one mid-build, the newest queued run wins.
+concurrency:
+  group: deploy-prod
+  cancel-in-progress: false
+
 jobs:
   deploy:
     runs-on: ubuntu-22.04
