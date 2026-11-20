@@ -2,7 +2,20 @@
 // Balance workspace (port of resources/js/src/views/balances/Balances.vue). Embedded by BalanceFormWizard,
 // which relies on the exposed contract at the bottom.
 import { AgGridVue } from 'ag-grid-vue3'
-import { AllCommunityModule, ModuleRegistry, themeQuartz } from 'ag-grid-community'
+import {
+  CellStyleModule,
+  ClientSideRowModelModule,
+  ColumnAutoSizeModule,
+  ModuleRegistry,
+  NumberEditorModule,
+  RenderApiModule,
+  RowApiModule,
+  RowStyleModule,
+  TextEditorModule,
+  TooltipModule,
+  ValidationModule,
+  themeQuartz,
+} from 'ag-grid-community'
 import { useTheme } from 'vuetify'
 import BalanceSankey from './BalanceSankey.vue'
 import { buildFlowGraph } from './flowGraph'
@@ -17,7 +30,20 @@ const props = defineProps({
 
 const emit = defineEmits(['edit-mode-chosen'])
 
-ModuleRegistry.registerModules([AllCommunityModule])
+// Only what these grids use (AllCommunityModule roughly doubled the page bundle).
+// ValidationModule logs a "missing module" error in dev if a feature here needs one we left out.
+ModuleRegistry.registerModules([
+  ClientSideRowModelModule,
+  TextEditorModule,
+  NumberEditorModule,
+  CellStyleModule,
+  RowStyleModule,
+  TooltipModule,
+  ColumnAutoSizeModule,
+  RowApiModule,
+  RenderApiModule,
+  ...(import.meta.env.DEV ? [ValidationModule] : []),
+])
 
 const { t } = useI18n()
 const notify = useNotify()
