@@ -51,6 +51,9 @@
   <!-- Manifest para PWA -->
   <link rel="manifest" href="{{ asset('images/logo/site.webmanifest') }}">
 
+  <!-- Match the splash to the user's saved skin before anything paints. -->
+  <script>try { if (localStorage.getItem('vuexy-skin') === 'dark') document.documentElement.classList.add('loader-dark') } catch (e) {}</script>
+
   <!-- Splash Screen/Loader Styles -->
   <link rel="stylesheet" type="text/css" href="{{ asset(mix('css/loader.css')) }}" />
 
@@ -69,52 +72,16 @@
     Por favor, habilite JavaScript en su navegador para continuar.</strong>
   </noscript>
 
-  <div id="loading-bg">
-    <!-- Efectos de partículas adicionales -->
-    <div class="particles">
-      <div class="particle"></div>
-      <div class="particle"></div>
-      <div class="particle"></div>
-      <div class="particle"></div>
-      <div class="particle"></div>
-    </div>
-
-    <!-- Contenido principal -->
-    <div class="loading-content">
-      <div class="loading-logo">
-        <img src="{{ asset('logo.png') }}" alt="Sondek" />
-      </div>
-
-      <div class="loading">
-        <div class="effect-1 effects"></div>
-        <div class="effect-2 effects"></div>
-        <div class="effect-3 effects"></div>
-      </div>
-
-      <div class="loading-text">
-        <span class="loading-title">Cargando Sondek</span>
-        <div class="loading-dots">
-          <span class="dot"></span>
-          <span class="dot"></span>
-          <span class="dot"></span>
-        </div>
-      </div>
-
-      <!-- Barra de progreso -->
-      <div class="progress-container">
-        <div class="progress-bar">
-          <div class="progress-fill"></div>
-        </div>
-        <div class="progress-text">Inicializando...</div>
-      </div>
-    </div>
+  <div id="loading-bg" role="status" aria-live="polite">
+    <img class="loading-logo" src="{{ asset('logo.png') }}" alt="CMP" />
+    <div class="loading-bar"></div>
+    <span class="loading-text">Cargando…</span>
   </div>
 
   <div id="app">
   </div>
 
   <script src="{{ asset(mix('js/app.js')) }}"></script>
-  <script src="{{ asset('js/loading-screen.js') }}"></script>
 
 </body>
 
