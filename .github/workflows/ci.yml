@@ -40,22 +40,3 @@ jobs:
       - name: JS unit tests
         run: node --test tests/js/*.test.mjs
 
-  frontend-v3:
-    runs-on: ubuntu-22.04
-    defaults:
-      run:
-        working-directory: frontend-v3
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: "22"
-          cache: npm
-          cache-dependency-path: frontend-v3/package-lock.json
-
-      - name: Install
-        run: npm ci --no-audit --no-fund
-
-      - name: Build (Vue 3 app served at /v3)
-        run: npx vite build
