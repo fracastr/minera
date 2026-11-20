@@ -1,5 +1,8 @@
 // ❗ Path must be relative
-@forward "../@core/template/libs/vuetify/variables";
+// CMP brand typeface (cmp.cl uses Work Sans for body text).
+@forward "../@core/template/libs/vuetify/variables" with (
+  $body-font-family: ("Work Sans", sans-serif, -apple-system, blinkmacsystemfont, "Segoe UI", roboto, "Helvetica Neue", arial, sans-serif)
+);
 
 // ℹ️ Remove above import and uncomment below to override core variables.
 // @forward "../@core/template/libs/vuetify/variables" with (

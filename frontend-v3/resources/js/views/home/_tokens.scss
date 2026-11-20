@@ -1,18 +1,24 @@
-// Sondek public-surface tokens, shared by the homepage and the login.
-@mixin sondek-tokens {
-  --ink: #172024;
-  --ink-2: #212c31;
-  --ink-line: rgba(227, 232, 230, 0.14);
-  --assay: #e2e5e1;
-  --paper: #f1f2ee;
-  --text: #1b2326;
-  --text-muted: #4f5a5e;
-  --on-ink: #eef1ef;
-  --on-ink-muted: rgba(238, 241, 239, 0.7);
-  --ore: #e07a3a;
-  --ore-hover: #ec8a4b;
-  --hematite: #dcc1b5;
-  --serif: 'Newsreader', Georgia, 'Times New Roman', serif;
-  --sans: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+// CMP public-surface tokens, shared by the homepage and the login.
+// Colors and Work Sans come from cmp.cl's own CSS and logo (2026-11); Archivo expanded stands in for
+// their commercial display face (Monument Extended).
+@mixin cmp-tokens {
+  --ink: #252a3f; // CMP navy
+  --ink-2: #2d3350;
+  --ink-line: rgba(216, 233, 255, 0.14);
+  --assay: #e9eef6;
+  --paper: #f5f8fc;
+  --text: #252a3f;
+  --text-muted: #4b5470;
+  --on-ink: #f2f5fa;
+  --on-ink-muted: rgba(242, 245, 250, 0.72);
+  --ore: #1c68c9; // CMP blue: fills with white text
+  --ore-hover: #1858ad;
+  --ore-bright: #529eff; // CMP light blue: accent text and strokes on navy
+  --hematite: #d8e9ff;
+  --valle-copiapo: #b13f95;
+  --valle-huasco: #00837a;
+  --valle-elqui: #ff6462;
+  --serif: 'Archivo', 'Work Sans', system-ui, sans-serif;
+  --sans: 'Work Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
 }

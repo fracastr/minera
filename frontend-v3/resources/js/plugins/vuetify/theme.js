@@ -1,5 +1,5 @@
-export const staticPrimaryColor = '#1D4F9C' // CMP blue
-export const staticPrimaryDarkenColor = '#17417F'
+export const staticPrimaryColor = '#1C68C9' // CMP blue, from cmp.cl
+export const staticPrimaryDarkenColor = '#1858AD'
 // Lighter CMP blue keeps contrast on dark surfaces.
 export const staticDarkPrimaryColor = '#4A82D6'
 export const staticDarkPrimaryDarkenColor = '#3A6FC0'
@@ -9,7 +9,7 @@ export const themes = {
     colors: {
       'primary': staticPrimaryColor,
       'on-primary': '#fff',
-      'primary-darken-1': '#17417F',
+      'primary-darken-1': staticPrimaryDarkenColor,
       'secondary': '#808390',
       'on-secondary': '#fff',
       'secondary-darken-1': '#737682',
