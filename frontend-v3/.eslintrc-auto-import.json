@@ -360,6 +360,7 @@
     "watchTriggerable": true,
     "watchWithFilter": true,
     "whenever": true,
-    "useAbility": true
+    "useAbility": true,
+    "useNotify": true
   }
 }

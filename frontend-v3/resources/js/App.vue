@@ -24,6 +24,7 @@ const configStore = useConfigStore()
       <RouterView />
 
       <ScrollToTop />
+      <AppNotify />
     </VApp>
   </VLocaleProvider>
 </template>
