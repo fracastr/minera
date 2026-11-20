@@ -11,9 +11,7 @@ async function logout() {
   catch (e) {
     // Token may already be expired; local cleanup below is what matters.
   }
-  useCookie('accessToken').value = null
-  useCookie('userData').value = null
-  useCookie('userAbilityRules').value = null
+  clearSession()
   ability.update([])
   await router.push('/login')
 }

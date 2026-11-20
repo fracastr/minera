@@ -361,6 +361,12 @@
     "watchWithFilter": true,
     "whenever": true,
     "useAbility": true,
-    "useNotify": true
+    "useNotify": true,
+    "clearSession": true,
+    "expireSession": true,
+    "hasSession": true,
+    "isSessionIdle": true,
+    "sessionLifetimeMinutes": true,
+    "touchSession": true
   }
 }

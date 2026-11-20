@@ -8,13 +8,13 @@ export const $api = ofetch.create({
     if (accessToken)
       options.headers.append('Authorization', `Bearer ${accessToken}`)
   },
+  onResponse({ response }) {
+    if (response.ok && hasSession())
+      touchSession()
+  },
   // Sanctum tokens expire after idle time: drop the session and go back to login.
   onResponseError({ response }) {
-    if (response.status === 401 && useCookie('accessToken').value) {
-      useCookie('accessToken').value = null
-      useCookie('userData').value = null
-      useCookie('userAbilityRules').value = null
-      window.location.assign('/v3/login')
-    }
+    if (response.status === 401 && hasSession())
+      expireSession()
   },
 })

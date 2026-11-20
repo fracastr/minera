@@ -19,7 +19,7 @@ const form = ref({
 })
 
 const isPasswordVisible = ref(false)
-const errorMessage = ref('')
+const errorMessage = ref(useRoute().query.sesion === 'expirada' ? 'Tu sesión expiró por inactividad. Ingresa de nuevo.' : '')
 const isLoading = ref(false)
 const route = useRoute()
 const router = useRouter()
@@ -38,6 +38,7 @@ async function login() {
     ability.update(res.userData.ability)
     useCookie('userData').value = res.userData
     useCookie('accessToken').value = res.accessToken
+    touchSession()
     await router.replace(route.query.to ? String(route.query.to) : '/')
   }
   catch (e) {

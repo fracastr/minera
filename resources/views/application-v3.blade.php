@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="robots" content="noindex, nofollow" />
+  <meta name="session-lifetime" content="{{ (int) config('session.lifetime') }}">
   <title>Sondek - CMP Balances</title>
   <link rel="icon" type="image/x-icon" href="{{ url('/favicon.ico') }}">
   <script>try { if (localStorage.getItem('vuexy-skin') === 'dark') document.documentElement.classList.add('loader-dark') } catch (e) {}</script>
