@@ -332,7 +332,8 @@
     "toast": {
       "runError": "An error occurred while running the balance",
       "importError": "An error occurred while importing the file",
-      "cloneError": "Could not prepare a copy of the balance"
+      "cloneError": "Could not prepare a copy of the balance",
+      "exportError": "Could not generate the Excel file"
     }
   }
 }

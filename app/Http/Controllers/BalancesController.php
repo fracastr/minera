@@ -7,8 +7,10 @@ use App\Services\BalanceEventService;
 use App\Models\Datos_entrada;
 use App\Models\Procesos;
 use App\Models\User;
+use Illuminate\Http\Client\HttpClientException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
 class BalancesController extends Controller
 {
@@ -295,6 +297,11 @@ class BalancesController extends Controller
 
     public function import(Request $request)
     {
+        $request->validate([
+            'proceso_id' => 'required|integer|exists:procesos,id',
+            'file' => app()->environment('local') ? 'nullable' : 'required|file|mimes:xlsx,xls|max:20480',
+        ]);
+
         try {
             $user = $request->user();
             if (!$user) {
@@ -331,7 +338,7 @@ class BalancesController extends Controller
         $response = Http::acceptJson()->post($url, [
             'path_name' => $path,
             'nombre_proceso' => $nombre_proceso
-        ]);
+        ])->throw();
 
         $data = json_decode($response->getBody()->getContents());
         foreach ($data as $key => &$value) {
@@ -413,11 +420,52 @@ class BalancesController extends Controller
         'inventarios_data' => $inventarios_data,
         'path' => $path,
         'datos_entrada_id' => $datos_entrada_id];
-        } catch (\GuzzleHttp\Exception\BadResponseException $e) {
-            return "ERROR";
+        } catch (HttpClientException $e) {
+            return $this->solverError('import', $e);
+        }
+    }
+
+    private function solverError(string $action, \Throwable $e)
+    {
+        Log::error("Balance solver failed on {$action}", ['error' => $e->getMessage()]);
+
+        return response()->json(['message' => 'El servicio de cálculo no respondió correctamente.'], 502);
+    }
+
+    /**
+     * Writes the edited inventory grid rows back into datos_entrada so the solver sees them.
+     * Only keys that already exist in datos_entrada are touched.
+     */
+    public static function applyInventariosTable(array $datosEntrada, $inventariosTable, array $componentes): array
+    {
+        $columns = [
+            'tmh_ini' => 'TMH INI',
+            'tmh_fin' => 'TMH FIN',
+            'tmh_delta' => 'TMH Delta',
+            'humedad_inventario' => 'Humedad [%]',
+            'tms_ini' => 'TMS INI',
+            'tms_fin' => 'TMS FIN',
+            'tms_delta' => 'TMS Delta',
+        ];
+        $toNumber = fn ($v) => floatval(str_replace(',', '', (string) $v));
+
+        foreach ((array) $inventariosTable as $i => $row) {
+            $row = (array) $row;
+            foreach ($columns as $key => $field) {
+                if (array_key_exists($field, $row) && isset($datosEntrada[$key]) && array_key_exists($i, $datosEntrada[$key])) {
+                    $datosEntrada[$key][$i] = $toNumber($row[$field]);
+                }
+            }
+            foreach ($componentes as $k => $componente) {
+                $field = $componente . ' [%]';
+                if (array_key_exists($field, $row) && isset($datosEntrada['componentes_inventario'][$i])
+                    && array_key_exists($k, $datosEntrada['componentes_inventario'][$i])) {
+                    $datosEntrada['componentes_inventario'][$i][$k] = $toNumber($row[$field]);
+                }
+            }
         }
 
-        return response()->json(['message' => 'uploaded successfully'], 200);
+        return $datosEntrada;
     }
 
     public function get_listado(Request $request)
@@ -504,42 +552,9 @@ class BalancesController extends Controller
         $proceso_id = $request->proceso_id;
         $inventarios_table = $request->inventarios_table;
 
-        $tmh_ini = array();
-        $tmh_fin = array();
-        $tmh_delta = array();
-        $tms_ini = array();
-        $tms_fin = array();
-        $tms_delta = array();
-        $humedad = array();
-        foreach ($inventarios_table as $key_inventarios_table => $value_inventarios_table) {
-            switch ($key_inventarios_table) {
-                case 'TMH INI':
-                    array_push($tmh_ini, $value_inventarios_table);
-                    break;
-                case 'TMH FIN':
-                    array_push($tmh_fin, $value_inventarios_table);
-                    break;
-                case 'TMH Delta':
-                    array_push($tmh_fin, $value_inventarios_table);
-                    break;
-                case 'TMS INI':
-                    array_push($tms_ini, $value_inventarios_table);
-                    break;
-                case 'TMS FIN':
-                    array_push($tms_fin, $value_inventarios_table);
-                    break;
-                case 'TMS Delta':
-                    array_push($tms_fin, $value_inventarios_table);
-                    break;
-                case 'Humedad [%]':
-                    array_push($humedad, $value_inventarios_table);
-                    break;
-
-                default:
-                    # code...
-                    break;
-            }
-        }
+        $proceso = Procesos::find($proceso_id);
+        $componentes = json_decode($proceso->componentes)->data;
+        $datos_entrada = self::applyInventariosTable($datos_entrada, $inventarios_table, $componentes);
 
         $new_mediciones = array();
 
@@ -589,7 +604,7 @@ class BalancesController extends Controller
         $myBody['datos_entrada_id'] = $datos_entrada_id;
         $response = Http::acceptJson()->post($url, [
             'datos_entrada_id' => $datos_entrada_id,
-        ]);
+        ])->throw();
 
         $data = json_decode($response->getBody()->getContents());
 
@@ -642,10 +657,6 @@ class BalancesController extends Controller
 
 
 
-        $proceso = Procesos::find($proceso_id);
-        $componentes = json_decode($proceso->componentes);
-        $componentes = $componentes->data;
-
         $balance_nodos_fields = $this->createTableBalanceNodosFields($componentes);
         $array_balance_nodos = $this->createTableBalanceNodos($balance_nodos, $nodos_data, $nodos, $componentes);
 
@@ -668,11 +679,9 @@ class BalancesController extends Controller
         'inventarios_data' => $inventarios_data,
         'path' => "",
         'datos_entrada_id' => $datos_entrada_id];
-        } catch (\GuzzleHttp\Exception\BadResponseException $e) {
-            return "ERROR";
+        } catch (HttpClientException $e) {
+            return $this->solverError('correr_balance', $e);
         }
-
-        return response()->json(['message' => 'uploaded successfully'], 200);
     }
 
     public function paint_tables(Request $request)
@@ -686,7 +695,7 @@ class BalancesController extends Controller
             $response = Http::acceptJson()->post($url, [
                 'datos_entrada_id' => $datos_entrada_id,
                 'rowIndex' => $rowIndex
-            ]);
+            ])->throw();
 
             $data = json_decode($response->getBody()->getContents());
             foreach ($data as $key => &$value) {
@@ -710,7 +719,7 @@ class BalancesController extends Controller
                 "green" => $green
             ];
         } catch (\Throwable $th) {
-            return "ERROR";
+            return $this->solverError('paint_tables', $th);
         }
     }
 

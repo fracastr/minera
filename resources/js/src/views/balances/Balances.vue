@@ -509,7 +509,14 @@ export default {
         .catch(e => {
           this.isLoading = false
           console.log('FAILURE!!', e)
-        }).finally(() => {
+          this.$toast({
+            component: ToastificationContent,
+            props: {
+              title: this.$t('balances.toast.exportError'),
+              icon: 'AlertTriangleIcon',
+              variant: 'danger',
+            },
+          })
         })
     },
     tbl_expand(table) {
@@ -669,6 +676,14 @@ export default {
         .catch(e => {
           this.isLoading = false
           console.log('FAILURE!! correr_balance', e)
+          this.$toast({
+            component: ToastificationContent,
+            props: {
+              title: this.$t('balances.toast.runError'),
+              icon: 'AlertTriangleIcon',
+              variant: 'danger',
+            },
+          })
         })
     },
     async onSubmit(event) {
