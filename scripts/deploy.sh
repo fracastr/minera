@@ -40,7 +40,7 @@ find public/js/chunks -type f -mtime +7 -print0 | while IFS= read -r -d '' f; do
   sudo -n rm -f "$f"
 done
 
-if [ -d frontend-v3 ]; then
+if [ -f frontend-v3/package.json ]; then  # node_modules may linger after git reset
 echo "==> frontend v3 (Vite / Node 22 from /opt/node22; system Node 10 stays for Mix and Excel)"
 V3_PATH="/opt/node22/bin:$PATH"
 (
