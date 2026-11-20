@@ -1,10 +1,5 @@
 export default [
   {
-    path: '/dashboard/analytics',
-    name: 'dashboard-analytics',
-    component: () => import('@/views/dashboard/analytics/Analytics.vue'),
-  },
-  {
     path: '/dashboard/balance-analytics',
     name: 'dashboard-balance-analytics',
     component: () => import('@/views/dashboard/balance-analytics/BalanceAnalyticsDashboard.vue'),
