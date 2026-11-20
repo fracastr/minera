@@ -315,7 +315,8 @@
       "reset": "Reset",
       "run": "Correr",
       "generateExcel": "Generar Excel Resultados",
-      "history": "Historial"
+      "history": "Historial",
+      "diagram": "Ver diagrama"
     },
     "tables": {
       "balances": "Tabla Balances",
@@ -371,6 +372,15 @@
       "current": "Actual",
       "restore": "Restaurar",
       "types": { "importacion": "Importación", "corrida": "Corrida", "restauracion": "Restauración" }
+    },
+    "sankey": {
+      "title": "Diagrama de flujo (TMS balance)",
+      "empty": "No hay flujos con TMS para dibujar.",
+      "recirculations": "Recirculaciones",
+      "recirculationsHint": "Flujos que vuelven a un nodo anterior; no se dibujan en el diagrama.",
+      "flow": "Flujo",
+      "from": "Desde",
+      "to": "Hacia"
     }
   }
 }
