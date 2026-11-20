@@ -376,6 +376,21 @@
     "sankey": {
       "title": "Diagrama de flujo (TMS balance)",
       "empty": "No hay flujos con TMS para dibujar.",
+      "explain": "Cómo se mueven las toneladas secas (TMS balance) del período entre los nodos del proceso. Cada banda es un flujo y su ancho es proporcional a las toneladas; se lee de izquierda a derecha: entradas, nodos y salidas. Una variación de stock entra al proceso cuando el stock baja (consumo) y sale cuando sube (acumulación). Pase el cursor sobre una banda o un nodo para ver el detalle.",
+      "kpi": {
+        "entradas": "Entradas",
+        "salidas": "Salidas",
+        "stock": "Stock: consumo / acumulación",
+        "cierre": "Diferencia de cierre (entradas + consumo − salidas − acumulación)"
+      },
+      "legend": {
+        "entrada": "Entrada",
+        "proceso": "Nodo de proceso",
+        "salida": "Salida",
+        "stock": "Variación de stock"
+      },
+      "animate": "Animar flujos",
+      "ofInput": "de lo que entra",
       "recirculations": "Recirculaciones",
       "recirculationsHint": "Flujos que vuelven a un nodo anterior; no se dibujan en el diagrama.",
       "flow": "Flujo",

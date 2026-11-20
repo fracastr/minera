@@ -600,6 +600,7 @@ export default {
         matriz: (this.datos_entrada && this.datos_entrada.matriz) || [],
         balanceNodos: this.balance_nodos,
         balancesTable: this.balances_table,
+        indicesStock: (this.datos_entrada && this.datos_entrada.indices_stock) || [],
       })
     },
     calidadFilas() {
