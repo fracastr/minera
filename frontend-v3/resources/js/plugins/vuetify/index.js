@@ -1,5 +1,8 @@
 import { deepMerge } from '@antfu/utils'
 import { createVuetify } from 'vuetify'
+import { createVueI18nAdapter } from 'vuetify/locale/adapters/vue-i18n'
+import { useI18n } from 'vue-i18n'
+import { getI18n } from '@/plugins/i18n'
 import { VBtn } from 'vuetify/components/VBtn'
 import { VVideo } from 'vuetify/labs/VVideo'
 import defaults from './defaults'
@@ -43,6 +46,7 @@ export default function (app) {
     defaults,
     icons,
     theme: optionTheme,
+    locale: { adapter: createVueI18nAdapter({ i18n: getI18n(), useI18n }) },
   })
 
   app.use(vuetify)
