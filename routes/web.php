@@ -23,5 +23,8 @@ Route::get('forgot-password', function () {
     return view('application');
 })->name('password.request');
 
+// Vue 3 migration shell (frontend-v3/), served side by side with the current app.
+Route::get('/v3/{any?}', fn () => view('application-v3'))->where('any', '.*');
+
 Route::get('/{any}', [ApplicationController::class, 'index'])->where('any', '.*');
 
