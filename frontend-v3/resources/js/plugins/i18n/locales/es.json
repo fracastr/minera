@@ -301,7 +301,8 @@
       "error": "Ocurrió un problema al intentar guardar el balance",
       "loadError": "Error al cargar los valles",
       "processError": "Error al cargar los procesos"
-    }
+    },
+    "required": "El campo {field} es obligatorio"
   },
   "balances": {
     "fileUpload": {

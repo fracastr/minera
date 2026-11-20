@@ -301,7 +301,8 @@
       "error": "An error occurred while trying to save the balance",
       "loadError": "Error loading valleys",
       "processError": "Error loading processes"
-    }
+    },
+    "required": "The {field} field is required"
   },
   "balances": {
     "fileUpload": {
