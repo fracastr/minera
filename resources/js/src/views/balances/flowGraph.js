@@ -1,9 +1,12 @@
 // Sankey data from the balance matrix (nodes × flows, +1 = flow enters the node, -1 = leaves it).
 // Link value is |TMS balance|; the coefficient gives the direction (stock deltas already carry it).
 // echarts' Sankey only accepts a DAG, so recirculations (back edges) are moved to a separate list.
+// tipo: 'entrada' / 'salida' (external), 'stock' (delta stock, from indices_stock), 'interno'.
 import { toNumber } from './reconciliationQuality.js'
 
-export function buildFlowGraph({ matriz = [], balanceNodos = [], balancesTable = [] }) {
+export function buildFlowGraph({ matriz = [], balanceNodos = [], balancesTable = [], indicesStock = [] }) {
+  // indices_stock rows are 1-based [node, flow].
+  const stockCols = new Set(indicesStock.map(pair => toNumber(pair[1]) - 1))
   const nodeNames = balanceNodos.map((n, i) => String(n.Nodos || `Nodo ${i + 1}`))
   const used = new Set(nodeNames)
   const unique = base => {
@@ -28,7 +31,11 @@ export function buildFlowGraph({ matriz = [], balanceNodos = [], balancesTable =
     const flujo = String(row.Flujos || `Flujo ${j + 1}`)
     const source = out.length ? nodeNames[out[0]] : unique(flujo)
     const target = into.length ? nodeNames[into[0]] : unique(flujo)
-    edges.push({ source, target, value, flujo })
+    let tipo = 'interno'
+    if (stockCols.has(j)) tipo = 'stock'
+    else if (!out.length) tipo = 'entrada'
+    else if (!into.length) tipo = 'salida'
+    edges.push({ source, target, value, flujo, tipo })
   })
 
   // DFS from the entry points first, so the edges that close a loop are the ones flowing "back".
@@ -68,6 +75,25 @@ export function buildFlowGraph({ matriz = [], balanceNodos = [], balancesTable =
   const links = edges.filter((_, k) => !back.has(k))
   const recirculaciones = edges.filter((_, k) => back.has(k))
   const linked = new Set(links.flatMap(e => [e.source, e.target]))
-  const nodes = names.filter(n => linked.has(n)).map(name => ({ name, externo: !nodeNames.includes(name) }))
-  return { nodes, links, recirculaciones }
+  const tipoNodo = new Map(edges.filter(e => e.tipo !== 'interno').map(e => [nodeNames.includes(e.source) ? e.target : e.source, e.tipo]))
+  const nodes = names.filter(n => linked.has(n)).map(name => ({
+    name,
+    externo: !nodeNames.includes(name),
+    tipo: nodeNames.includes(name) ? 'proceso' : tipoNodo.get(name),
+    // Same rule echarts uses for node size; set explicitly so labels and tooltips can show it.
+    value: Math.max(
+      links.filter(l => l.target === name).reduce((acc, l) => acc + l.value, 0),
+      links.filter(l => l.source === name).reduce((acc, l) => acc + l.value, 0),
+    ),
+  }))
+  const sum = pred => edges.filter(pred).reduce((acc, e) => acc + e.value, 0)
+  const isNode = n => nodeNames.includes(n)
+  const totales = {
+    entradas: sum(e => e.tipo === 'entrada'),
+    salidas: sum(e => e.tipo === 'salida'),
+    // A delta flowing into a node means the stock was drawn down; out of a node, it accumulated.
+    stockConsumo: sum(e => e.tipo === 'stock' && !isNode(e.source)),
+    stockAcumulacion: sum(e => e.tipo === 'stock' && !isNode(e.target)),
+  }
+  return { nodes, links, recirculaciones, totales }
 }
