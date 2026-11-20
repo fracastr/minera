@@ -344,6 +344,24 @@
       "restoreError": "No se pudo restaurar la versión",
       "historyError": "No se pudo cargar el historial"
     },
+    "quality": {
+      "title": "Calidad de la reconciliación",
+      "hint": "Uso de tolerancia: cuánto del margen permitido en Restricciones consumió el ajuste. Cerca de 100% suele indicar una medición dudosa.",
+      "flowsAtLimit": "Variables cerca del límite",
+      "flowsOutside": "Fuera de tolerancia",
+      "maxTmsAdjustment": "Mayor ajuste TMS",
+      "nodesOpen": "Nodos sin cerrar",
+      "nodesOpenList": "Nodos sin cerrar:",
+      "flow": "Flujo",
+      "variable": "Variable",
+      "adjustment": "Ajuste",
+      "tolerance": "Tolerancia",
+      "usage": "Uso",
+      "noTolerance": "Jerarquía ≠ 1",
+      "showAll": "Ver todas ({n})",
+      "showLess": "Ver menos",
+      "status": { "ok": "OK", "limite": "Al límite", "fuera": "Fuera", "sin-tolerancia": "Sin tolerancia" }
+    },
     "history": {
       "title": "Historial de corridas",
       "empty": "Aún no hay versiones registradas",

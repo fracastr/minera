@@ -344,6 +344,24 @@
       "restoreError": "Could not restore the version",
       "historyError": "Could not load the history"
     },
+    "quality": {
+      "title": "Reconciliation quality",
+      "hint": "Tolerance usage: how much of the margin allowed in Restrictions the adjustment used. Close to 100% usually points to a doubtful measurement.",
+      "flowsAtLimit": "Variables near the limit",
+      "flowsOutside": "Outside tolerance",
+      "maxTmsAdjustment": "Largest TMS adjustment",
+      "nodesOpen": "Unclosed nodes",
+      "nodesOpenList": "Unclosed nodes:",
+      "flow": "Flow",
+      "variable": "Variable",
+      "adjustment": "Adjustment",
+      "tolerance": "Tolerance",
+      "usage": "Usage",
+      "noTolerance": "Hierarchy ≠ 1",
+      "showAll": "Show all ({n})",
+      "showLess": "Show less",
+      "status": { "ok": "OK", "limite": "At limit", "fuera": "Outside", "sin-tolerancia": "No tolerance" }
+    },
     "history": {
       "title": "Run history",
       "empty": "No versions recorded yet",
