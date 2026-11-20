@@ -60,3 +60,8 @@ yarn-error.log*
 /docs/.temp
 /.phpunit.cache
 .env.*
+
+# Vue 3 shell (frontend-v3)
+/frontend-v3/node_modules
+/public/v3-build
+/public/v3.hot

@@ -40,6 +40,28 @@ find public/js/chunks -type f -mtime +7 -print0 | while IFS= read -r -d '' f; do
   sudo -n rm -f "$f"
 done
 
+echo "==> frontend v3 (Vite / Node 22 from /opt/node22; system Node 10 stays for Mix and Excel)"
+V3_PATH="/opt/node22/bin:$PATH"
+(
+  cd frontend-v3
+  # npm ci only when the lockfile changed: it is slow on this box.
+  lock_sha="$(sha256sum package-lock.json | cut -d' ' -f1)"
+  if [ "$(cat node_modules/.lock-sha 2>/dev/null || true)" != "$lock_sha" ]; then
+    sudo -n env PATH="$V3_PATH" npm ci --no-audit --no-fund
+    echo "$lock_sha" | sudo -n tee node_modules/.lock-sha >/dev/null
+  fi
+  sudo -n env PATH="$V3_PATH" npx vite build
+)
+
+echo "==> prune v3 assets older than 7 days"
+# Vite does not empty public/v3-build (it is outside its root); keep whatever the manifest still uses.
+find public/v3-build/assets -type f -mtime +7 -print0 | while IFS= read -r -d '' f; do
+  if grep -qF "$(basename "$f")" public/v3-build/manifest.json; then
+    continue
+  fi
+  sudo -n rm -f "$f"
+done
+
 echo "==> migrate"
 php_artisan migrate --force
 
