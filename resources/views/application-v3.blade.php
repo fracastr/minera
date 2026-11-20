@@ -7,6 +7,8 @@
   <meta name="session-lifetime" content="{{ (int) config('session.lifetime') }}">
   <title>Sondek - CMP Balances</title>
   <link rel="icon" type="image/x-icon" href="{{ url('/favicon.ico') }}">
+  {{-- Fonts of the public landing (pages/index.vue), same as the current app. --}}
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Newsreader:opsz,wght@6..72,300;6..72,400&display=swap" rel="stylesheet">
   <script>try { if (localStorage.getItem('vuexy-skin') === 'dark') document.documentElement.classList.add('loader-dark') } catch (e) {}</script>
   <style>
     #loading-bg { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1.5rem; background: #f8f7fa; }

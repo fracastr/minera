@@ -4,6 +4,11 @@ export const setupGuards = router => {
   // 👉 router.beforeEach
   // Docs: https://router.vuejs.org/guide/advanced/navigation-guards.html#global-before-guards
   router.beforeEach(to => {
+    // Public landing: logged-in users go to their home route, like getHomeRouteForLoggedInUser in the Vue 2 app
+    // (it returns 'dashboard-balances' for every role; Listado is its v3 counterpart).
+    if (to.meta.redirectIfLoggedIn && useCookie('userData').value && useCookie('accessToken').value)
+      return '/balances/Listado'
+
     /*
          * If it's a public route, continue navigation. This kind of pages are allowed to visited by login & non-login users. Basically, without any restrictions.
          * Examples of public routes are, 404, under maintenance, etc.

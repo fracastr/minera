@@ -23,6 +23,7 @@ declare module 'vue-router/auto-routes' {
     'admin-users': RouteRecordInfo<'admin-users', '/admin/users', Record<never, never>, Record<never, never>>,
     'balances-balance-form-wizard': RouteRecordInfo<'balances-balance-form-wizard', '/balances/BalanceFormWizard', Record<never, never>, Record<never, never>>,
     'balances-listado': RouteRecordInfo<'balances-listado', '/balances/Listado', Record<never, never>, Record<never, never>>,
+    'dashboard-balance-analytics': RouteRecordInfo<'dashboard-balance-analytics', '/dashboard/balance-analytics', Record<never, never>, Record<never, never>>,
     'forgot-password': RouteRecordInfo<'forgot-password', '/forgot-password', Record<never, never>, Record<never, never>>,
     'login': RouteRecordInfo<'login', '/login', Record<never, never>, Record<never, never>>,
     'not-authorized': RouteRecordInfo<'not-authorized', '/not-authorized', Record<never, never>, Record<never, never>>,
