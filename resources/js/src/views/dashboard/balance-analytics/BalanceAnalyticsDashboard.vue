@@ -403,6 +403,7 @@ import {
 } from 'bootstrap-vue'
 import VueApexCharts from 'vue-apexcharts'
 import { $themeColors } from '@themeConfig'
+import { valleColor } from '@/libs/valleColor'
 import useAppConfig from '@core/app-config/useAppConfig'
 
 function defaultFromDate() {
@@ -621,7 +622,10 @@ export default {
             opacity: 0.85,
           },
         },
-        colors: [$themeColors.primary, $themeColors.warning, $themeColors.success, $themeColors.info, $themeColors.danger],
+        colors: this.byValle.map((item, i) => {
+          const fallback = [$themeColors.primary, $themeColors.warning, $themeColors.info, $themeColors.secondary]
+          return valleColor(item.nombre, fallback[i % fallback.length])
+        }),
         tooltip: {
           theme: this.isDark ? 'dark' : 'light',
           fillSeriesColor: false,

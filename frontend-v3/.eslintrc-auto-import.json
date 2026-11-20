@@ -372,6 +372,7 @@
     "hasSession": true,
     "isSessionIdle": true,
     "sessionLifetimeMinutes": true,
-    "touchSession": true
+    "touchSession": true,
+    "valleColor": true
   }
 }
