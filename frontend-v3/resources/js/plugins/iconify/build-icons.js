@@ -13,6 +13,26 @@
 import { promises as fs } from 'node:fs';
 import { createRequire } from 'node:module';
 import { dirname, join } from 'node:path';
+import { readdirSync, readFileSync, statSync } from 'node:fs';
+
+// Only the Tabler icons the app references (full set = ~2.8 MB of CSS on every page).
+// Icon names must appear literally in resources/js or resources/styles (no 'tabler-' + x).
+const usedTablerIcons = (() => {
+    const found = new Set();
+    const walk = dir => {
+        for (const name of readdirSync(dir)) {
+            const path = join(dir, name);
+            if (statSync(path).isDirectory())
+                walk(path);
+            else if (/\.(vue|js|ts|scss)$/.test(name) && !path.includes('iconify'))
+                for (const m of readFileSync(path, 'utf8').matchAll(/tabler-([a-z0-9-]+)/g))
+                    found.add(m[1]);
+        }
+    };
+    walk(join(dirname(new URL(import.meta.url).pathname), '../..'));
+    walk(join(dirname(new URL(import.meta.url).pathname), '../../../styles'));
+    return [...found];
+})();
 // Installation: npm install --save-dev @iconify/tools @iconify/utils @iconify/json @iconify/iconify
 import { cleanupSVG, importDirectory, isEmptyColor, parseColors, runSVGO } from '@iconify/tools';
 import { getIcons, getIconsCSS, stringToIcon } from '@iconify/utils';
@@ -43,7 +63,10 @@ const sources = {
         // Custom JSON file
         // 'json/gg.json',
         // Iconify JSON file (@iconify/json is a package name, /json/ is directory where files are, then filename)
-        require.resolve('@iconify-json/tabler/icons.json'),
+        {
+            filename: require.resolve('@iconify-json/tabler/icons.json'),
+            icons: usedTablerIcons,
+        },
         {
             filename: require.resolve('@iconify-json/mdi/icons.json'),
             icons: [
