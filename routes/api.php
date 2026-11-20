@@ -44,6 +44,7 @@ Route::group(['prefix' => 'balances', 'middleware' => ['auth:sanctum']], functio
         Route::get('getValles/{user_id}', [UtilsController::class, 'getValles']);
         Route::get('getProcesos/{valle_id}', [UtilsController::class, 'getProcesos']);
         Route::get('getExcel/{datos_entrada_id}/{proceso_id}', [UtilsController::class, 'getExcel']);
+        Route::get('corridas/{datos_entrada_id}', [BalancesController::class, 'corridas']);
     });
 
     Route::middleware('balance:write')->group(function () {
@@ -52,6 +53,7 @@ Route::group(['prefix' => 'balances', 'middleware' => ['auth:sanctum']], functio
         Route::post('paint_tables', [BalancesController::class, 'paint_tables']);
         Route::post('clone_session', [BalancesController::class, 'clone_session']);
         Route::post('save_balance', [BalancesController::class, 'save_balance']);
+        Route::post('corridas/{corrida_id}/restaurar', [BalancesController::class, 'restaurar_corrida']);
     });
 });
 

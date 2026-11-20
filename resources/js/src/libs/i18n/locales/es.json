@@ -288,6 +288,11 @@
       "label": "Nombre Balance",
       "placeholder": "Ej: Balance Q1 2024",
       "invalidFeedback": "Nombre es requerido",
+      "tipo": "Tipo de período",
+      "tipos": { "quincenal": "Quincenal", "mensual": "Mensual" },
+      "periodoInicio": "Desde",
+      "periodoFin": "Hasta",
+      "periodoInvalid": "La fecha final debe ser igual o posterior a la inicial",
       "cancel": "Cancelar",
       "save": "Guardar Balance"
     },
@@ -309,7 +314,8 @@
       "load": "Cargar",
       "reset": "Reset",
       "run": "Correr",
-      "generateExcel": "Generar Excel Resultados"
+      "generateExcel": "Generar Excel Resultados",
+      "history": "Historial"
     },
     "tables": {
       "balances": "Tabla Balances",
@@ -333,7 +339,20 @@
       "runError": "Ocurrio un error al correr el balance",
       "importError": "Ocurrio un error al importar el archivo",
       "cloneError": "No se pudo preparar una copia del balance",
-      "exportError": "No se pudo generar el Excel"
+      "exportError": "No se pudo generar el Excel",
+      "restoreSuccess": "Versión restaurada",
+      "restoreError": "No se pudo restaurar la versión",
+      "historyError": "No se pudo cargar el historial"
+    },
+    "history": {
+      "title": "Historial de corridas",
+      "empty": "Aún no hay versiones registradas",
+      "date": "Fecha",
+      "type": "Tipo",
+      "user": "Usuario",
+      "current": "Actual",
+      "restore": "Restaurar",
+      "types": { "importacion": "Importación", "corrida": "Corrida", "restauracion": "Restauración" }
     }
   }
 }

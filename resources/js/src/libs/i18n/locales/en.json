@@ -288,6 +288,11 @@
       "label": "Balance Name",
       "placeholder": "Ex: Balance Q1 2024",
       "invalidFeedback": "Name is required",
+      "tipo": "Period type",
+      "tipos": { "quincenal": "Fortnightly", "mensual": "Monthly" },
+      "periodoInicio": "From",
+      "periodoFin": "To",
+      "periodoInvalid": "The end date must be on or after the start date",
       "cancel": "Cancel",
       "save": "Save Balance"
     },
@@ -309,7 +314,8 @@
       "load": "Load",
       "reset": "Reset",
       "run": "Run",
-      "generateExcel": "Generate Excel Results"
+      "generateExcel": "Generate Excel Results",
+      "history": "History"
     },
     "tables": {
       "balances": "Balances Table",
@@ -333,7 +339,20 @@
       "runError": "An error occurred while running the balance",
       "importError": "An error occurred while importing the file",
       "cloneError": "Could not prepare a copy of the balance",
-      "exportError": "Could not generate the Excel file"
+      "exportError": "Could not generate the Excel file",
+      "restoreSuccess": "Version restored",
+      "restoreError": "Could not restore the version",
+      "historyError": "Could not load the history"
+    },
+    "history": {
+      "title": "Run history",
+      "empty": "No versions recorded yet",
+      "date": "Date",
+      "type": "Type",
+      "user": "User",
+      "current": "Current",
+      "restore": "Restore",
+      "types": { "importacion": "Import", "corrida": "Run", "restauracion": "Restore" }
     }
   }
 }

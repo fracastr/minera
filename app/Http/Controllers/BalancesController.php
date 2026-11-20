@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\BalanceCorrida;
 use App\Models\Balances;
 use App\Services\BalanceEventService;
 use App\Models\Datos_entrada;
@@ -404,6 +405,7 @@ class BalancesController extends Controller
         $datos_entrada_model->save();
 
         BalanceEventService::logImported($datos_entrada_model, $user);
+        BalanceCorrida::record($datos_entrada_model, $user, BalanceCorrida::TIPO_IMPORTACION);
 
         $datos_entrada_id = $datos_entrada_model->id;
 
@@ -471,7 +473,7 @@ class BalancesController extends Controller
     public function get_listado(Request $request)
     {
         $listado = Balances::query()
-            ->select(['id', 'nombre', 'tipo', 'proceso_id', 'user_id', 'created_at', 'updated_at'])
+            ->select(['id', 'nombre', 'tipo', 'periodo_inicio', 'periodo_fin', 'proceso_id', 'user_id', 'created_at', 'updated_at'])
             ->with([
                 'user:id,nombre',
                 'datosEntrada.user:id,nombre',
@@ -489,6 +491,8 @@ class BalancesController extends Controller
                     'id' => $balance->id,
                     'nombre' => $balance->nombre,
                     'tipo' => $balance->tipo,
+                    'periodo_inicio' => optional($balance->periodo_inicio)->format('Y-m-d'),
+                    'periodo_fin' => optional($balance->periodo_fin)->format('Y-m-d'),
                     'proceso_id' => $balance->proceso_id,
                     'user_id' => $creator ? $creator->id : $balance->user_id,
                     'created_at' => $balance->created_at,
@@ -629,6 +633,7 @@ class BalancesController extends Controller
         $data->datos_entrada['nodos_data'] = $data->nodos_data;
         $datos_entrada_data->datos_entrada = json_encode($data->datos_entrada);
         $datos_entrada_data->save();
+        BalanceCorrida::record($datos_entrada_data, $request->user(), BalanceCorrida::TIPO_CORRIDA);
 
         $table_mediciones_fields = $this->createTableMedicionesFields($mediciones, $flujos);
         $array_mediciones = $this->createTableMediciones($mediciones, $flujos);
@@ -741,6 +746,9 @@ class BalancesController extends Controller
         $payload['balance'] = [
             'id' => $balance->id,
             'nombre' => $balance->nombre,
+            'tipo' => $balance->tipo,
+            'periodo_inicio' => optional($balance->periodo_inicio)->format('Y-m-d'),
+            'periodo_fin' => optional($balance->periodo_fin)->format('Y-m-d'),
             'proceso_id' => $balance->proceso_id,
             'valle_id' => optional($balance->proceso)->valle_id,
         ];
@@ -764,8 +772,46 @@ class BalancesController extends Controller
         $clone->balance_id = null;
         $clone->user_id = $user->id;
         $clone->save();
+        BalanceCorrida::copyHistory($original->id, $clone->id);
 
         return response()->json(['datos_entrada_id' => $clone->id]);
+    }
+
+    public function corridas($datos_entrada_id)
+    {
+        $corridas = BalanceCorrida::query()
+            ->select(['id', 'tipo', 'user_id', 'created_at'])
+            ->with('user:id,nombre')
+            ->where('datos_entrada_id', $datos_entrada_id)
+            ->orderByDesc('id')
+            ->get()
+            ->map(fn (BalanceCorrida $c) => [
+                'id' => $c->id,
+                'tipo' => $c->tipo,
+                'usuario_nombre' => optional($c->user)->nombre,
+                'created_at' => $c->created_at,
+            ]);
+
+        return response()->json(['corridas' => $corridas]);
+    }
+
+    public function restaurar_corrida(Request $request, $corrida_id)
+    {
+        $request->validate(['datos_entrada_id' => 'required|integer|exists:datos_entradas,id']);
+
+        $corrida = BalanceCorrida::with('datosEntrada:id,proceso_id')->findOrFail($corrida_id);
+        $target = Datos_entrada::findOrFail($request->datos_entrada_id);
+
+        // The target may be a clone of the corrida's session; only the process must match.
+        if ((int) $corrida->datosEntrada->proceso_id !== (int) $target->proceso_id) {
+            return response()->json(['message' => 'La versión pertenece a otro proceso.'], 422);
+        }
+
+        $target->datos_entrada = $corrida->snapshot;
+        $target->save();
+        BalanceCorrida::record($target, $request->user(), BalanceCorrida::TIPO_RESTAURACION);
+
+        return response()->json($this->buildTablesFromDatosEntrada($target));
     }
 
     public function save_balance(Request $request){
@@ -773,6 +819,14 @@ class BalancesController extends Controller
         if (!$user) {
             return response()->json(['message' => 'Unauthorized'], 401);
         }
+
+        $request->validate([
+            'nombre_balance' => 'required|string|max:255',
+            'tipo' => 'required|in:' . implode(',', Balances::TIPOS),
+            'periodo_inicio' => 'required|date',
+            'periodo_fin' => 'required|date|after_or_equal:periodo_inicio',
+        ]);
+        $periodo = $request->only(['tipo', 'periodo_inicio', 'periodo_fin']);
 
         $datos_entrada = Datos_entrada::find($request->datos_entrada_id);
         if (!$datos_entrada) {
@@ -787,6 +841,7 @@ class BalancesController extends Controller
             }
 
             $balance->nombre = $request->nombre_balance;
+            $balance->fill($periodo);
             if ($request->proceso_id) {
                 $balance->proceso_id = $request->proceso_id;
             }
@@ -794,7 +849,7 @@ class BalancesController extends Controller
         } else {
             $balance = new Balances();
             $balance->nombre = $request->nombre_balance;
-            $balance->tipo = "quincenal";
+            $balance->fill($periodo);
             $balance->proceso_id = $request->proceso_id;
             $balance->user_id = $user->id;
             $balance->save();

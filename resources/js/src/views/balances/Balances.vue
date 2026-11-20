@@ -61,6 +61,16 @@
           >
             {{ $t('balances.buttons.generateExcel') }}
           </b-button>
+          <b-button
+            v-show="exportar_button"
+            type="button"
+            variant="outline-primary"
+            class="ml-1"
+            @click="abrirHistorial"
+          >
+            <feather-icon icon="ClockIcon" class="mr-50" />
+            {{ $t('balances.buttons.history') }}
+          </b-button>
         </b-col>
       </b-row>
     </b-form>
@@ -240,6 +250,49 @@
         />
       </b-modal>
     </b-container>
+    <b-modal
+      ref="historial-modal"
+      :title="$t('balances.history.title')"
+      size="lg"
+      centered
+      hide-footer
+    >
+      <b-table
+        :items="corridas"
+        :fields="corridasFields"
+        :busy="corridasLoading"
+        :empty-text="$t('balances.history.empty')"
+        show-empty
+        small
+        responsive
+      >
+        <template #table-busy>
+          <div class="text-center my-1">
+            <b-spinner small />
+          </div>
+        </template>
+        <template #cell(created_at)="{ value }">
+          {{ formatFecha(value) }}
+        </template>
+        <template #cell(tipo)="{ value }">
+          {{ $t(`balances.history.types.${value}`) }}
+        </template>
+        <template #cell(acciones)="{ item, index }">
+          <span
+            v-if="index === 0"
+            class="text-muted"
+          >{{ $t('balances.history.current') }}</span>
+          <b-button
+            v-else-if="canWrite"
+            size="sm"
+            variant="outline-primary"
+            @click="restaurarCorrida(item)"
+          >
+            {{ $t('balances.history.restore') }}
+          </b-button>
+        </template>
+      </b-table>
+    </b-modal>
     <loading
       :active.sync="isLoading"
       :can-cancel="false"
@@ -276,6 +329,7 @@ import {
 import Ripple from 'vue-ripple-directive'
 import { AgGridVue } from 'ag-grid-vue'
 import ToastificationContent from '@core/components/toastification/ToastificationContent.vue'
+import { getUserData } from '@/auth/utils'
 
 function decimalFormatter(params) {
   // console.log("params decimal", params.value);
@@ -386,7 +440,23 @@ export default {
       proceso_id: '',
       modalTitle: '',
       defaultColDef: null,
+      corridas: [],
+      corridasLoading: false,
     }
+  },
+  computed: {
+    canWrite() {
+      const user = getUserData()
+      return !!user && ['admin', 'operator'].includes(user.role)
+    },
+    corridasFields() {
+      return [
+        { key: 'created_at', label: this.$t('balances.history.date') },
+        { key: 'tipo', label: this.$t('balances.history.type') },
+        { key: 'usuario_nombre', label: this.$t('balances.history.user') },
+        { key: 'acciones', label: '', class: 'text-right' },
+      ]
+    },
   },
   mounted() {
     console.log('mounted')
@@ -518,6 +588,58 @@ export default {
             },
           })
         })
+    },
+    showToast(titleKey, variant) {
+      this.$toast({
+        component: ToastificationContent,
+        props: {
+          title: this.$t(titleKey),
+          icon: variant === 'danger' ? 'AlertTriangleIcon' : 'CheckIcon',
+          variant,
+        },
+      })
+    },
+    formatFecha(value) {
+      return new Date(value).toLocaleString('es-CL', { dateStyle: 'medium', timeStyle: 'short' })
+    },
+    async cargarCorridas() {
+      this.corridasLoading = true
+      try {
+        const { data } = await this.$http.get(`/api/balances/corridas/${this.datos_entrada_id}`)
+        this.corridas = data.corridas
+      } catch (e) {
+        this.corridas = []
+        this.showToast('balances.toast.historyError', 'danger')
+      } finally {
+        this.corridasLoading = false
+      }
+    },
+    abrirHistorial() {
+      this.$refs['historial-modal'].show()
+      this.cargarCorridas()
+    },
+    async restaurarCorrida(corrida) {
+      // A reopened saved balance must first choose overwrite vs. copy, like a run.
+      const canModify = await this.ensureEditDecision()
+      if (!canModify) {
+        return
+      }
+
+      this.isLoading = true
+      try {
+        const response = await this.$http.post(`/api/balances/corridas/${corrida.id}/restaurar`, {
+          datos_entrada_id: this.datos_entrada_id,
+        })
+        this.applyBalancePayload(response)
+        this.yellow = []
+        this.green = []
+        this.showToast('balances.toast.restoreSuccess', 'success')
+        await this.cargarCorridas()
+      } catch (e) {
+        this.showToast('balances.toast.restoreError', 'danger')
+      } finally {
+        this.isLoading = false
+      }
     },
     tbl_expand(table) {
       this.modal_var = table
