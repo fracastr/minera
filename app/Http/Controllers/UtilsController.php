@@ -146,7 +146,7 @@ class UtilsController extends Controller
             $response = Http::acceptJson()->post($url, [
                 'datos_entrada_id' => $datos_entrada_id,
                 'componentes' => $componentes
-            ]);
+            ])->throw();
             /*
             Lista de procesos por id
             #   valle, proceso, valle_id, proceso_id
@@ -206,7 +206,8 @@ class UtilsController extends Controller
                 return $return;
             }
         } catch (Exception $e) {
-            return $e->getMessage();
+            \Log::error('Excel export failed', ['datos_entrada_id' => $datos_entrada_id, 'error' => $e->getMessage()]);
+            return response()->json(['message' => 'No se pudo generar el Excel.'], 500);
         }
 
 

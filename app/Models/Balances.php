@@ -9,7 +9,14 @@ class Balances extends Model
 {
     use HasFactory;
 
-    public $fillable = ['nombre', 'tipo', 'proceso_id', 'user_id'];
+    public const TIPOS = ['quincenal', 'mensual'];
+
+    public $fillable = ['nombre', 'tipo', 'periodo_inicio', 'periodo_fin', 'proceso_id', 'user_id'];
+
+    protected $casts = [
+        'periodo_inicio' => 'date:Y-m-d',
+        'periodo_fin' => 'date:Y-m-d',
+    ];
 
     public function user()
     {

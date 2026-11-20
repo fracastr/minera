@@ -2,7 +2,6 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ApplicationController;
-use Illuminate\Support\Facades\Storage;
 
 /*
 |--------------------------------------------------------------------------
@@ -14,10 +13,6 @@ use Illuminate\Support\Facades\Storage;
 | contains the "web" middleware group. Now create something great!
 |
 */
-
-Route::get('test', function() {
-    Storage::disk('google')->put('test.txt', 'Hello World');
-});
 
 // Password Reset Routes
 Route::get('reset-password/{token}', function ($token) {

@@ -230,6 +230,55 @@
               :placeholder="$t('balanceFormWizard.saveModal.placeholder')"
             />
           </b-form-group>
+          <b-row>
+            <b-col md="4">
+              <b-form-group
+                :label="$t('balanceFormWizard.saveModal.tipo')"
+                label-for="tipo_balance"
+                class="form-group-enhanced"
+              >
+                <b-form-select
+                  id="tipo_balance"
+                  v-model="tipo"
+                  :options="tipoOptions"
+                  @change="suggestPeriodoFin"
+                />
+              </b-form-group>
+            </b-col>
+            <b-col md="4">
+              <b-form-group
+                :label="$t('balanceFormWizard.saveModal.periodoInicio')"
+                label-for="periodo_inicio"
+                class="form-group-enhanced"
+              >
+                <b-form-input
+                  id="periodo_inicio"
+                  v-model="periodo_inicio"
+                  type="date"
+                  required
+                  @change="suggestPeriodoFin"
+                />
+              </b-form-group>
+            </b-col>
+            <b-col md="4">
+              <b-form-group
+                :label="$t('balanceFormWizard.saveModal.periodoFin')"
+                label-for="periodo_fin"
+                :invalid-feedback="$t('balanceFormWizard.saveModal.periodoInvalid')"
+                :state="periodoState"
+                class="form-group-enhanced"
+              >
+                <b-form-input
+                  id="periodo_fin"
+                  v-model="periodo_fin"
+                  type="date"
+                  required
+                  :min="periodo_inicio || null"
+                  :state="periodoState"
+                />
+              </b-form-group>
+            </b-col>
+          </b-row>
         </form>
       </div>
 
@@ -239,7 +288,7 @@
             <feather-icon icon="XIcon" size="16" class="mr-2" />
             {{ $t('balanceFormWizard.saveModal.cancel') }}
           </b-button>
-          <b-button variant="primary" @click="ok" :disabled="!nombre_balance.trim()" class="btn-enhanced">
+          <b-button variant="primary" @click="ok" :disabled="!canSave" class="btn-enhanced">
             <feather-icon icon="SaveIcon" size="16" class="mr-2" />
             {{ $t('balanceFormWizard.saveModal.save') }}
           </b-button>
@@ -1179,6 +1228,10 @@ export default {
   data() {
     return {
       nombre_balance: '',
+      tipo: 'quincenal',
+      periodo_inicio: '',
+      periodo_fin: '',
+      savedMeta: null,
       nameState: null,
       required,
       email,
@@ -1194,6 +1247,18 @@ export default {
       wizardStartIndex: 0,
       show_tables: false,
     }
+  },
+  computed: {
+    tipoOptions() {
+      return ['quincenal', 'mensual'].map(value => ({ value, text: this.$t(`balanceFormWizard.saveModal.tipos.${value}`) }))
+    },
+    periodoState() {
+      if (!this.periodo_inicio || !this.periodo_fin) return null
+      return this.periodo_fin >= this.periodo_inicio ? null : false
+    },
+    canSave() {
+      return !!this.nombre_balance.trim() && !!this.periodo_inicio && !!this.periodo_fin && this.periodoState !== false
+    },
   },
   mounted() {
     this.loading = true
@@ -1230,6 +1295,7 @@ export default {
       const { balance } = response.data
       this.sourceBalanceId = balance.id
       this.balance_id = balance.id
+      this.savedMeta = balance
       this.nombre_balance = balance.nombre
       this.valle = balance.valle_id
       this.editMode = null
@@ -1257,8 +1323,20 @@ export default {
       return valid
     },
     resetModal() {
-      this.nombre_balance = ''
+      // Prefill from the reopened/last saved balance so overwriting keeps its name and period.
+      const meta = this.savedMeta || {}
+      this.nombre_balance = meta.nombre || ''
+      this.tipo = meta.tipo === 'mensual' ? 'mensual' : 'quincenal'
+      this.periodo_inicio = meta.periodo_inicio || ''
+      this.periodo_fin = meta.periodo_fin || ''
       this.nameState = null
+    },
+    suggestPeriodoFin() {
+      if (!this.periodo_inicio) return
+      const [y, m, d] = this.periodo_inicio.split('-').map(Number)
+      const lastDay = new Date(y, m, 0).getDate()
+      const day = this.tipo === 'quincenal' && d <= 15 ? 15 : lastDay
+      this.periodo_fin = `${y}-${String(m).padStart(2, '0')}-${String(day).padStart(2, '0')}`
     },
     handleOk(bvModalEvent) {
       // Prevent modal from closing
@@ -1283,6 +1361,9 @@ export default {
         .post('/api/balances/save_balance', {
           datos_entrada: this.$refs.balances_ref.datos_entrada,
           nombre_balance: this.nombre_balance,
+          tipo: this.tipo,
+          periodo_inicio: this.periodo_inicio,
+          periodo_fin: this.periodo_fin,
           datos_entrada_id: this.$refs.balances_ref.datos_entrada_id,
           proceso_id: this.proceso,
           overwrite,
@@ -1295,6 +1376,12 @@ export default {
         .then(response => {
           this.balance_id = response.data.balance_id
           this.sourceBalanceId = response.data.balance_id
+          this.savedMeta = {
+            nombre: this.nombre_balance,
+            tipo: this.tipo,
+            periodo_inicio: this.periodo_inicio,
+            periodo_fin: this.periodo_fin,
+          }
           this.editMode = null
           this.$toast({
             component: ToastificationContent,
