@@ -1,4 +1,5 @@
 <script setup>
+import { valleColor } from '@/utils/valleColor'
 import { useTheme } from 'vuetify'
 
 definePage({
@@ -155,6 +156,8 @@ const byProcesoLabels = computed(() => byProceso.value.map(item => item.label ||
 const byProcesoSeries = computed(() => [{ name: seriesName.value, data: byProceso.value.map(item => item.total) }])
 const byProcesoOptions = computed(() => horizontalBarOptions(byProcesoLabels.value, colors.value.success))
 
+const valleFallback = computed(() => [colors.value.primary, colors.value.warning, colors.value.info, colors.value.secondary])
+
 const byValleLabels = computed(() => byValle.value.map(item => item.nombre))
 const byValleSeries = computed(() => byValle.value.map(item => item.total))
 
@@ -168,7 +171,7 @@ const byValleOptions = computed(() => ({
     dropShadow: { enabled: true, top: 1, left: 1, blur: 2, color: '#000', opacity: 0.85 },
   },
   stroke: { colors: [theme.value.colors.surface] },
-  colors: [colors.value.primary, colors.value.warning, colors.value.success, colors.value.info, colors.value.error],
+  colors: byValle.value.map((item, i) => valleColor(item.nombre, valleFallback.value[i % valleFallback.value.length])),
   tooltip: { ...apexBaseOptions.value.tooltip, style: { fontSize: '13px' } },
 }))
 
