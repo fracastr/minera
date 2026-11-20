@@ -7,8 +7,8 @@ import { AppContentLayoutNav, ContentWidth, FooterType, NavbarType } from '@layo
 
 export const { themeConfig, layoutConfig } = defineThemeConfig({
   app: {
-    title: 'Sondek',
-    logo: h('img', { src: '/logo.png', alt: 'CMP', style: 'block-size: 26px; inline-size: auto;' }),
+    title: 'Balances',
+    logo: h('img', { src: '/brand/cmp-logo.svg', alt: 'CMP', style: 'block-size: 30px; inline-size: auto;' }),
     contentWidth: ContentWidth.Boxed,
     contentLayoutNav: AppContentLayoutNav.Vertical,
     overlayNavFromBreakpoint: breakpointsVuetifyV3.lg - 1, // 1 for matching with vuetify breakpoint. Docs: https://next.vuetifyjs.com/en/features/display-and-platform/

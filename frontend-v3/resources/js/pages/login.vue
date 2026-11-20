@@ -109,7 +109,7 @@ const authThemeMask = useGenerateImageVariant(authV2MaskLight, authV2MaskDark)
       >
         <VCardText>
           <h4 class="text-h4 mb-1">
-            Bienvenido a {{ themeConfig.app.title }}
+            Bienvenido a Balances CMP
           </h4>
           <p class="mb-0">
             Ingresa con tu cuenta para continuar

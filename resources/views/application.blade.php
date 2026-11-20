@@ -9,23 +9,23 @@
   <meta name="session-lifetime" content="{{ (int) config('session.lifetime') }}">
 
   <!-- SEO Meta Tags -->
-  <title>Sondek - Sistema de Gestión CMP Balances | Administración Minera</title>
+  <title>Balances CMP | Compañía Minera del Pacífico</title>
   <meta name="description" content="Sistema integral de gestión para balances mineros CMP. Administre balances, reportes y análisis financieros de manera eficiente. Plataforma web especializada en minería.">
-  <meta name="keywords" content="sistema minero, balances CMP, gestión minera, reportes financieros, administración minera, Sondek, CMP Balances">
-  <meta name="author" content="Sondek">
+  <meta name="keywords" content="sistema minero, balances CMP, gestión minera, reportes financieros, administración minera, CMP, Balances CMP">
+  <meta name="author" content="CMP">
   <meta name="robots" content="index, follow">
 
   <!-- Open Graph / Facebook -->
   <meta property="og:type" content="website">
   <meta property="og:url" content="{{ url()->current() }}">
-  <meta property="og:title" content="Sondek - Sistema de Gestión CMP Balances">
+  <meta property="og:title" content="Balances CMP | Compañía Minera del Pacífico">
   <meta property="og:description" content="Sistema integral de gestión para balances mineros CMP. Administre balances, reportes y análisis financieros de manera eficiente.">
   <meta property="og:image" content="{{ asset('images/logo/logo.png') }}">
 
   <!-- Twitter -->
   <meta property="twitter:card" content="summary_large_image">
   <meta property="twitter:url" content="{{ url()->current() }}">
-  <meta property="twitter:title" content="Sondek - Sistema de Gestión CMP Balances">
+  <meta property="twitter:title" content="Balances CMP | Compañía Minera del Pacífico">
   <meta property="twitter:description" content="Sistema integral de gestión para balances mineros CMP. Administre balances, reportes y análisis financieros de manera eficiente.">
   <meta property="twitter:image" content="{{ asset('images/logo/logo.png') }}">
 
@@ -60,19 +60,17 @@
   <link rel="stylesheet" href="{{ asset(mix('css/app.css')) }}">
 
   <!-- Font -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Newsreader:opsz,wght@6..72,300;6..72,400&display=swap" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap"
-    rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@125,600&family=Work+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
 </head>
 
 <body>
   <noscript>
-    <strong>El Sistema Sondek CMP Balances requiere JavaScript para funcionar correctamente.
+    <strong>El sistema Balances CMP requiere JavaScript para funcionar correctamente.
     Por favor, habilite JavaScript en su navegador para continuar.</strong>
   </noscript>
 
   <div id="loading-bg" role="status" aria-live="polite">
-    <img class="loading-logo" src="{{ asset('logo.png') }}" alt="CMP" />
+    <img class="loading-logo" src="{{ asset('brand/cmp-logo.svg') }}" alt="CMP" />
     <div class="loading-bar"></div>
     <span class="loading-text">Cargando…</span>
   </div>
