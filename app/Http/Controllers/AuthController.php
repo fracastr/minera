@@ -87,7 +87,8 @@ class AuthController extends Controller
      */
     public function user(Request $request)
     {
-        return response()->json($request->user());
+        // Same shape as login's userData, so the SPA can refresh role and abilities.
+        return response()->json($request->user()->toUserData());
     }
 
     /**
@@ -128,12 +129,14 @@ class AuthController extends Controller
             'email' => 'required|email',
         ]);
 
+        // Link built from APP_URL, never from the request Host header (host-header poisoning).
         \App\Notifications\ResetPasswordNotification::createUrlUsing(function ($user, $token) {
-            return url('/reset-password/' . $token . '?email=' . urlencode($user->email));
+            return rtrim(config('app.url'), '/') . '/reset-password/' . $token . '?email=' . urlencode($user->email);
         });
 
-        // Same answer whether or not the email exists, so the endpoint cannot be used to enumerate accounts.
-        Password::sendResetLink($request->only('email'));
+        // Same answer, and same response time, whether or not the email exists: no account enumeration.
+        $email = $request->input('email');
+        dispatch(fn () => Password::sendResetLink(['email' => $email]))->afterResponse();
 
         return response()->json([
             'message' => 'Si el correo está registrado, te enviaremos un enlace para restablecer la contraseña.',

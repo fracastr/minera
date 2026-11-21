@@ -22,7 +22,7 @@ Route::view('forgot-password', 'app')->name('password.request');
 Route::get('/v3/{any?}', function (\Illuminate\Http\Request $request, $any = '') {
     $query = $request->getQueryString();
 
-    return redirect('/' . $any . ($query ? '?' . $query : ''), 301);
+    return redirect('/' . ltrim($any, '/') . ($query ? '?' . $query : ''), 301); // ltrim: no //evil.com
 })->where('any', '.*');
 
 Route::get('/{any}', [ApplicationController::class, 'index'])->where('any', '.*');

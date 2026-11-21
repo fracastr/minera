@@ -44,7 +44,8 @@ return [
     |
     */
 
-    'expiration' => null,
+    // Absolute lifetime of a token (12 h); the idle limit is in AuthServiceProvider.
+    'expiration' => 720,
 
     /*
     |--------------------------------------------------------------------------
