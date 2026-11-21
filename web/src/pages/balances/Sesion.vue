@@ -17,6 +17,7 @@ import { useSesionStore } from '@/stores/sesion'
 const DiagramaTab = defineAsyncComponent(() => import('@/components/diagrama/DiagramaTab.vue'))
 // ECharts loads only with the diagnosis.
 const DiagnosticoTab = defineAsyncComponent(() => import('@/components/diagnostico/DiagnosticoTab.vue'))
+const AsistentePanel = defineAsyncComponent(() => import('@/components/diagnostico/AsistentePanel.vue'))
 
 const route = useRoute()
 const router = useRouter()
@@ -24,6 +25,8 @@ const auth = useAuthStore()
 const store = useSesionStore()
 
 const canWrite = computed(() => can(auth.user?.ability, 'update', 'Balances'))
+// The assistant endpoint is balance:write and 404s while AI_ASSISTANT_ENABLED is off: no panel at all then.
+const asistente = computed(() => !!auth.user?.asistente_habilitado && canWrite.value)
 const tab = ref('datos')
 const guardarOpen = ref(false)
 const verSolver = ref(false)
@@ -172,7 +175,11 @@ const tabs = [
         <DatosTab v-model:nodo="store.nodoSel" :sesion="s" :editable="canWrite" :locked="!!store.busy" @edit="store.edited()" />
       </TabsContent>
       <TabsContent value="diagnostico">
-        <DiagnosticoTab :sesion="s" :editable="canWrite" @ver="tab = 'diagrama'" />
+        <DiagnosticoTab :sesion="s" :editable="canWrite" @ver="tab = 'diagrama'">
+          <template v-if="asistente" #asistente>
+            <AsistentePanel :sesion="s" :editable="canWrite" @ver="tab = 'diagrama'" />
+          </template>
+        </DiagnosticoTab>
       </TabsContent>
       <TabsContent value="historial">
         <HistorialTab :sesion-id="s.id" :version="s.updated_at" :editable="canWrite" />
