@@ -88,7 +88,8 @@ router.afterEach((to, from, failure) => {
   if (failure) return
   document.title = to.meta.title ? `${to.meta.title} · Balances CMP` : 'Balances CMP | Compañía Minera del Pacífico'
   // First load: leave focus where the browser puts it. Later navigations: move it to the new content.
-  if (from.matched.length === 0) return
+  // Same page with new query/params (listado filters, a clone taking over the session URL): keep focus where the user is.
+  if (from.matched.length === 0 || to.name === from.name) return
   announcement.value = to.meta.title ?? 'Balances CMP'
   nextTick(() => document.getElementById('contenido')?.focus({ preventScroll: true }))
 })

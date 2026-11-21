@@ -107,6 +107,21 @@ class V2SesionesTest extends TestCase
             ->assertJsonPath('flujos.1.tms.medido', -100);
     }
 
+    public function testImportOfAWorkbookTheSolverRejectsIsReadableAndLeavesNothingBehind(): void
+    {
+        Storage::fake('local');
+        Http::fake(['solver.test/get_balance' => Http::response('Worksheet named Matriz de nodos not found', 500)]);
+        $file = UploadedFile::fake()->createWithContent('viejo.xlsx', file_get_contents(public_path('Export/Exportar_Elqui_Pleito.xlsx')));
+
+        $this->actingAs($this->operator)
+            ->post('/api/v2/sesiones', ['proceso_id' => $this->procesoId, 'file' => $file], ['Accept' => 'application/json'])
+            ->assertStatus(502)
+            ->assertJsonPath('message', fn ($m) => str_starts_with($m, 'El solver no pudo leer el Excel'));
+
+        $this->assertSame([], Storage::disk('local')->allFiles('public'));
+        $this->assertSame(0, Datos_entrada::count());
+    }
+
     public function testImportValidatesProcessAndFile(): void
     {
         $this->actingAs($this->operator)

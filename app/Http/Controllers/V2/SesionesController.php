@@ -40,7 +40,12 @@ class SesionesController extends Controller
         $fileName = $base.'_'.now()->format('YmdHis').'_'.$user->id.'.'.strtolower($file->getClientOriginalExtension());
         $stored = $file->storeAs('public', $fileName);
 
-        $res = $this->solver('/get_balance', ['path_name' => Storage::path($stored), 'nombre_proceso' => $proceso->nombre]);
+        try {
+            $res = $this->solver('/get_balance', ['path_name' => Storage::path($stored), 'nombre_proceso' => $proceso->nombre]);
+        } catch (HttpResponseException $e) {
+            Storage::delete($stored); // a workbook the solver could not read is not kept
+            throw $e;
+        }
 
         $datos = $res['datos_entrada'];
         $datos['desviaciones'] = $res['desviaciones'];
