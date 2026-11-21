@@ -159,7 +159,7 @@ Auth (login con rate limit, logout, olvidé/restablecer contraseña con StrongPa
   - `deploy.sh` compila `web/` con Node 22 hacia `public/app-build`;
   - la vista Blade `app` sirve el SPA en todas las rutas no-API de v2;
   - al hacer el corte se eliminan de `next` el Vue 2 (`resources/js`, Mix) y `frontend-v3/`; www sigue en `Prod`.
-- **Datos locales:** SQLite temporal con datos de prueba (ver MIGRATION.md); los procesos se siembran con el seeder nuevo `ValleProcesoSeeder` (solo local/test).
+- **Datos locales:** SQLite temporal con datos de prueba (ver `docs/desarrollo-local.md`); los procesos se siembran con el seeder nuevo `ValleProcesoSeeder` (solo local/test).
 
 ## 12. Entregas (rebanadas verticales, en orden)
 
