@@ -3,7 +3,6 @@ import { createRouter, createWebHistory } from 'vue-router'
 import { can } from '@/lib/abilities'
 import { useAuthStore } from '@/stores/auth'
 import AppShell from '@/layouts/AppShell.vue'
-import Placeholder from '@/pages/Placeholder.vue'
 
 declare module 'vue-router' {
   interface RouteMeta {
@@ -12,8 +11,6 @@ declare module 'vue-router' {
     public?: boolean
     /** [action, subject] the user needs, checked against userData.ability. */
     can?: [string, string]
-    /** What the page will hold once built (shown by the placeholder). */
-    summary?: string
   }
 }
 
@@ -45,12 +42,12 @@ export const router = createRouter({
           meta: { title: 'Espacio de balance', section: 'Balances', can: ['read', 'Balances'] },
         },
         {
-          path: 'analytics', name: 'analytics', component: Placeholder,
-          meta: { title: 'Analytics', can: ['read', 'DashboardAnalytics'], summary: 'Indicadores de uso y cierre de balances por período, valle, proceso y usuario.' },
+          path: 'analytics', name: 'analytics', component: () => import('@/pages/Analytics.vue'),
+          meta: { title: 'Analytics', can: ['read', 'DashboardAnalytics'] },
         },
         {
-          path: 'admin/usuarios', name: 'admin-usuarios', component: Placeholder,
-          meta: { title: 'Usuarios', section: 'Administración', can: ['manage', 'Users'], summary: 'Alta, roles, acceso a analytics y desactivación de cuentas.' },
+          path: 'admin/usuarios', name: 'admin-usuarios', component: () => import('@/pages/admin/Usuarios.vue'),
+          meta: { title: 'Usuarios', section: 'Administración', can: ['manage', 'Users'] },
         },
         {
           // Admin and operator: operator's only write ability is on Balances.
