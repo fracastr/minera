@@ -16,7 +16,6 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Process;
 use Illuminate\Support\Str;
-use Symfony\Component\HttpFoundation\HeaderUtils;
 
 /**
  * Excel export of a session: Flask /get_excel fills the process template (public/Export/excelnode.js), plus
@@ -33,7 +32,7 @@ class ExportarController extends Controller
         'diagrama' => ['Diagrama Sistema', 'Diagrama del proceso', 1800],
         'desbalance_nodos' => ['Gráficos Sistema', 'Desbalance medido por nodo', 1000],
         'uso_tolerancia' => ['Gráficos Sistema', 'Uso de tolerancia por medición', 1000],
-        'tendencia' => ['Gráficos Sistema', 'Tendencia del principal sospechoso', 600],
+        'tendencia' => ['Gráficos Sistema', 'Tendencia del ajuste de los principales sospechosos', 1000],
     ];
 
     public function exportar(Request $request, int $sesion)
@@ -66,7 +65,8 @@ class ExportarController extends Controller
         File::ensureDirectoryExists($tmp);
         $id = 'export_'.$s->id.'_'.Str::random(16);
         $out = "{$tmp}/{$id}.xlsx";
-        $borrar = [$out];
+        $borrar = []; // the uploaded PNGs; $out too unless it is sent
+        $listo = false;
         try {
             $hojas = [];
             foreach (self::IMAGENES as $campo => [$hoja, $titulo, $ancho]) {
@@ -89,33 +89,36 @@ class ExportarController extends Controller
                 Log::error('excelnode failed', ['sesion' => $s->id, 'exit' => $result->exitCode(), 'stderr' => mb_substr($result->errorOutput(), 0, 2000)]);
                 return response()->json(['message' => 'No se pudo generar el Excel con la plantilla del proceso. Intenta nuevamente; si persiste, avisa al administrador.'], 500);
             }
-            $contents = file_get_contents($out);
+            $listo = true;
         } catch (ProcessTimedOutException) {
             Log::error('excelnode timed out', ['sesion' => $s->id]);
             return response()->json(['message' => 'La generación del Excel tardó demasiado. Intenta nuevamente.'], 504);
         } finally {
-            foreach ($borrar as $f) {
+            foreach ($listo ? $borrar : [...$borrar, $out] as $f) {
                 @unlink($f);
             }
         }
 
         $nombre = $this->nombre($s);
-        $headers = [
-            'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-            'Content-Disposition' => HeaderUtils::makeDisposition('attachment', $nombre, Str::ascii($nombre)),
-        ];
+        $headers = ['Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'];
+        $stream = fopen($out, 'r');
         try {
             // Drive names keep v1's shape (…_<user>_<timestamp>) so uploads never collide.
             $headers['X-Drive-Link'] = app(DriveUploader::class)->upload(
                 pathinfo($nombre, PATHINFO_FILENAME).'_'.$request->user()->id.'_'.now()->format('YmdHis').'.xlsx',
-                $contents,
+                $stream,
             );
         } catch (\Throwable $e) {
             Log::warning('Excel export: Drive upload failed, download only', ['sesion' => $s->id, 'error' => $e->getMessage()]);
+        } finally {
+            if (is_resource($stream)) {
+                fclose($stream);
+            }
         }
         BalanceEventService::logExported($s, $request->user());
 
-        return response($contents, 200, $headers);
+        // Streamed from disk and deleted once sent: no second copy in memory.
+        return response()->download($out, $nombre, $headers)->deleteFileAfterSend();
     }
 
     /** `<valle>_<proceso>_<periodo or today>.xlsx`, ASCII and file-safe. */

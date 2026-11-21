@@ -50,7 +50,7 @@ class V2ExportarTest extends TestCase
         $this->app->instance(DriveUploader::class, new class($link) extends DriveUploader {
             public function __construct(private ?string $link) {}
 
-            public function upload(string $name, string $contents): string
+            public function upload(string $name, $contents): string
             {
                 return $this->link ?? throw new \RuntimeException('no drive');
             }
@@ -72,7 +72,7 @@ class V2ExportarTest extends TestCase
         ]);
 
         $res->assertOk();
-        $this->assertSame('XLSX', $res->getContent());
+        $this->assertSame('XLSX', $res->streamedContent()); // sending it also deletes the file
         $this->assertStringContainsString('attachment; filename=elqui_pleito_2026-03-01_2026-03-31.xlsx', $res->headers->get('Content-Disposition'));
         $res->assertHeader('X-Drive-Link', 'https://drive.google.com/file/d/abc/view');
         Http::assertSent(fn ($r) => $r->url() === 'http://solver.test/get_excel' && $r['datos_entrada_id'] === $this->sesion->id && $r['componentes'] === ['FeT']);
@@ -81,7 +81,7 @@ class V2ExportarTest extends TestCase
         $hojas = json_decode($this->args[8], true);
         $this->assertSame(['Diagrama Sistema', 'Gráficos Sistema'], array_column($hojas, 'name'));
         $this->assertSame('Uso de tolerancia por medición', $hojas[1]['images'][0]['title']);
-        // Temp files (images and the workbook) are gone.
+        // Temp files (images, and the workbook once sent) are gone.
         $this->assertFileDoesNotExist($hojas[0]['images'][0]['path']);
         $this->assertSame([], glob(storage_path('app/tmp/export_'.$this->sesion->id.'_*')));
         $this->assertDatabaseHas('balance_events', ['datos_entrada_id' => $this->sesion->id, 'event_type' => 'exported', 'user_id' => $this->operator->id]);
@@ -94,6 +94,7 @@ class V2ExportarTest extends TestCase
 
         $res->assertOk();
         $this->assertFalse($res->headers->has('X-Drive-Link'));
+        $this->assertSame('XLSX', $res->streamedContent());
         $this->assertCount(8, $this->args);
     }
 
