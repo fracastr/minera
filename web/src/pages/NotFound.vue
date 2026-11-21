@@ -5,7 +5,7 @@ const auth = useAuthStore()
 </script>
 
 <template>
-  <main class="grid min-h-dvh place-items-center px-4 text-center">
+  <main id="contenido" tabindex="-1" class="grid min-h-dvh place-items-center px-4 text-center outline-none">
     <div>
       <p class="font-display text-5xl font-semibold text-ink-faint tabular-nums">404</p>
       <h1 class="mt-4 font-display text-xl font-semibold">Esta página no existe</h1>

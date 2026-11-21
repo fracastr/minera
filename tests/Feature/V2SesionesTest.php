@@ -92,9 +92,9 @@ class V2SesionesTest extends TestCase
 
         $sesion = Datos_entrada::findOrFail($id);
         $this->assertMatchesRegularExpression('/^Carga_Pleito_\d{14}_'.$this->operator->id.'\.xlsx$/', $sesion->file_path);
-        Storage::disk('local')->assertExists('public/'.$sesion->file_path);
+        Storage::disk('local')->assertExists('balances-carga/'.$sesion->file_path);
         Http::assertSent(fn (HttpRequest $r) => $r['nombre_proceso'] === 'Pleito'
-            && $r['path_name'] === Storage::disk('local')->path('public/'.$sesion->file_path));
+            && $r['path_name'] === Storage::disk('local')->path('balances-carga/'.$sesion->file_path));
         $this->assertSame([[0.25, 0.01]], json_decode($sesion->datos_entrada, true)['nodos_data']);
         $this->assertSame(['importacion'], BalanceCorrida::where('datos_entrada_id', $id)->pluck('tipo')->all());
         $this->assertTrue(BalanceEvent::where('datos_entrada_id', $id)->where('event_type', BalanceEvent::TYPE_IMPORTED)->exists());
@@ -105,6 +105,21 @@ class V2SesionesTest extends TestCase
             ->assertJsonPath('corrida', false)
             ->assertJsonPath('flujos.1.stock', true)
             ->assertJsonPath('flujos.1.tms.medido', -100);
+    }
+
+    public function testImportOfAWorkbookTheSolverRejectsIsReadableAndLeavesNothingBehind(): void
+    {
+        Storage::fake('local');
+        Http::fake(['solver.test/get_balance' => Http::response('Worksheet named Matriz de nodos not found', 500)]);
+        $file = UploadedFile::fake()->createWithContent('viejo.xlsx', file_get_contents(public_path('Export/Exportar_Elqui_Pleito.xlsx')));
+
+        $this->actingAs($this->operator)
+            ->post('/api/v2/sesiones', ['proceso_id' => $this->procesoId, 'file' => $file], ['Accept' => 'application/json'])
+            ->assertStatus(502)
+            ->assertJsonPath('message', fn ($m) => str_starts_with($m, 'El solver no pudo leer el Excel'));
+
+        $this->assertSame([], Storage::disk('local')->allFiles());
+        $this->assertSame(0, Datos_entrada::count());
     }
 
     public function testImportValidatesProcessAndFile(): void
@@ -306,5 +321,143 @@ class V2SesionesTest extends TestCase
         $this->assertSame($c->datosEntrada->id, $row['datos_entrada_id']);
 
         $this->actingAs($this->operator)->getJson('/api/v2/balances?tipo=anual&orden=x')->assertStatus(422);
+    }
+
+    public function testNonFiniteOrHugeNumbersAreRejectedAndTheRowStaysIntact(): void
+    {
+        $sesion = $this->sesion();
+        $before = $sesion->datos_entrada;
+
+        foreach (['1e999', '-1e999', 1e13] as $bad) {
+            $body = $this->edits(1);
+            $body['flujos'][0]['tms_medido'] = $bad;
+            $this->actingAs($this->operator)->putJson("/api/v2/sesiones/{$sesion->id}/datos", $body)
+                ->assertStatus(422)->assertJsonValidationErrors('flujos.0.tms_medido');
+        }
+        $body = $this->edits(1);
+        $body['flujos'][0]['leyes_tol'][0][1] = '1e999';
+        $this->actingAs($this->operator)->putJson("/api/v2/sesiones/{$sesion->id}/datos", $body)
+            ->assertStatus(422)->assertJsonValidationErrors('flujos.0.leyes_tol.0.1');
+
+        $this->assertSame($before, $sesion->fresh()->datos_entrada);
+    }
+
+    public function testEditsAreRefusedWhenTheStoredTablesAreIncomplete(): void
+    {
+        $datos = $this->datos();
+        $datos['restricciones'][0] = [5, 5]; // short row: writing ley tolerances would leave a sparse array
+        $sesion = $this->sesion(['datos_entrada' => json_encode($datos)]);
+
+        $this->actingAs($this->operator)->putJson("/api/v2/sesiones/{$sesion->id}/datos", $this->edits(1))
+            ->assertStatus(422)->assertJsonPath('message', fn ($m) => str_contains($m, 'tabla de flujos'));
+        $this->assertSame(json_encode($datos), $sesion->fresh()->datos_entrada);
+    }
+
+    public function testUploadNameAndExtensionNeverComeFromTheClient(): void
+    {
+        Storage::fake('local');
+        Http::fake(['solver.test/get_balance' => Http::response($this->solverResponse($this->datos(), []))]);
+        $xlsx = file_get_contents(public_path('Export/Exportar_Elqui_Pleito.xlsx'));
+
+        // A real workbook named x.php is refused outright (Laravel blocks .php uploads), and nothing is stored.
+        $this->actingAs($this->operator)
+            ->post('/api/v2/sesiones', ['proceso_id' => $this->procesoId, 'file' => UploadedFile::fake()->createWithContent('x.php', $xlsx)], ['Accept' => 'application/json'])
+            ->assertStatus(422)->assertJsonValidationErrors('file');
+        $this->assertSame([], Storage::disk('local')->allFiles());
+
+        // Any other client extension is replaced by the one guessed from the content; long names are cut.
+        // A real UploadedFile (not fake()), so the type comes from the bytes and not from the name.
+        $tmp = tempnam(sys_get_temp_dir(), 'carga');
+        file_put_contents($tmp, $xlsx);
+        $file = new UploadedFile($tmp, str_repeat('a', 300).'.bin', null, null, true);
+        $id = $this->actingAs($this->operator)
+            ->post('/api/v2/sesiones', ['proceso_id' => $this->procesoId, 'file' => $file], ['Accept' => 'application/json'])
+            ->assertCreated()->json('id');
+
+        $name = Datos_entrada::find($id)->file_path;
+        $this->assertMatchesRegularExpression('/^a{100}_\d{14}_'.$this->operator->id.'\.xlsx$/', $name);
+        $this->assertSame(['balances-carga/'.$name], Storage::disk('local')->allFiles());
+        $this->assertSame($this->operator->id, Balances::userIdDeArchivo($name));
+    }
+
+    public function testSolverPayloadMissingAKeyOrUnconfiguredIsA502AndNothingIsKept(): void
+    {
+        Storage::fake('local');
+        $file = fn () => UploadedFile::fake()->createWithContent('c.xlsx', file_get_contents(public_path('Export/Exportar_Elqui_Pleito.xlsx')));
+        Http::fake(['solver.test/get_balance' => Http::response(['datos_entrada' => json_encode($this->datos())])]);
+
+        $this->actingAs($this->operator)->post('/api/v2/sesiones', ['proceso_id' => $this->procesoId, 'file' => $file()], ['Accept' => 'application/json'])
+            ->assertStatus(502)->assertJsonPath('message', fn ($m) => str_contains($m, 'respuesta inválida'));
+
+        config(['services.flask.url' => '']);
+        $this->actingAs($this->operator)->post('/api/v2/sesiones', ['proceso_id' => $this->procesoId, 'file' => $file()], ['Accept' => 'application/json'])
+            ->assertStatus(502)->assertJsonPath('message', fn ($m) => str_contains($m, 'no está configurado'));
+
+        $this->assertSame([], Storage::disk('local')->allFiles());
+        $this->assertSame(0, Datos_entrada::count());
+        $this->assertSame(0, BalanceCorrida::count());
+    }
+
+    public function testRunConflictsWhenTheSessionChangedWhileSolving(): void
+    {
+        $sesion = $this->sesion();
+        Http::fake(function () use ($sesion) {
+            $other = $this->datos(500);
+            Datos_entrada::whereKey($sesion->id)->update(['datos_entrada' => json_encode($other)]); // someone else saved meanwhile
+
+            return Http::response($this->solverResponse($this->datos(), [[90, 98, 60, 60], [-90, -98, 60, 60]]));
+        });
+
+        $this->actingAs($this->operator)->postJson("/api/v2/sesiones/{$sesion->id}/correr", $this->edits(90))
+            ->assertStatus(409)->assertJsonPath('message', fn ($m) => str_starts_with($m, 'Otra persona modificó'));
+
+        $this->assertSame(500, json_decode($sesion->fresh()->datos_entrada, true)['mediciones'][0][0]);
+        $this->assertSame(0, BalanceCorrida::where('datos_entrada_id', $sesion->id)->count());
+    }
+
+    public function testSaveAsNewWorksWhenTheSessionPointsAtADeletedBalance(): void
+    {
+        $sesion = $this->sesion();
+        // A balance deleted outside the app (MySQL in prod has rows like this); the test DB enforces the FK, so lift it.
+        DB::statement('PRAGMA defer_foreign_keys = ON'); // checked at commit, and RefreshDatabase never commits
+        $sesion->forceFill(['balance_id' => 9999])->saveQuietly();
+        $body = ['nombre' => 'Nuevo', 'tipo' => 'mensual', 'periodo_inicio' => '2026-11-01', 'periodo_fin' => '2026-11-30'];
+
+        $this->actingAs($this->operator)->postJson("/api/v2/sesiones/{$sesion->id}/guardar", $body + ['sobrescribir' => true])->assertStatus(422);
+        $id = $this->actingAs($this->operator)->postJson("/api/v2/sesiones/{$sesion->id}/guardar", $body + ['sobrescribir' => false])
+            ->assertOk()->json('balance_id');
+        $this->assertSame($id, $sesion->fresh()->balance_id);
+    }
+
+    public function testListadoQueryCountDoesNotGrowWithLegacyRowsAndSkipsTheBalanceJson(): void
+    {
+        $legacy = function (int $n) {
+            foreach (range(1, $n) as $i) {
+                $owner = User::factory()->create();
+                $b = Balances::create(['nombre' => "Legacy {$i}", 'proceso_id' => $this->procesoId, 'tipo' => 'mensual', 'user_id' => 1]);
+                $this->sesion(['balance_id' => $b->id, 'user_id' => null, 'file_path' => "carga_20250101120000_{$owner->id}.xlsx"]);
+            }
+        };
+        $count = function () {
+            DB::flushQueryLog();
+            DB::enableQueryLog();
+            $res = $this->actingAs($this->operator)->getJson('/api/v2/balances')->assertOk();
+            $log = DB::getQueryLog();
+            DB::disableQueryLog();
+
+            return [count($log), $log, $res];
+        };
+
+        $legacy(2);
+        [$few] = $count();
+        $legacy(6);
+        [$many, $log, $res] = $count();
+
+        $this->assertSame($few, $many);
+        $this->assertNotNull($res->json('data.0.usuario.id'));
+        foreach ($log as $q) {
+            $this->assertStringNotContainsString('"datos_entradas".*', $q['query']);
+            $this->assertDoesNotMatchRegularExpression('/select \* from "datos_entradas"/', $q['query']);
+        }
     }
 }

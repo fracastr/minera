@@ -109,33 +109,77 @@ final class SesionMapper
         ];
     }
 
+    /** Largest magnitude an edited value may have; anything bigger is a typo, and INF/NaN would not survive json_encode. */
+    public const MAX_ABS = 1e12;
+
     /** Validation rules for an edits body, sized to this session. */
     public static function editRules(array $d): array
     {
         $k = self::nComponentes($d);
         $maxFlujo = max(0, count($d['flujos'] ?? []) - 1);
         $maxInv = max(0, count($d['inventarios'] ?? []) - 1);
+        // `numeric` accepts "1e999"; this rejects what is not a finite, plausible number.
+        $finite = function (string $attribute, mixed $value, \Closure $fail) {
+            if (is_numeric($value) && (!is_finite((float) $value) || abs((float) $value) > self::MAX_ABS)) {
+                $fail('El valor no es un número válido.');
+            }
+        };
+        $num = fn (string ...$extra) => ['required', 'numeric', ...$extra, $finite];
 
         return [
             'flujos' => 'sometimes|array',
             'flujos.*.idx' => "required|integer|between:0,{$maxFlujo}|distinct",
-            'flujos.*.tms_medido' => 'required|numeric',
+            'flujos.*.tms_medido' => $num(),
             'flujos.*.leyes_medido' => "required|array|size:{$k}",
-            'flujos.*.leyes_medido.*' => 'required|numeric|min:0',
-            'flujos.*.tms_tol_inf' => 'required|numeric|min:0',
-            'flujos.*.tms_tol_sup' => 'required|numeric|min:0',
+            'flujos.*.leyes_medido.*' => $num('min:0'),
+            'flujos.*.tms_tol_inf' => $num('min:0'),
+            'flujos.*.tms_tol_sup' => $num('min:0'),
             'flujos.*.leyes_tol' => "required|array|size:{$k}",
             'flujos.*.leyes_tol.*' => 'required|array|size:2',
-            'flujos.*.leyes_tol.*.*' => 'required|numeric|min:0',
+            'flujos.*.leyes_tol.*.*' => $num('min:0'),
             'flujos.*.jerarquia' => 'required|integer|in:1,2',
             'inventarios' => 'sometimes|array',
             'inventarios.*.idx' => "required|integer|between:0,{$maxInv}|distinct",
-            'inventarios.*.humedad' => 'required|numeric|min:0|lt:100',
-            'inventarios.*.tms_ini' => 'required|numeric',
-            'inventarios.*.tms_fin' => 'required|numeric',
+            'inventarios.*.humedad' => $num('min:0', 'lt:100'),
+            'inventarios.*.tms_ini' => $num(),
+            'inventarios.*.tms_fin' => $num(),
             'inventarios.*.leyes' => "required|array|size:{$k}",
-            'inventarios.*.leyes.*' => 'required|numeric|min:0',
+            'inventarios.*.leyes.*' => $num('min:0'),
         ];
+    }
+
+    /**
+     * Why this stored row cannot take edits, or null. Writing into short or missing rows would leave sparse
+     * arrays, which json_encode turns into objects that neither the solver nor v1 can read.
+     */
+    public static function shapeError(array $d): ?string
+    {
+        $n = count($d['flujos'] ?? []);
+        $width = 2 + 2 * self::nComponentes($d);
+        $rows = fn (string $key, int $count, int $len) => is_array($d[$key] ?? null) && count($d[$key]) >= $count
+            && collect(array_slice($d[$key], 0, $count))->every(fn ($r) => is_array($r) && array_is_list($r) && count($r) >= $len);
+
+        if ($n === 0 || !$rows('mediciones', $n, $width) || !$rows('restricciones', $n, $width)
+            || !is_array($d['jerarquia'] ?? null) || count($d['jerarquia']) < $n) {
+            return 'La sesión no tiene una tabla de flujos completa; no se puede editar.';
+        }
+        $m = count($d['inventarios'] ?? []);
+        foreach (['tmh_ini', 'tmh_fin', 'tmh_delta', 'humedad_inventario', 'tms_ini', 'tms_fin', 'tms_delta'] as $key) {
+            if ($m && (!is_array($d[$key] ?? null) || count($d[$key]) < $m)) {
+                return 'La sesión no tiene una tabla de inventarios completa; no se puede editar.';
+            }
+        }
+        if ($m && !$rows('componentes_inventario', $m, $width / 2 - 1)) {
+            return 'La sesión no tiene una tabla de inventarios completa; no se puede editar.';
+        }
+
+        return null;
+    }
+
+    /** The only way datos_entrada is written: fails instead of storing an empty string. */
+    public static function encode(array $d): string
+    {
+        return json_encode($d, JSON_THROW_ON_ERROR);
     }
 
     /** Writes validated edits into the stored layout. Reconciled values and deviations are left as the last run left them. */

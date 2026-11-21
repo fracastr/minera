@@ -20,7 +20,7 @@ defineProps<{ title: string; description?: string }>()
       <p class="text-xs text-rail-muted">Compañía Minera del Pacífico</p>
     </aside>
 
-    <main class="flex flex-col px-4 py-8 sm:px-10">
+    <main id="contenido" tabindex="-1" class="flex flex-col px-4 py-8 outline-none sm:px-10">
       <RouterLink to="/" class="w-fit rounded lg:hidden">
         <img src="/brand/cmp-logo.svg" alt="CMP, Compañía Minera del Pacífico" class="h-8 w-auto dark:hidden">
         <img src="/brand/cmp-logo-white.svg" alt="CMP, Compañía Minera del Pacífico" class="hidden h-8 w-auto dark:block">

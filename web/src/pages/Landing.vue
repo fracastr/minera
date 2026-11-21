@@ -34,7 +34,7 @@ const valleys = [
       <RouterLink to="/login" class="btn btn-quiet h-9">Ingresar</RouterLink>
     </header>
 
-    <main class="flex-1">
+    <main id="contenido" tabindex="-1" class="flex-1 outline-none">
       <section class="mx-auto grid max-w-6xl items-center gap-12 px-4 pt-12 pb-16 sm:px-6 lg:grid-cols-[minmax(0,5fr)_minmax(0,6fr)] lg:pt-20 lg:pb-24">
         <div>
           <h1 class="font-display text-[clamp(2.5rem,6vw,4.25rem)] leading-[1.02] font-semibold">Balances CMP</h1>

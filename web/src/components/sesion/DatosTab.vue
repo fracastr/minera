@@ -8,7 +8,7 @@ import FlujosGrid from './FlujosGrid.vue'
 import InventariosGrid from './InventariosGrid.vue'
 import NodosGrid from './NodosGrid.vue'
 
-const props = defineProps<{ sesion: Sesion; editable: boolean }>()
+const props = defineProps<{ sesion: Sesion; editable: boolean; locked: boolean }>()
 const nodo = defineModel<number | null>('nodo', { required: true })
 const emit = defineEmits<{ edit: [] }>()
 
@@ -63,7 +63,12 @@ const h2 = 'font-display text-[0.9375rem] font-semibold'
           {{ editable ? 'Las celdas sombreadas se editan. ' : '' }}Elige un nodo para ver sus flujos.
         </p>
       </div>
-      <FlujosGrid :sesion="sesion" :editable="editable" :nodo="nodo" @edit="emit('edit')" />
+      <FlujosGrid :sesion="sesion" :editable="editable" :locked="locked" :nodo="nodo" @edit="emit('edit')" />
+      <p class="mt-1.5 text-xs text-ink-muted">
+        <span class="font-semibold text-warn">!</span> en el límite (≥ 80 % de la tolerancia) ·
+        <span class="font-semibold text-danger">‼</span> fuera de tolerancia<template v-if="nodoNombre"> · → entra a {{ nodoNombre }} · ← sale de {{ nodoNombre }}</template>
+        <template v-if="locked && editable"> · Edición en pausa mientras termina la operación.</template>
+      </p>
     </section>
 
     <div class="grid gap-6 xl:grid-cols-2">
@@ -73,7 +78,7 @@ const h2 = 'font-display text-[0.9375rem] font-semibold'
       </section>
       <section v-if="sesion.inventarios.length" aria-labelledby="t-inv">
         <h2 id="t-inv" :class="h2" class="mb-2">Inventarios</h2>
-        <InventariosGrid :sesion="sesion" :editable="editable" @edit="emit('edit')" />
+        <InventariosGrid :sesion="sesion" :editable="editable" :locked="locked" @edit="emit('edit')" />
       </section>
     </div>
   </div>

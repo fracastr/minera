@@ -1,3 +1,4 @@
+import { nextTick, ref } from 'vue'
 import { createRouter, createWebHistory } from 'vue-router'
 import { can } from '@/lib/abilities'
 import { useAuthStore } from '@/stores/auth'
@@ -71,10 +72,24 @@ router.beforeEach(async to => {
   }
   if (!auth.loggedIn) return { name: 'login', query: { redirect: to.fullPath } }
   if (!auth.validated && !(await auth.validate())) return { name: 'login', query: { sesion: 'expirada' } }
-  if (to.meta.can && !can(auth.user?.ability, ...to.meta.can)) return { name: 'inicio' }
+  if (to.meta.can && !can(auth.user?.ability, ...to.meta.can)) {
+    // Inicio is the fallback; if even that is denied the stored user is unusable, so start over.
+    if (to.name !== 'inicio') return { name: 'inicio' }
+    auth.reset()
+    return { name: 'login' }
+  }
   return true
 })
 
-router.afterEach(to => {
+/** Page title for the aria-live region in App.vue. */
+export const announcement = ref('')
+
+router.afterEach((to, from, failure) => {
+  if (failure) return
   document.title = to.meta.title ? `${to.meta.title} · Balances CMP` : 'Balances CMP | Compañía Minera del Pacífico'
+  // First load: leave focus where the browser puts it. Later navigations: move it to the new content.
+  // Same page with new query/params (listado filters, a clone taking over the session URL): keep focus where the user is.
+  if (from.matched.length === 0 || to.name === from.name) return
+  announcement.value = to.meta.title ?? 'Balances CMP'
+  nextTick(() => document.getElementById('contenido')?.focus({ preventScroll: true }))
 })

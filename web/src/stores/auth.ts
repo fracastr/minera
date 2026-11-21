@@ -2,7 +2,8 @@ import { FetchError } from 'ofetch'
 import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
 import { api } from '@/lib/api'
-import { clearSession, getStoredUser, getToken, saveSession, type UserData } from '@/lib/session'
+import { useSesionStore } from '@/stores/sesion'
+import { clearSession, getStoredUser, getToken, saveSession, saveUser, type UserData } from '@/lib/session'
 
 export const useAuthStore = defineStore('auth', () => {
   const token = ref(getToken())
@@ -21,10 +22,12 @@ export const useAuthStore = defineStore('auth', () => {
     validated.value = true
   }
 
-  /** Checks the stored token with the server once per app load. Only a 401 ends the session. */
+  /** Checks the stored token once per app load and refreshes role/abilities. Only a 401 ends the session. */
   async function validate(): Promise<boolean> {
     try {
-      await api('/auth/user')
+      const fresh = await api<UserData>('/auth/user')
+      saveUser(fresh)
+      user.value = fresh
     } catch (e) {
       if (e instanceof FetchError && e.status === 401) {
         reset()
@@ -43,11 +46,12 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   function reset() {
+    useSesionStore().reset() // the next user must not see this one's open balance or edits
     clearSession()
     token.value = null
     user.value = null
     validated.value = false
   }
 
-  return { token, user, validated, loggedIn, login, validate, logout }
+  return { token, user, validated, loggedIn, login, validate, logout, reset }
 })

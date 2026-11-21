@@ -2,7 +2,7 @@
 import { ExternalLink, History, LoaderCircle, Play, Save } from '@lucide/vue'
 import { TabsContent, TabsIndicator, TabsList, TabsRoot, TabsTrigger } from 'reka-ui'
 import { computed, defineAsyncComponent, onBeforeUnmount, onMounted, ref, watch } from 'vue'
-import { onBeforeRouteLeave, useRoute, useRouter } from 'vue-router'
+import { onBeforeRouteLeave, onBeforeRouteUpdate, useRoute, useRouter } from 'vue-router'
 import Notice from '@/components/Notice.vue'
 import UnderConstruction from '@/components/UnderConstruction.vue'
 import DatosTab from '@/components/sesion/DatosTab.vue'
@@ -23,11 +23,17 @@ const auth = useAuthStore()
 const store = useSesionStore()
 
 const canWrite = computed(() => can(auth.user?.ability, 'update', 'Balances'))
-// A session that has been run opens on the diagram; one only imported opens on its data.
-const tabInicial = () => (store.sesion?.corrida || store.sesion?.balance ? 'diagrama' : 'datos')
-const tab = ref(store.sesion?.id === Number(route.params.id) ? tabInicial() : 'datos')
+const tab = ref('datos')
 const guardarOpen = ref(false)
 const s = computed(() => store.sesion)
+
+// A run (or saved) session opens on the diagram; one only imported opens on its data.
+const tabInicial = () => (store.sesion?.corrida || store.sesion?.balance ? 'diagrama' : 'datos')
+
+// Load on entry and when the URL changes, but not when a "guardar como nuevo" clone just took over the URL.
+watch(() => Number(route.params.id), id => {
+  if (id && id !== store.sesion?.id) store.load(id).then(() => (tab.value = tabInicial()))
+}, { immediate: true })
 
 async function correr() {
   await store.correr()
@@ -38,20 +44,10 @@ function editarEnDatos(flujo: number) {
   store.flujoFoco = flujo
   tab.value = 'datos'
 }
-
-// Load on entry and when the URL changes, but not when a "guardar como nuevo" clone just took over the URL.
-watch(() => Number(route.params.id), id => {
-  if (id && id !== store.sesion?.id) store.load(id).then(() => (tab.value = tabInicial()))
-}, { immediate: true })
 watch(() => store.sesion?.id, id => {
   if (id && id !== Number(route.params.id)) router.replace({ name: 'balance-sesion', params: { id } })
 })
 
-async function onEdit() {
-  // Editing a reopened saved balance asks first, like any other write.
-  store.dirty = true
-  if (!(await store.ensureWritable())) store.load(store.sesion!.id)
-}
 
 async function abrirGuardar() {
   if (await store.ensureWritable()) guardarOpen.value = true
@@ -60,18 +56,20 @@ async function guardar(body: Parameters<typeof store.guardar>[0]) {
   if (await store.guardar(body)) guardarOpen.value = false
 }
 
-// Unsaved edits: confirm before leaving the page or closing the tab.
-onBeforeRouteLeave(async to => {
-  if (!store.dirty || to.name === 'balance-sesion') return true
-  const ok = await ask('Hay cambios sin guardar', 'Si sales ahora se pierden las ediciones que no has corrido ni guardado.', [
+// Unsaved edits: confirm before leaving the page, opening another session or closing the tab.
+const confirmDiscard = async () =>
+  !!(await ask('Hay cambios sin guardar', 'Si sales ahora se pierden las ediciones que no has corrido ni guardado.', [
     { value: 'salir', label: 'Salir sin guardar', tone: 'danger' },
-  ])
-  if (ok) store.dirty = false
-  return !!ok
-})
+  ]))
+onBeforeRouteLeave(() => (store.dirty ? confirmDiscard() : true))
+// Another session by URL (back/forward, a link) asks too; a clone taking over this session's URL does not.
+onBeforeRouteUpdate(to => (store.dirty && Number(to.params.id) !== store.sesion?.id ? confirmDiscard() : true))
 const beforeUnload = (e: BeforeUnloadEvent) => store.dirty && e.preventDefault()
 onMounted(() => window.addEventListener('beforeunload', beforeUnload))
-onBeforeUnmount(() => window.removeEventListener('beforeunload', beforeUnload))
+onBeforeUnmount(() => {
+  window.removeEventListener('beforeunload', beforeUnload)
+  store.reset() // nothing of this visit survives: coming back always reloads from the server
+})
 
 const estadoStyle = computed(() => ({
   Importado: 'bg-surface-2 text-ink-muted',
@@ -154,7 +152,7 @@ const tabs = [
         <DiagramaTab :sesion="s" :editable="canWrite" @editar="editarEnDatos" />
       </TabsContent>
       <TabsContent value="datos">
-        <DatosTab v-model:nodo="store.nodoSel" :sesion="s" :editable="canWrite" @edit="onEdit" />
+        <DatosTab v-model:nodo="store.nodoSel" :sesion="s" :editable="canWrite" :locked="!!store.busy" @edit="store.edited()" />
       </TabsContent>
       <TabsContent value="diagnostico">
         <UnderConstruction summary="Mediciones sospechosas ordenadas, desbalance por nodo y sugerencias de corrección." />

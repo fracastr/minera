@@ -25,8 +25,12 @@ export function getStoredUser(): UserData | null {
 
 export function saveSession(token: string, user: UserData, now = Date.now()) {
   localStorage.setItem(TOKEN_KEY, token)
-  localStorage.setItem(USER_KEY, JSON.stringify(user))
+  saveUser(user)
   localStorage.setItem(ACTIVITY_KEY, String(now))
+}
+
+export function saveUser(user: UserData) {
+  localStorage.setItem(USER_KEY, JSON.stringify(user))
 }
 
 export function clearSession() {
@@ -40,31 +44,64 @@ export function sessionLifetimeMinutes(): number {
   return parsed > 0 ? parsed : 120
 }
 
+// Activity is written at most this often: localStorage writes are synchronous.
+export const ACTIVITY_THROTTLE_MS = 15_000
+
 export function touchActivity(now = Date.now()) {
-  if (getToken()) localStorage.setItem(ACTIVITY_KEY, String(now))
+  if (!getToken()) return
+  const last = Number.parseInt(localStorage.getItem(ACTIVITY_KEY) ?? '', 10)
+  if (Number.isFinite(last) && now - last >= 0 && now - last < ACTIVITY_THROTTLE_MS) return
+  localStorage.setItem(ACTIVITY_KEY, String(now))
 }
 
 export function isIdle(now = Date.now(), lifetimeMinutes = sessionLifetimeMinutes()): boolean {
+  if (!getToken()) return false
   const last = Number.parseInt(localStorage.getItem(ACTIVITY_KEY) ?? '', 10)
-  if (!Number.isFinite(last)) return false
+  if (!Number.isFinite(last)) {
+    // Token without a timestamp (e.g. key cleared): start counting now instead of never expiring.
+    localStorage.setItem(ACTIVITY_KEY, String(now))
+    return false
+  }
   return now - last > lifetimeMinutes * 60_000
 }
 
+/** Ends the session: revokes the token on the server (best effort), clears storage, goes to login. */
 export function expireSession() {
+  const token = getToken()
+  if (token) {
+    fetch('/api/auth/logout', {
+      method: 'POST',
+      headers: { Accept: 'application/json', Authorization: `Bearer ${token}` },
+      keepalive: true,
+    }).catch(() => {})
+  }
   clearSession()
   if (!location.pathname.startsWith('/login')) location.assign('/login?sesion=expirada')
 }
 
-/** Ends the session after the idle lifetime: checked every minute and when the tab becomes visible. */
-export function watchIdle() {
+/**
+ * Ends the session after the idle lifetime: checked every minute and when the tab becomes visible.
+ * Returns a disposer (used on HMR).
+ */
+export function watchIdle(): () => void {
   const check = () => {
-    if (getToken() && isIdle()) expireSession()
+    if (isIdle()) expireSession()
   }
-  for (const evt of ['pointerdown', 'keydown', 'scroll', 'mousemove'])
-    window.addEventListener(evt, () => touchActivity(), { passive: true })
-  document.addEventListener('visibilitychange', () => {
-    if (document.visibilityState === 'visible') check()
-  })
-  window.setInterval(check, 60_000)
+  const bump = () => touchActivity()
+  const onVisible = () => {
+    if (document.visibilityState !== 'visible') return
+    check()
+    bump()
+  }
+  const events = ['pointerdown', 'keydown', 'scroll'] as const
+  for (const evt of events) window.addEventListener(evt, bump, { passive: true })
+  document.addEventListener('visibilitychange', onVisible)
+  const timer = window.setInterval(check, 60_000)
   check()
+
+  return () => {
+    for (const evt of events) window.removeEventListener(evt, bump)
+    document.removeEventListener('visibilitychange', onVisible)
+    window.clearInterval(timer)
+  }
 }
