@@ -212,6 +212,10 @@ const ZOOM_LEGIBLE = 0.75
 function vistaInicial() {
   const l = layout.value
   if (!l) return
+  // "Ver en diagrama" from Diagnóstico: center the pulsing stream's label at 100 %.
+  const pulso = fs.value.edges.find(e => e.primary && e.flujo === store.flujoPulso)
+  const lab = pulso && geom.value[pulso.id]?.label
+  if (lab) return setViewport({ x: canvas.w / 2 - (lab.x + lab.width / 2), y: canvas.h / 2 - (lab.y + lab.height / 2), zoom: 1 })
   const b = boundsOf(l, pos, geom.value)
   if (fitZoom(b, canvas.w, canvas.h) >= ZOOM_LEGIBLE) return ajustar()
   const z = ZOOM_LEGIBLE
@@ -361,6 +365,8 @@ function cerrarPanel() {
 const NUDGE = 8
 const ctx = reactive({
   geom, chips, nodos, foco, nodosAtenuados,
+  sospechosos: computed(() => (store.overlaySospechosos ? store.flujosSospechosos : null)),
+  pulso: computed(() => store.flujoPulso),
   flujoSel, flujoHover: computed(() => hover.flujo),
   nodoSelId: computed(() => (store.nodoSel === null ? null : unitId(store.nodoSel))),
   editable: computed(() => props.editable),
@@ -410,6 +416,7 @@ const panelFlujo = computed(() => (flujoSel.value === null ? null : props.sesion
 function limpiar() {
   cerrarPanel()
   store.nodoSel = null
+  store.flujoPulso = null
 }
 
 // ── View controls ───────────────────────────────────────────────────────────
@@ -493,6 +500,15 @@ const sueltos = computed(() => fs.value.sueltos.map(j => props.sesion.flujos[j]!
           <button type="button" :class="seg" :aria-pressed="desbalanceEn === 'unidades'" @click="desbalanceEn = 'unidades'">Unidades</button>
           <button type="button" :class="seg" :aria-pressed="desbalanceEn === 'pct'" @click="desbalanceEn = 'pct'">%</button>
         </div>
+      </div>
+      <div v-if="store.diag" :class="grupo" role="group" aria-label="Capa del diagnóstico">
+        <button
+          type="button" :class="seg" :aria-pressed="store.overlaySospechosos"
+          title="Marca los flujos con mediciones sospechosas según el diagnóstico"
+          @click="store.overlaySospechosos = !store.overlaySospechosos; store.flujoPulso = null"
+        >
+          Sospechosos ({{ store.flujosSospechosos.size }})
+        </button>
       </div>
       <div class="ml-auto flex items-center gap-1">
         <template v-if="editable && (movido || guardado)">
@@ -676,6 +692,40 @@ const sueltos = computed(() => fs.value.sueltos.map(j => props.sesion.flujos[j]!
 }
 .fs-edge.f-out .fs-arrow {
   fill: var(--flow-out);
+}
+.fs-edge.sosp .fs-line {
+  stroke: var(--danger);
+  stroke-width: 3;
+}
+.fs-edge.sosp .fs-arrow {
+  fill: var(--danger);
+}
+.fs-edge.sosp .fs-chip-bg {
+  fill: var(--danger-soft);
+  stroke: var(--danger);
+  stroke-width: 2;
+}
+.fs-edge.no-sosp {
+  opacity: 0.35;
+}
+.fs-edge.pulso .fs-line,
+.fs-edge.pulso .fs-chip-bg {
+  animation: fs-pulso 1.1s ease-in-out infinite alternate;
+}
+@keyframes fs-pulso {
+  from {
+    stroke-width: 2;
+  }
+  to {
+    stroke-width: 6;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .fs-edge.pulso .fs-line,
+  .fs-edge.pulso .fs-chip-bg {
+    animation: none;
+    stroke-width: 5;
+  }
 }
 .fs-edge.f-dim {
   opacity: 0.18;

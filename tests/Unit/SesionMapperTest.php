@@ -79,6 +79,16 @@ class SesionMapperTest extends TestCase
         $this->assertSame([57.0], $out['componentes_inventario'][0]);
     }
 
+    public function testUnchangedInventoryHasExactlyZeroDeltas(): void
+    {
+        $out = SesionMapper::applyEdits($this->datos(), [
+            'inventarios' => [['idx' => 0, 'humedad' => 7.3, 'tms_ini' => 12345.678, 'tms_fin' => 12345.678, 'leyes' => [55]]],
+        ]);
+
+        $this->assertSame(0.0, $out['tms_delta'][0]);
+        $this->assertSame(0.0, $out['tmh_delta'][0]);
+    }
+
     public function testRowsWithoutRunExtrasGetDeviationsAndResidualsLikeTheSolver(): void
     {
         $d = $this->datos();

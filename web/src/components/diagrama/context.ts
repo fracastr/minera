@@ -30,6 +30,10 @@ export interface DiagramCtx {
   /** Edge id → 'in' | 'out' relative to the selected node, or 'dim'; absent = no node selected. */
   foco: Record<string, 'in' | 'out' | 'dim'>
   nodosAtenuados: Set<string>
+  /** Diagnosis overlay: flows with a suspect measurement; null = overlay off. */
+  sospechosos: Set<number> | null
+  /** Flow pulsing after "Ver en diagrama". */
+  pulso: number | null
   flujoSel: number | null
   flujoHover: number | null
   /** Vue Flow id of the selected unit (store.nodoSel). */

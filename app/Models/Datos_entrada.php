@@ -18,6 +18,8 @@ class Datos_entrada extends Model
         'user_id',
     ];
 
+    protected $casts = ['solver_estado' => 'array'];
+
     public function balance()
     {
         return $this->belongsTo(Balances::class, 'balance_id');

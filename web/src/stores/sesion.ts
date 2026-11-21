@@ -1,5 +1,7 @@
+import { FetchError } from 'ofetch'
 import { defineStore } from 'pinia'
-import { computed, reactive, ref } from 'vue'
+import { computed, reactive, ref, shallowRef } from 'vue'
+import { claveSospechoso, flujoDe, leyIdx, sugerencia, type Accion, type Diagnostico, type VariableDiag } from '@/domain/diagnostico'
 import { toEdits, type Sesion } from '@/domain/types'
 import { api, errorMessage } from '@/lib/api'
 import { ask, notify } from '@/lib/feedback'
@@ -15,6 +17,16 @@ export const useSesionStore = defineStore('sesion', () => {
   const nodoSel = ref<number | null>(null)
   /** Flow to bring into view in the flows grid ("Editar en Datos" from the diagram). */
   const flujoFoco = ref<number | null>(null)
+  /** Gross-error diagnosis of the stored data, and the session version (updated_at) it was computed for. */
+  const diag = shallowRef<Diagnostico | null>(null)
+  const diagVersion = ref<string | null>(null)
+  const diagCargando = ref(false)
+  const diagError = ref('')
+  /** Suspects the user dismissed in this visit (client only), by claveSospechoso. */
+  const descartados = reactive(new Set<string>())
+  /** Diagram overlay: mark the suspect streams; `flujoPulso` pulses one ("Ver en diagrama"). */
+  const overlaySospechosos = ref(false)
+  const flujoPulso = ref<number | null>(null)
   /** Saved balance reopened: the user already chose to overwrite it in this visit (v1 asks once). */
   const sobrescribir = ref(false)
 
@@ -36,6 +48,13 @@ export const useSesionStore = defineStore('sesion', () => {
     nodoSel.value = null
     flujoFoco.value = null
     sobrescribir.value = false
+    diag.value = null
+    diagVersion.value = null
+    diagError.value = ''
+    diagCargando.value = false
+    descartados.clear()
+    overlaySospechosos.value = false
+    flujoPulso.value = null
     writable = null
     ops.clear()
   }
@@ -201,5 +220,64 @@ export const useSesionStore = defineStore('sesion', () => {
     else if (!tab) notify('ok', 'El Excel está listo. El navegador bloqueó la pestaña nueva:', { href: url, label: 'Abrir en Drive' })
   }
 
-  return { sesion, dirty, busy, loadError, nodoSel, flujoFoco, estado, reset, load, ensureWritable, edited, correr, guardar, restaurar, exportar }
+  let diagSeq = 0
+  /** Loads the diagnosis unless the one in hand is for this version of the session. */
+  async function cargarDiagnostico() {
+    const s = sesion.value
+    if (!s || (diag.value && diagVersion.value === s.updated_at)) return
+    const mine = ++diagSeq
+    const version = s.updated_at
+    diagCargando.value = true
+    diagError.value = ''
+    try {
+      const res = await api<Diagnostico>(`/v2/sesiones/${s.id}/diagnostico`)
+      if (mine !== diagSeq || sesion.value !== s) return
+      diag.value = res
+      diagVersion.value = version
+    } catch (e) {
+      if (mine !== diagSeq || sesion.value !== s) return
+      diagError.value = e instanceof FetchError && e.status === 503
+        ? 'Diagnóstico no disponible (servicio en actualización).'
+        : errorMessage(e, 'No se pudo calcular el diagnóstico.')
+    } finally {
+      if (mine === diagSeq) diagCargando.value = false
+    }
+  }
+
+  /** Session rows of the suspects still shown (and of their equivalents), for the diagram overlay. */
+  const flujosSospechosos = computed(() => {
+    const s = sesion.value
+    const out = new Set<number>()
+    for (const x of diag.value?.diagnostico.sospechosos ?? []) {
+      if (!s || descartados.has(claveSospechoso(x))) continue
+      for (const e of [x, ...x.equivalentes]) {
+        const f = flujoDe(s.flujos, e.flujo, e.tag)
+        if (f) out.add(f.idx)
+      }
+    }
+    return out
+  })
+
+  /**
+   * "Aplicar sugerencia" (and the S4 assistant's proposals): writes the suggested value or widened tolerance into
+   * the session like a grid edit (same ownership question, dirty flag and edit version). It does not run.
+   */
+  async function aplicarSugerencia(flujo: number, variable: VariableDiag, accion: Accion, sugerido: number): Promise<boolean> {
+    const s = sesion.value
+    const f = s?.flujos[flujo]
+    if (!s || !f || busy.value || !Number.isFinite(sugerido) || !(await ensureWritable())) return false
+    if (sesion.value !== s) return false
+    const x = leyIdx(variable) < 0 ? f.tms : f.leyes[leyIdx(variable)]
+    if (!x) return false
+    const sg = sugerencia(f, variable, accion, sugerido)
+    if (sg.campo === 'medido') x.medido = sg.valor
+    else x.tol_inf = x.tol_sup = sg.valor
+    markEdited()
+    dirty.value = true
+    notify('ok', sg.campo === 'medido' ? 'Valor aplicado; corre el balance para ver el efecto.' : 'Tolerancia ampliada; corre el balance para ver el efecto.')
+    return true
+  }
+
+  return { diag, diagCargando, diagError, descartados, overlaySospechosos, flujoPulso, flujosSospechosos, cargarDiagnostico, aplicarSugerencia,
+    sesion, dirty, busy, loadError, nodoSel, flujoFoco, estado, reset, load, ensureWritable, edited, correr, guardar, restaurar, exportar }
 })

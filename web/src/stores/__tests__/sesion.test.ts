@@ -11,7 +11,7 @@ const { useSesionStore } = await import('../sesion')
 const { toasts } = await import('@/lib/feedback')
 
 const sesion = (id: number, medido = 100, balance: Sesion['balance'] = null): Sesion => ({
-  id, balance, proceso: { id: 7, nombre: 'Pleito', valle: { id: 3, nombre: 'Elqui' } }, componentes: ['FeT'], corrida: false,
+  id, balance, proceso: { id: 7, nombre: 'Pleito', valle: { id: 3, nombre: 'Elqui' } }, componentes: ['FeT'], corrida: false, solver: null,
   flujos: [{ idx: 0, nombre: 'F', tag: null, descripcion: null, jerarquia: 1, stock: false,
     tms: { medido, reconciliado: medido, tol_inf: 5, tol_sup: 5, desv_inf: 0, desv_sup: 0 },
     leyes: [{ medido: 60, reconciliado: 60, tol_inf: 2, tol_sup: 2, desv_inf: 0, desv_sup: 0 }] }],
@@ -124,5 +124,41 @@ describe('sesion store', () => {
     await store.edited()
     store.reset()
     expect([store.sesion, store.dirty]).toEqual([null, false])
+  })
+
+  it('applies a suggestion like a grid edit: asks on a saved balance, keeps the stock sign, marks dirty, does not run', async () => {
+    const store = useSesionStore()
+    const s = sesion(1, -130, { id: 9, nombre: 'Nov', tipo: 'mensual', periodo_inicio: null, periodo_fin: null })
+    api.mockResolvedValueOnce(s)
+    await store.load(1)
+    ask.mockResolvedValueOnce(null) // cancelled: nothing changes
+    expect(await store.aplicarSugerencia(0, 'tms', 'corregir_valor', 100)).toBe(false)
+    expect([store.sesion!.flujos[0]!.tms.medido, store.dirty]).toEqual([-130, false])
+
+    ask.mockResolvedValueOnce('sobrescribir')
+    expect(await store.aplicarSugerencia(0, 'tms', 'corregir_valor', 100)).toBe(true)
+    expect([store.sesion!.flujos[0]!.tms.medido, store.dirty]).toEqual([-100, true])
+    expect(toasts.at(-1)?.message).toBe('Valor aplicado; corre el balance para ver el efecto.')
+
+    await store.aplicarSugerencia(0, 'ley_1', 'ampliar_tolerancia', 63.1) // 5,17 % off a 2 % tolerance
+    expect(store.sesion!.flujos[0]!.leyes[0]).toMatchObject({ medido: 60, tol_inf: 5.2, tol_sup: 5.2 })
+    expect(api).toHaveBeenCalledTimes(1) // never ran
+  })
+
+  it('loads the diagnosis once per session version and says when the service is unavailable', async () => {
+    const { FetchError } = await import('ofetch')
+    const store = useSesionStore()
+    api.mockResolvedValueOnce({ ...sesion(1), updated_at: 'v1' })
+    await store.load(1)
+    const unavailable = Object.assign(new FetchError('503'), { status: 503 })
+    api.mockRejectedValueOnce(unavailable).mockResolvedValueOnce({ diagnostico: { sospechosos: [{ flujo: 'F', tag: null, variable: 'tms', equivalentes: [] }] }, tendencia: {} })
+    await store.cargarDiagnostico()
+    expect(store.diagError).toBe('Diagnóstico no disponible (servicio en actualización).')
+    await store.cargarDiagnostico()
+    await store.cargarDiagnostico()
+    expect(api).toHaveBeenCalledTimes(3)
+    expect([...store.flujosSospechosos]).toEqual([0])
+    store.descartados.add('F|tms')
+    expect(store.flujosSospechosos.size).toBe(0)
   })
 })
