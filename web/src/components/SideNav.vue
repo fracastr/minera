@@ -15,7 +15,7 @@ defineProps<{ groups: NavGroup[]; collapsed: boolean }>()
 
 <template>
   <nav class="px-2 py-3">
-    <div v-for="(g, gi) in groups" :key="gi" :class="{ 'mt-5': gi > 0 && g.label, 'mt-1': gi > 0 && !g.label }">
+    <div v-for="(g, gi) in groups" :key="gi" :class="{ 'mt-5': gi > 0 }">
       <p v-if="g.label && !collapsed" class="px-3 pb-1.5 text-[0.75rem] font-medium text-rail-muted">{{ g.label }}</p>
       <div v-else-if="g.label" class="mx-3 mb-2 h-px bg-white/10" aria-hidden="true" />
       <ul class="space-y-0.5">
@@ -28,7 +28,7 @@ defineProps<{ groups: NavGroup[]; collapsed: boolean }>()
                 exact-active-class="!bg-rail-active !text-white font-medium"
                 :aria-label="collapsed ? item.label : undefined"
               >
-                <component :is="item.icon" class="size-4.5 shrink-0 text-rail-muted group-hover:text-rail-ink group-[.router-link-exact-active]:text-rail-accent" aria-hidden="true" />
+                <component :is="item.icon" class="size-4.5 shrink-0 text-rail-muted group-hover:text-rail-ink group-aria-[current=page]:text-rail-accent" aria-hidden="true" />
                 <span v-if="!collapsed" class="truncate">{{ item.label }}</span>
               </RouterLink>
             </TooltipTrigger>

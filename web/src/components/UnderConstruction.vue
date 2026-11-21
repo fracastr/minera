@@ -14,7 +14,7 @@ defineProps<{ summary?: string }>()
       <p class="mt-1 text-ink-muted">Esta sección llega en una próxima entrega de la nueva versión.</p>
       <slot />
     </div>
-    <dl class="absolute right-0 bottom-0 hidden grid-cols-[auto_auto] border-t border-l border-line text-left text-[0.6875rem] sm:grid">
+    <dl class="absolute right-0 bottom-0 hidden overflow-hidden rounded-br-lg grid-cols-[auto_auto] border-t border-l border-line text-left text-[0.6875rem] sm:grid">
       <dt class="border-r border-b border-line px-2 py-1 text-ink-faint">Estado</dt>
       <dd class="border-b border-line px-2 py-1 font-medium text-warn">Pendiente</dd>
       <dt class="border-r border-line px-2 py-1 text-ink-faint">Versión</dt>

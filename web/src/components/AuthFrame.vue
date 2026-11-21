@@ -25,7 +25,7 @@ defineProps<{ title: string; description?: string }>()
         <img src="/brand/cmp-logo.svg" alt="CMP, Compañía Minera del Pacífico" class="h-8 w-auto dark:hidden">
         <img src="/brand/cmp-logo-white.svg" alt="CMP, Compañía Minera del Pacífico" class="hidden h-8 w-auto dark:block">
       </RouterLink>
-      <div class="m-auto w-full max-w-sm py-10">
+      <div class="mx-auto w-full max-w-sm pt-12 pb-10 sm:my-auto sm:py-10">
         <h1 class="font-display text-2xl font-semibold">{{ title }}</h1>
         <p v-if="description" class="mt-2 text-ink-muted">{{ description }}</p>
         <div class="mt-8">

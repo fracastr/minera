@@ -18,7 +18,8 @@ const busy = ref(false)
 const error = ref<unknown>(null)
 
 const checks = computed(() => passwordRules.map(r => ({ label: r.label, ok: r.test(password.value) })))
-const mismatch = computed(() => confirmation.value !== '' && confirmation.value !== password.value)
+// Only complain once the confirmation stops being a prefix of the password (not while still typing it).
+const mismatch = computed(() => confirmation.value !== '' && !password.value.startsWith(confirmation.value))
 const ready = computed(() => email.value && checks.value.every(c => c.ok) && confirmation.value === password.value)
 
 async function submit() {

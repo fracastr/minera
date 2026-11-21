@@ -7,7 +7,7 @@ const nodes = [
   { x: 280, w: 120, label: 'Sep. magnética' },
 ]
 const streams = [
-  { id: 'f1', d: 'M8 150 H96', label: 'Alimentación', x: 12, y: 140, values: 'M 1.234 · R 1.240', vy: 168 },
+  { id: 'f1', d: 'M8 150 H96', label: 'Alimentación', x: 12, y: 140, values: 'M 1.234', vy: 168 },
   { id: 'f2', d: 'M208 150 H280', label: 'Descarga', x: 214, y: 140, values: 'R 1.712', vy: 168 },
   { id: 'f3', d: 'M400 140 H440 V62 H512', label: 'Concentrado', x: 446, y: 52, values: 'M 702 · R 698', vy: 80 },
   { id: 'f4', d: 'M400 160 H440 V238 H512', label: 'Relave', x: 446, y: 228, values: 'E 3,8 %', vy: 256, off: true },
@@ -19,7 +19,7 @@ const streams = [
   <svg
     viewBox="0 0 520 290"
     class="sketch w-full"
-    :class="tone === 'rail' ? 'text-rail-muted [--sk-ink:var(--color-rail-ink)] [--sk-node:var(--color-rail-hover)]' : 'text-ink-faint [--sk-ink:var(--color-ink)] [--sk-node:var(--color-surface)]'"
+    :class="tone === 'rail' ? 'text-rail-muted [--sk-ink:var(--color-rail-ink)] [--sk-node:var(--color-rail-hover)] [--sk-warn:#f0a43a]' : 'text-ink-faint [--sk-ink:var(--color-ink)] [--sk-node:var(--color-surface)] [--sk-warn:var(--color-warn)]'"
     role="img"
     aria-label="Esquema de un balance: alimentación, molienda, separación magnética, concentrado, relave y recirculación"
   >
@@ -36,11 +36,11 @@ const streams = [
         stroke="currentColor"
         stroke-width="1.5"
         :stroke-dasharray="s.dashed ? '4 4' : undefined"
-        :class="['stream', { 'text-warn': s.off }]"
+        :class="['stream', { 'text-(color:--sk-warn)': s.off }]"
         marker-end="url(#sk-arrow)"
       />
       <text :x="s.x" :y="s.y" class="fill-[var(--sk-ink)] text-[11px] font-medium">{{ s.label }}</text>
-      <text :x="s.x" :y="s.vy" class="text-[10px] tabular-nums" :class="s.off ? 'fill-warn' : 'fill-current'">{{ s.values }}</text>
+      <text :x="s.x" :y="s.vy" class="text-[10px] tabular-nums" :class="s.off ? 'fill-[var(--sk-warn)]' : 'fill-current'">{{ s.values }}</text>
     </g>
 
     <g v-for="n in nodes" :key="n.label">

@@ -69,7 +69,7 @@ watch(() => route.fullPath, () => (drawerOpen.value = false))
 
       <!-- Desktop rail -->
       <aside
-        class="sticky top-0 hidden h-dvh shrink-0 flex-col bg-rail text-rail-ink transition-[width] duration-200 ease-[var(--ease-out-expo)] lg:flex"
+        class="sticky top-0 hidden h-dvh shrink-0 flex-col bg-rail [--focus:var(--rail-accent)] text-rail-ink transition-[width] duration-200 ease-[var(--ease-out-expo)] lg:flex"
         :class="collapsed ? 'w-16' : 'w-60'"
         aria-label="Navegación principal"
       >
@@ -96,7 +96,7 @@ watch(() => route.fullPath, () => (drawerOpen.value = false))
       <DialogRoot v-model:open="drawerOpen">
         <DialogPortal>
           <DialogOverlay class="drawer-overlay fixed inset-0 z-40 bg-navy/50 lg:hidden" />
-          <DialogContent class="drawer fixed inset-y-0 left-0 z-50 flex w-72 max-w-[85vw] flex-col bg-rail text-rail-ink shadow-[4px_0_24px_rgb(0_0_0/0.25)] lg:hidden">
+          <DialogContent class="drawer fixed inset-y-0 left-0 z-50 flex w-72 max-w-[85vw] flex-col bg-rail [--focus:var(--rail-accent)] text-rail-ink shadow-[4px_0_24px_rgb(0_0_0/0.25)] lg:hidden">
             <div class="flex h-14 items-center justify-between px-4">
               <DialogTitle class="flex items-center gap-2.5">
                 <img src="/brand/cmp-logo-white.svg" alt="CMP" class="h-6 w-auto">
