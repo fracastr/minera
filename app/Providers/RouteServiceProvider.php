@@ -87,5 +87,18 @@ class RouteServiceProvider extends ServiceProvider
                     ->response($throttledResponse),
             ];
         });
+
+        // forgot-password / reset-password: stops mail flooding and token guessing.
+        RateLimiter::for('auth-reset', function (Request $request) {
+            $email = Str::lower((string) $request->input('email', ''));
+            $throttledResponse = fn (Request $request, array $headers) => response()->json([
+                'message' => 'Demasiados intentos. Intenta nuevamente mas tarde.',
+            ], 429, $headers);
+
+            return [
+                Limit::perMinutes(15, 20)->by('reset-ip:'.$request->ip())->response($throttledResponse),
+                Limit::perMinutes(15, 5)->by('reset-account:'.($email ?: $request->ip()))->response($throttledResponse),
+            ];
+        });
     }
 }
