@@ -1,3 +1,4 @@
+import { notify } from '@/lib/feedback'
 import {
   CellStyleModule,
   ClientSideRowModelModule,
@@ -55,14 +56,47 @@ export const gridTheme = themeQuartz.withParams({
 /** Numbers align right; cellStyle (not cellClass) so columns can still set their own classes. */
 export const columnTypes = { num: { cellStyle: { textAlign: 'right' }, headerClass: 'ag-right-aligned-header' } }
 
-/**
- * Accepts what people type in Chile ("1.234,5", "1234,5", "17.900" as thousands) and plain "1234.5";
- * anything else keeps the old value.
- */
-export function parseNumber(p: Pick<ValueParserParams, 'newValue' | 'oldValue'>): number {
-  const raw = String(p.newValue ?? '').trim().replace(/\s/g, '')
-  const thousands = /^-?\d{1,3}(\.\d{3})+$/.test(raw)
-  const normalized = raw.includes(',') || thousands ? raw.replace(/\./g, '').replace(',', '.') : raw
-  const n = Number(normalized)
-  return raw !== '' && Number.isFinite(n) ? n : (p.oldValue as number)
+/** Every balance grid keys rows by the session index, so edits and refreshes keep their place. */
+export const rowIdByIdx = (p: { data: { idx: number } }) => String(p.data.idx)
+
+/** The few grid texts our grids can show, in Spanish. */
+export const localeText = {
+  noRowsToShow: 'Sin filas',
+  loadingOoo: 'Cargando…',
+  ariaRowSelect: 'Seleccionar fila',
+  ariaSearch: 'Buscar',
+  ariaColumn: 'Columna',
+  ariaRow: 'Fila',
 }
+
+/** Same bound the server applies to edited values. */
+export const MAX_ABS = 1e12
+
+/**
+ * Reads what people type in Chile ("1.234,5", "1234,5", "17.900" as thousands) and plain "1234.5".
+ * With `max` (0–100 columns: leyes, tolerancias, humedad), a dot that would make the value exceed it is a
+ * decimal point ("0.125" → 0.125, "1.500" → 1.5). Returns null for anything else (letters, hex, ±∞).
+ */
+export function readNumber(input: unknown, max?: number): number | null {
+  const raw = String(input ?? '').trim().replace(/\s/g, '')
+  if (!/^-?[\d.,]+$/.test(raw) || !/\d/.test(raw)) return null
+  const asThousands = /^-?\d{1,3}(\.\d{3})+$/.test(raw) ? Number(raw.replace(/\./g, '')) : null
+  let n: number
+  if (raw.includes(',')) n = Number(raw.replace(/\./g, '').replace(',', '.'))
+  else if (asThousands !== null && (max === undefined || asThousands <= max)) n = asThousands
+  else n = Number(raw)
+  return Number.isFinite(n) && Math.abs(n) <= MAX_ABS ? n : null
+}
+
+/** AG Grid valueParser: keeps the old value and says why when the input is not a number. */
+export function numberParser(max?: number) {
+  return (p: Pick<ValueParserParams, 'newValue' | 'oldValue'>): number => {
+    const n = readNumber(p.newValue, max)
+    if (n !== null && (max === undefined || (n >= 0 && n <= max))) return n
+    notify('danger', `«${String(p.newValue ?? '').trim()}» no es un valor válido${max === undefined ? '' : ` (0 a ${max})`}. Ejemplos: 1.234,5 · 1234,5 · 58,66`)
+    return p.oldValue as number
+  }
+}
+
+export const parseNumber = numberParser()
+export const parsePct = numberParser(100)

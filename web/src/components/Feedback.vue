@@ -9,7 +9,10 @@ import { answer, pending, toasts } from '@/lib/feedback'
 
 // Toasts (bottom right) and the one pending ask() dialog, mounted once in the shell.
 const open = computed({ get: () => !!pending.value, set: v => !v && answer(null) })
-const remove = (id: number) => toasts.splice(toasts.findIndex(t => t.id === id), 1)
+function remove(id: number) {
+  const i = toasts.findIndex(t => t.id === id)
+  if (i >= 0) toasts.splice(i, 1)
+}
 const tone = { primary: 'btn-primary', danger: 'bg-danger text-white hover:opacity-90', quiet: 'btn-quiet' }
 </script>
 
@@ -17,12 +20,15 @@ const tone = { primary: 'btn-primary', danger: 'bg-danger text-white hover:opaci
   <ToastProvider swipe-direction="right">
     <ToastRoot
       v-for="t in toasts" :key="t.id"
-      :duration="t.tone === 'danger' ? 8000 : 4000"
+      :duration="t.tone === 'danger' ? Infinity : 4000"
       class="toast flex items-start gap-2.5 rounded-lg border border-line bg-surface p-3 pr-2 text-[0.8125rem] shadow-[0_8px_24px_rgb(16_20_40/0.16)]"
       @update:open="v => !v && remove(t.id)"
     >
       <component :is="t.tone === 'danger' ? CircleAlert : CircleCheck" class="mt-px size-4 shrink-0" :class="t.tone === 'danger' ? 'text-danger' : 'text-ok'" aria-hidden="true" />
-      <ToastDescription class="flex-1 leading-snug">{{ t.message }}</ToastDescription>
+      <ToastDescription class="flex-1 leading-snug">
+        {{ t.message }}
+        <a v-if="t.link" :href="t.link.href" target="_blank" rel="noopener noreferrer" class="mt-1 block font-medium text-primary underline">{{ t.link.label }}</a>
+      </ToastDescription>
       <ToastClose class="grid size-6 place-items-center rounded text-ink-faint hover:bg-surface-2 hover:text-ink" aria-label="Cerrar">
         <X class="size-3.5" aria-hidden="true" />
       </ToastClose>

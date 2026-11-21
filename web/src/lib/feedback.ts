@@ -4,14 +4,16 @@ export interface Toast {
   id: number
   tone: 'ok' | 'danger'
   message: string
+  /** Optional link shown under the message (e.g. the Drive file when the popup was blocked). */
+  link?: { href: string; label: string }
 }
 
 export const toasts = reactive<Toast[]>([])
 let seq = 0
 
-/** Short-lived message; errors stay until dismissed (Toaster sets the duration). */
-export function notify(tone: Toast['tone'], message: string) {
-  toasts.push({ id: ++seq, tone, message })
+/** Success messages close by themselves; errors stay until dismissed (Feedback.vue sets the duration). */
+export function notify(tone: Toast['tone'], message: string, link?: Toast['link']) {
+  toasts.push({ id: ++seq, tone, message, link })
 }
 
 export interface AskAction<T extends string> {
