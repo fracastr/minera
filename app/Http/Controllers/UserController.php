@@ -8,6 +8,7 @@ use App\Support\PasswordRules;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 
 class UserController extends Controller
 {
@@ -74,6 +75,17 @@ class UserController extends Controller
             'activo' => 'sometimes|boolean',
             'dashboard_access' => 'sometimes|boolean',
         ], self::MENSAJES, self::ATRIBUTOS);
+
+        // An admin must not lock themself out (nobody else may be left to undo it).
+        if ($request->user()->id === $user->id) {
+            $errores = array_filter([
+                'role' => isset($validated['role']) && $validated['role'] !== 'admin' ? ['No puedes quitarte el rol de administrador.'] : null,
+                'activo' => array_key_exists('activo', $validated) && !$validated['activo'] ? ['No puedes desactivar tu propia cuenta.'] : null,
+            ]);
+            if ($errores) {
+                throw ValidationException::withMessages($errores);
+            }
+        }
 
         if (isset($validated['name'])) {
             $user->nombre = $validated['name'];

@@ -224,9 +224,10 @@ const card = 'rounded-lg border border-line bg-surface p-4'
       </div>
     </section>
 
+    <p class="sr-only" role="status" aria-live="polite">{{ loading ? 'Cargando indicadores…' : data ? 'Indicadores actualizados.' : '' }}</p>
     <Notice v-if="error" tone="danger" class="mt-4">{{ error }}</Notice>
 
-    <div class="mt-4 grid grid-cols-2 gap-3 lg:grid-cols-4">
+    <div class="mt-4 grid grid-cols-2 gap-3 lg:grid-cols-4" :aria-busy="loading">
       <div v-for="k in kpis" :key="k.label" :class="card">
         <p class="text-xs font-medium text-ink-muted">{{ k.label }}</p>
         <p v-if="k.value !== undefined" class="mt-1 font-display text-2xl font-semibold">{{ fmt(k.value) }}</p>
@@ -234,7 +235,7 @@ const card = 'rounded-lg border border-line bg-surface p-4'
       </div>
     </div>
 
-    <div v-if="data" class="mt-4 grid gap-4 lg:grid-cols-3" :class="{ 'opacity-60 transition-opacity': loading }">
+    <div v-if="data" class="mt-4 grid gap-4 lg:grid-cols-3" :aria-busy="loading" :class="{ 'opacity-60 transition-opacity': loading }">
       <section :class="card" class="lg:col-span-2">
         <div class="mb-1 flex flex-wrap items-center justify-between gap-2">
           <button v-if="mes" type="button" class="inline-flex items-center gap-1 text-xs font-medium text-primary hover:underline" @click="volver">

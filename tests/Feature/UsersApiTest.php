@@ -55,4 +55,15 @@ class UsersApiTest extends TestCase
         $operator = User::factory()->create(['role' => 'operator']);
         $this->actingAs($operator)->getJson('/api/users')->assertForbidden();
     }
+    public function testAnAdminCannotDemoteOrDeactivateThemself(): void
+    {
+        $this->actingAs($this->admin)->putJson("/api/users/{$this->admin->id}", ['role' => 'viewer', 'activo' => false])
+            ->assertStatus(422)
+            ->assertJsonPath('errors.role.0', 'No puedes quitarte el rol de administrador.')
+            ->assertJsonPath('errors.activo.0', 'No puedes desactivar tu propia cuenta.');
+        $this->assertSame('admin', $this->admin->fresh()->role);
+
+        // Saving their own form unchanged still works.
+        $this->putJson("/api/users/{$this->admin->id}", ['name' => 'Admin', 'role' => 'admin', 'activo' => true])->assertOk();
+    }
 }

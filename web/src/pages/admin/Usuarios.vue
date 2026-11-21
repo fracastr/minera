@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { FetchError } from 'ofetch'
 import { Check, LoaderCircle, Pencil, Search, Trash2, UserPlus, X } from '@lucide/vue'
 import { DialogClose, DialogContent, DialogDescription, DialogOverlay, DialogPortal, DialogRoot, DialogTitle } from 'reka-ui'
 import { computed, onMounted, reactive, ref } from 'vue'
@@ -114,11 +115,17 @@ async function guardar() {
   }
 }
 // A 422 with field errors shows next to the fields; anything else as a banner in the dialog.
+// Field errors show next to their field; one for a field the form does not show falls back to the banner.
+const EN_CAMPO = ['name', 'email', 'role', 'activo', 'password']
 const errorGeneral = computed(() => {
   const e = serverError.value
   if (!e) return ''
-  return ['name', 'email', 'role', 'password'].some(k => fieldError(e, k)) ? '' : errorMessage(e, 'No se pudo guardar el usuario.')
+  const errors = e instanceof FetchError ? (e.data?.errors as Record<string, string[]> | undefined) : undefined
+  if (!errors) return errorMessage(e, 'No se pudo guardar el usuario.')
+  return Object.entries(errors).find(([k]) => !EN_CAMPO.includes(k))?.[1]?.[0] ?? ''
 })
+// Editing yourself: the server refuses a demotion or deactivation (nobody might be left to undo it).
+const yo = computed(() => !!editando.value && editando.value.id === auth.user?.id)
 
 async function eliminar(u: Usuario) {
   const ok = await ask('Eliminar usuario', `${u.nombre} (${u.email}) perderá el acceso de inmediato. Sus balances guardados se conservan.`, [
@@ -180,7 +187,34 @@ const radio = 'flex cursor-pointer items-start gap-2.5 rounded-md border border-
 
     <Notice v-if="error" tone="danger" class="mt-4">{{ error }}</Notice>
 
-    <div class="mt-4 overflow-x-auto rounded-lg border border-line bg-surface">
+    <!-- Phones: one card per user, from the same rows. -->
+    <ul class="mt-4 space-y-3 sm:hidden">
+      <li v-if="loading" class="rounded-lg border border-line bg-surface px-4 py-10 text-center text-ink-muted">Cargando usuarios…</li>
+      <li v-else-if="!filas.length" class="rounded-lg border border-line bg-surface px-4 py-10 text-center">
+        <p class="font-medium">{{ hayFiltros ? 'Ningún usuario coincide con los filtros.' : 'Todavía no hay usuarios.' }}</p>
+        <button v-if="hayFiltros" type="button" class="mt-2 text-primary hover:underline" @click="limpiar">Limpiar filtros</button>
+      </li>
+      <li v-for="u in filas" v-else :key="u.id" class="rounded-lg border border-line bg-surface p-4">
+        <p class="font-medium">{{ u.nombre }} <span v-if="u.id === auth.user?.id" class="text-xs font-normal text-ink-faint">(tú)</span></p>
+        <p class="truncate text-xs text-ink-muted">{{ u.email }}</p>
+        <div class="mt-2.5 flex flex-wrap items-center gap-1.5 text-xs font-medium">
+          <span class="rounded bg-surface-2 px-1.5 py-0.5">{{ ROLES[u.role]?.label ?? u.role }}</span>
+          <span class="rounded px-1.5 py-0.5" :class="u.activo ? 'bg-ok-soft text-ok' : 'bg-surface-2 text-ink-muted'">{{ u.activo ? 'Activo' : 'Inactivo' }}</span>
+          <span v-if="u.role === 'admin' || u.dashboard_access" class="rounded bg-primary-soft px-1.5 py-0.5 text-primary">Analytics</span>
+        </div>
+        <p class="mt-2 text-xs text-ink-muted">Creado {{ fecha(u.created_at) }}</p>
+        <div class="mt-3 grid grid-cols-2 gap-2 border-t border-line pt-3">
+          <button type="button" class="btn btn-quiet h-11" :aria-label="`Editar a ${u.nombre}`" @click="abrir(u)">
+            <Pencil class="size-4" aria-hidden="true" /> Editar
+          </button>
+          <button type="button" class="btn btn-quiet h-11 text-danger" :aria-label="`Eliminar a ${u.nombre}`" @click="eliminar(u)">
+            <Trash2 class="size-4" aria-hidden="true" /> Eliminar
+          </button>
+        </div>
+      </li>
+    </ul>
+
+    <div class="mt-4 hidden overflow-x-auto rounded-lg border border-line bg-surface sm:block">
       <table class="w-full min-w-[46rem] text-left text-[0.8125rem]">
         <thead class="border-b border-line bg-surface-2/60 text-xs text-ink-muted">
           <tr>
@@ -249,7 +283,7 @@ const radio = 'flex cursor-pointer items-start gap-2.5 rounded-md border border-
               <legend class="mb-1.5 text-[0.8125rem] font-medium">Rol</legend>
               <div class="grid gap-2 sm:grid-cols-3">
                 <label v-for="(r, k) in ROLES" :key="k" :class="radio">
-                  <input v-model="form.role" type="radio" :value="k" class="mt-1 accent-[var(--primary)]">
+                  <input v-model="form.role" type="radio" :value="k" class="mt-1 accent-[var(--primary)]" :disabled="yo">
                   <span>
                     <span class="block text-[0.8125rem] font-medium">{{ r.label }}</span>
                     <span class="block text-xs text-ink-muted">{{ r.detalle }}</span>
@@ -257,12 +291,14 @@ const radio = 'flex cursor-pointer items-start gap-2.5 rounded-md border border-
                 </label>
               </div>
               <p v-if="fieldError(serverError, 'role')" class="mt-1 text-[0.8125rem] text-danger">{{ fieldError(serverError, 'role') }}</p>
+              <p v-else-if="yo" class="mt-1 text-xs text-ink-muted">No puedes cambiar tu propio rol ni desactivar tu cuenta.</p>
             </fieldset>
             <div class="space-y-2">
-              <label class="flex items-center gap-2.5">
-                <input v-model="form.activo" type="checkbox" class="size-4 accent-[var(--primary)]">
+              <label class="flex items-center gap-2.5" :class="{ 'text-ink-muted': yo }">
+                <input v-model="form.activo" type="checkbox" class="size-4 accent-[var(--primary)]" :disabled="yo">
                 <span>Cuenta activa <span class="text-ink-muted">(una cuenta inactiva no puede entrar)</span></span>
               </label>
+              <p v-if="fieldError(serverError, 'activo')" class="text-[0.8125rem] text-danger">{{ fieldError(serverError, 'activo') }}</p>
               <label class="flex items-center gap-2.5" :class="{ 'text-ink-muted': form.role === 'admin' }">
                 <input v-model="form.dashboard_access" type="checkbox" class="size-4 accent-[var(--primary)]" :disabled="form.role === 'admin'">
                 <span>Acceso a Analytics <span v-if="form.role === 'admin'">(los administradores siempre lo tienen)</span></span>

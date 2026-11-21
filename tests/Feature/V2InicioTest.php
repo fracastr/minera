@@ -140,4 +140,28 @@ class V2InicioTest extends TestCase
             ->assertJsonPath('sesgos.0.proceso', 'Planta Pellets')
             ->assertJsonPath('sesgos.0.balances', 4);
     }
+    public function testPicksTheLatestBalancePerProcessInSqlAndSkipsUnreadableRows(): void
+    {
+        $otro = DB::table('procesos')->insertGetId(['nombre' => 'Otro', 'tipo' => 't', 'valle_id' => $this->valleId, 'componentes' => '{"data":["FeT"]}']);
+        $this->guardado('Viejo', '2026-10-31', $this->datos(112));
+        $this->guardado('Empate A', '2026-11-30', $this->datos(112));
+        $this->guardado('Empate B', '2026-11-30', $this->datos()); // same period end: the higher id wins
+        $roto = Balances::create(['nombre' => 'Roto', 'tipo' => 'mensual', 'periodo_fin' => '2026-11-30', 'proceso_id' => $otro, 'user_id' => $this->operator->id]);
+        $this->sesion(['flujos' => 'no es una lista'], ['balance_id' => $roto->id, 'proceso_id' => $otro]);
+
+        $this->actingAs($this->operator)->getJson('/api/v2/inicio')
+            ->assertOk()
+            ->assertJsonCount(1, 'alertas')
+            ->assertJsonPath('alertas.0.nombre', 'Empate B')
+            ->assertJsonPath('alertas.0.fuera', 0);
+    }
+
+    public function testANewSolverStatusRefreshesTheCacheEvenWithTheSameUpdatedAt(): void
+    {
+        $s = $this->guardado('Noviembre', '2026-11-30', $this->datos());
+        $this->actingAs($this->operator)->getJson('/api/v2/inicio')->assertJsonPath('alertas.0.solver_ok', null);
+
+        DB::table('datos_entradas')->where('id', $s->id)->update(['solver_estado' => json_encode(['ok' => false, 'hash' => md5($s->datos_entrada)])]);
+        $this->getJson('/api/v2/inicio')->assertJsonPath('alertas.0.solver_ok', false);
+    }
 }

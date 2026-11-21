@@ -136,7 +136,7 @@ const card = 'rounded-lg border border-line bg-surface'
           </div>
           <p v-else class="px-4 py-8 text-ink-muted">Todavía no hay balances guardados.</p>
           <p v-if="conAlerta.length && sinAlerta.length" class="border-t border-line px-4 py-2.5 text-xs text-ink-muted">
-            Sin alertas: {{ sinAlerta.map(a => a.proceso).join(', ') }}.
+            Sin alertas: {{ sinAlerta.map(a => a.proceso ?? 'Sin proceso').join(', ') }}.
           </p>
         </template>
       </section>
