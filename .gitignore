@@ -65,3 +65,5 @@ yarn-error.log*
 /frontend-v3/node_modules
 /public/v3-build
 /public/v3.hot
+/public/app-build
+/public/app.hot
