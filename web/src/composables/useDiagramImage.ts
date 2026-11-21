@@ -29,7 +29,39 @@ function cloneInlined(el: SVGElement): SVGElement {
 
 const NS = 'http://www.w3.org/2000/svg'
 
-export function diagramSvg(container: HTMLElement, pad = 24): { svg: string; width: number; height: number } {
+let fontCss: Promise<string> | null = null
+/**
+ * Work Sans (latin subset) as @font-face rules with the woff2 files inlined, read from the Google Fonts
+ * stylesheet the page already loads, so the file renders with the app's font anywhere. '' when unavailable
+ * (offline, blocked): the export then falls back to the system sans-serif.
+ */
+function workSansCss(): Promise<string> {
+  return (fontCss ??= (async () => {
+    const href = document.querySelector<HTMLLinkElement>('link[rel="stylesheet"][href*="fonts.googleapis.com"]')?.href
+    if (!href) return ''
+    const css = await (await fetch(href)).text()
+    const blocks = (css.match(/@font-face\s*{[^}]*}/g) ?? []).filter(b => /Work Sans/.test(b) && /U\+0000-00FF/.test(b))
+    const files = new Map<string, Promise<string>>()
+    const dataUri = (url: string) => {
+      if (!files.has(url)) {
+        files.set(url, fetch(url).then(r => r.blob()).then(b => new Promise<string>((ok, ko) => {
+          const fr = new FileReader()
+          fr.onload = () => ok(String(fr.result))
+          fr.onerror = ko
+          fr.readAsDataURL(b)
+        })))
+      }
+      return files.get(url)!
+    }
+    const out = await Promise.all(blocks.map(async b => {
+      const url = /url\(([^)]+)\)/.exec(b)?.[1]
+      return url ? b.replace(url, await dataUri(url)) : ''
+    }))
+    return out.join('\n')
+  })().catch(() => ''))
+}
+
+export async function diagramSvg(container: HTMLElement, pad = 24): Promise<{ svg: string; width: number; height: number }> {
   const root = document.createElementNS(NS, 'svg')
   const content = document.createElementNS(NS, 'g')
   let x0 = Infinity
@@ -79,13 +111,19 @@ export function diagramSvg(container: HTMLElement, pad = 24): { svg: string; wid
   bg.setAttribute('width', String(width))
   bg.setAttribute('height', String(height))
   bg.setAttribute('fill', cs.backgroundColor)
+  const fonts = await workSansCss()
+  if (fonts) {
+    const style = document.createElementNS(NS, 'style')
+    style.textContent = fonts
+    root.append(style)
+  }
   root.append(bg, content)
   return { svg: `<?xml version="1.0" encoding="UTF-8"?>\n${new XMLSerializer().serializeToString(root)}`, width, height }
 }
 
 /** PNG at `scale`× (2× by default) of the SVG, drawn through a canvas. */
 export async function diagramPng(container: HTMLElement, scale = 2): Promise<Blob> {
-  const { svg, width, height } = diagramSvg(container)
+  const { svg, width, height } = await diagramSvg(container)
   const img = new Image()
   img.decoding = 'async'
   img.src = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`

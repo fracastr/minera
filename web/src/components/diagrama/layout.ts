@@ -46,6 +46,7 @@ export async function layoutFlowsheet(
   fs: Flowsheet,
   nodeSize: (n: FsNode) => Size,
   labelSize: (e: FsEdge) => Size,
+  options: Record<string, string> = {},
 ): Promise<Layout> {
   const children: ElkNode[] = fs.nodes.map(n => {
     const size = nodeSize(n)
@@ -75,7 +76,7 @@ export async function layoutFlowsheet(
     labels: e.primary ? [{ id: `${e.id}:label`, text: e.id, ...labelSize(e), layoutOptions: { 'elk.edgeLabels.placement': 'CENTER' } }] : [],
   }))
 
-  const out = await elk.layout({ id: 'root', layoutOptions: ROOT_OPTIONS, children, edges })
+  const out = await elk.layout({ id: 'root', layoutOptions: { ...ROOT_OPTIONS, ...options }, children, edges })
 
   const layout: Layout = { nodes: {}, edges: {} }
   for (const c of out.children ?? []) layout.nodes[c.id] = { x: c.x ?? 0, y: c.y ?? 0, width: c.width ?? 0, height: c.height ?? 0 }
@@ -149,3 +150,27 @@ export function arrowAt(points: Pt[], size = 7): string {
   const w = size * 0.55
   return `M${t.x},${t.y} L${bx - uy * w},${by + ux * w} L${bx + uy * w},${by - ux * w} Z`
 }
+
+/** Bounding box of the nodes, labels and edge routes (`edges` overrides the layout's routes, e.g. after a drag). */
+export function boundsOf(l: Layout, pos: Record<string, Pt> = {}, edges: Layout['edges'] = l.edges): Rect {
+  let x0 = Infinity
+  let y0 = Infinity
+  let x1 = -Infinity
+  let y1 = -Infinity
+  const grow = (r: Rect) => {
+    x0 = Math.min(x0, r.x)
+    y0 = Math.min(y0, r.y)
+    x1 = Math.max(x1, r.x + r.width)
+    y1 = Math.max(y1, r.y + r.height)
+  }
+  for (const [id, r] of Object.entries(l.nodes)) grow({ ...r, ...pos[id] })
+  for (const e of Object.values(edges)) {
+    if (e.label) grow(e.label)
+    for (const p of e.points) grow({ ...p, width: 0, height: 0 })
+  }
+  return Number.isFinite(x0) ? { x: x0, y: y0, width: x1 - x0, height: y1 - y0 } : { x: 0, y: 0, width: 0, height: 0 }
+}
+
+/** Zoom that fits `b` in a w × h viewport. */
+export const fitZoom = (b: Size, w: number, h: number, pad = 0.04) =>
+  Math.min((w * (1 - 2 * pad)) / Math.max(b.width, 1), (h * (1 - 2 * pad)) / Math.max(b.height, 1))
