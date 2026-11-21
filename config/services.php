@@ -35,6 +35,14 @@ return [
         'url' => env('FLASK_API_URL'),
     ],
 
+    // Balance assistant (Claude Messages API). Off unless AI_ASSISTANT_ENABLED=true; the endpoint 404s while off.
+    'anthropic' => [
+        'key' => env('ANTHROPIC_API_KEY'),
+        'model' => env('AI_ASSISTANT_MODEL', 'claude-sonnet-5-5'),
+        'enabled' => (bool) env('AI_ASSISTANT_ENABLED', false),
+        'base_url' => rtrim(env('ANTHROPIC_BASE_URL', 'https://api.anthropic.com'), '/'),
+    ],
+
     'node' => [
         'path' => env('NODEPATH'),
     ],

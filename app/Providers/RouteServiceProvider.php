@@ -88,6 +88,19 @@ class RouteServiceProvider extends ServiceProvider
             ];
         });
 
+        // Balance assistant: every call is a paid model request.
+        RateLimiter::for('asistente', function (Request $request) {
+            $id = optional($request->user())->id ?: $request->ip();
+            $response = fn (Request $request, array $headers) => response()->json([
+                'message' => 'Hiciste demasiadas consultas al asistente. Intenta nuevamente más tarde.',
+            ], 429, $headers);
+
+            return [
+                Limit::perMinute(20)->by('asistente-min:'.$id)->response($response),
+                Limit::perDay(200)->by('asistente-dia:'.$id)->response($response),
+            ];
+        });
+
         // forgot-password / reset-password: stops mail flooding and token guessing.
         RateLimiter::for('auth-reset', function (Request $request) {
             $email = Str::lower((string) $request->input('email', ''));
