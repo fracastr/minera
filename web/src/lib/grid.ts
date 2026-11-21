@@ -2,6 +2,7 @@ import { notify } from '@/lib/feedback'
 import {
   CellStyleModule,
   ClientSideRowModelModule,
+  LocaleModule,
   ModuleRegistry,
   RowStyleModule,
   TextEditorModule,
@@ -18,6 +19,7 @@ ModuleRegistry.registerModules([
   CellStyleModule,
   RowStyleModule,
   TooltipModule,
+  LocaleModule, // localeText (Spanish grid texts) needs it
   ...(import.meta.env.DEV ? [ValidationModule] : []),
 ])
 

@@ -13,6 +13,8 @@ export const useSesionStore = defineStore('sesion', () => {
   const loadError = ref('')
   /** Node whose streams are highlighted in the flows grid. */
   const nodoSel = ref<number | null>(null)
+  /** Flow to bring into view in the flows grid ("Editar en Datos" from the diagram). */
+  const flujoFoco = ref<number | null>(null)
   /** Saved balance reopened: the user already chose to overwrite it in this visit (v1 asks once). */
   const sobrescribir = ref(false)
 
@@ -32,6 +34,7 @@ export const useSesionStore = defineStore('sesion', () => {
     dirty.value = false
     loadError.value = ''
     nodoSel.value = null
+    flujoFoco.value = null
     sobrescribir.value = false
     writable = null
     ops.clear()
@@ -198,5 +201,5 @@ export const useSesionStore = defineStore('sesion', () => {
     else if (!tab) notify('ok', 'El Excel está listo. El navegador bloqueó la pestaña nueva:', { href: url, label: 'Abrir en Drive' })
   }
 
-  return { sesion, dirty, busy, loadError, nodoSel, estado, reset, load, ensureWritable, edited, correr, guardar, restaurar, exportar }
+  return { sesion, dirty, busy, loadError, nodoSel, flujoFoco, estado, reset, load, ensureWritable, edited, correr, guardar, restaurar, exportar }
 })

@@ -25,7 +25,8 @@ class AddSecurityHeaders
             "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
             "img-src 'self' data: blob: https:",
             "font-src 'self' data: https://fonts.gstatic.com",
-            "connect-src 'self'",
+            // Google Fonts: the diagram export fetches the Work Sans files to embed them in the SVG/PNG.
+            "connect-src 'self' https://fonts.googleapis.com https://fonts.gstatic.com",
             "frame-src 'self' https://www.youtube.com https://www.youtube-nocookie.com",
             "manifest-src 'self'",
             "media-src 'self' blob:",

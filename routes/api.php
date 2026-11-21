@@ -77,6 +77,7 @@ Route::group(['prefix' => 'v2', 'middleware' => ['auth:sanctum']], function () {
         Route::get('balances/{balance}/sesion', [V2\BalancesController::class, 'sesion'])->whereNumber('balance');
         Route::get('sesiones/{sesion}', [V2\SesionesController::class, 'show'])->whereNumber('sesion');
         Route::get('sesiones/{sesion}/corridas', [V2\SesionesController::class, 'corridas'])->whereNumber('sesion');
+        Route::get('procesos/{proceso}/diagrama', [V2\DiagramasController::class, 'show'])->whereNumber('proceso');
     });
 
     Route::middleware('balance:write')->group(function () {
@@ -86,5 +87,7 @@ Route::group(['prefix' => 'v2', 'middleware' => ['auth:sanctum']], function () {
         Route::post('sesiones/{sesion}/clonar', [V2\SesionesController::class, 'clonar'])->whereNumber('sesion');
         Route::post('sesiones/{sesion}/corridas/{corrida}/restaurar', [V2\SesionesController::class, 'restaurar'])->whereNumber(['sesion', 'corrida']);
         Route::post('sesiones/{sesion}/guardar', [V2\SesionesController::class, 'guardar'])->whereNumber('sesion');
+        Route::get('diagramas', [V2\DiagramasController::class, 'index']);
+        Route::put('procesos/{proceso}/diagrama', [V2\DiagramasController::class, 'update'])->whereNumber('proceso');
     });
 });
