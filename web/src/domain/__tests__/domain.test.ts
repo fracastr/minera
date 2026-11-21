@@ -92,6 +92,13 @@ describe('edits', () => {
     expect(i).toMatchObject({ tms_delta: 80, tmh_ini: 100, tmh_fin: 200, tmh_delta: 100 })
   })
 
+  it('gives exactly zero deltas for an unchanged inventory at 7,3 % moisture', () => {
+    const i = { idx: 0, nombre: 'Pila', tmh_ini: 0, tmh_fin: 0, tmh_delta: 1, humedad: 7.3, tms_ini: 12345.678, tms_fin: 12345.678, tms_delta: 1, leyes: [55] } as Inventario
+    recomputeInventario(i)
+    expect([i.tms_delta, i.tmh_delta]).toEqual([0, 0])
+    expect(Object.is(i.tmh_delta, -0)).toBe(false)
+  })
+
   it('sends every editable value at full precision', () => {
     const s = { flujos: [flujo(0, 'Mina', v(100.123456, 104), v(60.987654, 60.5))], inventarios: [] } as never
     expect(toEdits(s).flujos[0]).toEqual({
