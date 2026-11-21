@@ -27,6 +27,7 @@ const store = useSesionStore()
 const canWrite = computed(() => can(auth.user?.ability, 'update', 'Balances'))
 const tab = ref('datos')
 const guardarOpen = ref(false)
+const verSolver = ref(false)
 const s = computed(() => store.sesion)
 
 // A run (or saved) session opens on the diagram; one only imported opens on its data.
@@ -137,16 +138,19 @@ const tabs = [
           <div class="mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-1">
             <h1 class="truncate font-display text-lg font-semibold">{{ s.balance?.nombre ?? 'Sin guardar' }}</h1>
             <span class="rounded px-1.5 py-0.5 text-[0.6875rem] font-semibold" :class="estadoStyle">{{ store.estado }}</span>
-            <span
-              v-if="s.solver?.ok === false" class="inline-flex items-center gap-1 rounded bg-danger-soft px-1.5 py-0.5 text-[0.6875rem] font-semibold text-danger"
-              role="status" :title="`El solver no convergió${s.solver.mensaje ? `: ${s.solver.mensaje}` : ''}. Los valores reconciliados no son confiables.`"
+            <button
+              v-if="s.solver?.ok === false" type="button" class="inline-flex items-center gap-1 rounded bg-danger-soft px-1.5 py-0.5 text-[0.6875rem] font-semibold text-danger"
+              :aria-expanded="verSolver" aria-controls="solver-detalle" @click="verSolver = !verSolver"
             >
               <TriangleAlert class="size-3.5" aria-hidden="true" /> Solver sin converger: resultados no confiables
-            </span>
+            </button>
             <span v-if="store.dirty" class="inline-flex items-center gap-1.5 text-xs font-medium text-warn" role="status">
               <span class="size-1.5 rounded-full bg-warn" aria-hidden="true" /> Cambios sin guardar
             </span>
           </div>
+          <p v-if="s.solver?.ok === false && verSolver" id="solver-detalle" class="mt-1 max-w-xl text-xs text-danger">
+            El solver no convergió en la última corrida{{ s.solver.mensaje ? ` (${s.solver.mensaje})` : '' }}: los valores reconciliados quedaron en los límites y no son confiables. Revisa el Diagnóstico y vuelve a correr.
+          </p>
           <p v-if="s.balance?.periodo_inicio" class="text-xs text-ink-muted">{{ periodo(s.balance.periodo_inicio, s.balance.periodo_fin) }}</p>
         </div>
         <div class="flex flex-wrap gap-2">

@@ -4,7 +4,7 @@ import { computed, nextTick, onMounted, ref, watch } from 'vue'
 import EChart, { type Tokens } from '@/components/charts/EChart.vue'
 import Notice from '@/components/Notice.vue'
 import {
-  ACCION, caudalNodo, claveSospechoso, flujoDe, leyIdx, nombreVariable, toleranciasAmplias,
+  ACCION, caudalNodo, claveSospechoso, claveTendencia, flujoDe, leyIdx, nombreVariable, toleranciasAmplias,
   type Equivalente, type SerieVar, type Sospechoso,
 } from '@/domain/diagnostico'
 import { flowAdjustments, NEAR_LIMIT_PCT } from '@/domain/reconciliationQuality'
@@ -55,8 +55,8 @@ function descartar(s: Sospechoso) {
   else store.descartados.add(k)
 }
 
-function tendencia(s: Pick<Equivalente, 'flujo' | 'variable'>): SerieVar | null {
-  const t = store.diag?.tendencia[s.flujo]
+function tendencia(s: Pick<Equivalente, 'flujo' | 'tag' | 'variable'>): SerieVar | null {
+  const t = store.diag?.tendencia[claveTendencia(s)]
   const k = leyIdx(s.variable)
   const v = !t ? null : k < 0 ? t : (t.leyes[k] ?? null)
   return v && v.serie.length >= 2 ? v : null
