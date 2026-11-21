@@ -146,7 +146,7 @@ class UtilsController extends Controller
                 'datos_entrada_id' => $datos_entrada_id,
                 'componentes' => $componentes
             ])->throw();
-            $plantilla = config('excel.plantillas')[$proceso_id] ?? null;
+            $plantilla = config('exportar.plantillas')[$proceso_id] ?? null;
             if (!$plantilla) {
                 throw new Exception('Proceso sin plantilla de exportación');
             }

@@ -49,7 +49,7 @@ class ExportarController extends Controller
         if (!$s) {
             return response()->json(['message' => 'La sesión no existe.'], 404);
         }
-        $plantilla = config('excel.plantillas')[$s->proceso_id] ?? null;
+        $plantilla = config('exportar.plantillas')[$s->proceso_id] ?? null;
         if (!$plantilla || !$s->proceso) {
             return response()->json(['message' => 'Este proceso no tiene una plantilla de exportación.'], 422);
         }
