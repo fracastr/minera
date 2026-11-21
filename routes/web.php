@@ -14,20 +14,15 @@ use App\Http\Controllers\ApplicationController;
 |
 */
 
-// Password Reset Routes
-Route::get('reset-password/{token}', function ($token) {
-    return view('application-v3');
-})->name('password.reset');
-
-Route::get('forgot-password', function () {
-    return view('application-v3');
-})->name('password.request');
+// Password Reset Routes (named: the reset email builds its link from them). Served by the v2 SPA (web/).
+Route::view('reset-password/{token}', 'app')->name('password.reset');
+Route::view('forgot-password', 'app')->name('password.request');
 
 // The Vue 3 app used to live under /v3: keep old links working.
 Route::get('/v3/{any?}', function (\Illuminate\Http\Request $request, $any = '') {
     $query = $request->getQueryString();
 
-    return redirect('/' . $any . ($query ? '?' . $query : ''), 301);
+    return redirect('/' . ltrim($any, '/') . ($query ? '?' . $query : ''), 301); // ltrim: no //evil.com
 })->where('any', '.*');
 
 Route::get('/{any}', [ApplicationController::class, 'index'])->where('any', '.*');

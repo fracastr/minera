@@ -87,7 +87,8 @@ class AuthController extends Controller
      */
     public function user(Request $request)
     {
-        return response()->json($request->user());
+        // Same shape as login's userData, so the SPA can refresh role and abilities.
+        return response()->json($request->user()->toUserData());
     }
 
     /**
@@ -105,6 +106,18 @@ class AuthController extends Controller
     }
 
     /**
+     * Logout from this device only: revoke the token used for this request.
+     */
+    public function logoutCurrent(Request $request)
+    {
+        $request->user()->currentAccessToken()->delete();
+
+        return response()->json([
+            'message' => 'Sesión cerrada.',
+        ]);
+    }
+
+    /**
      * Send password reset link
      *
      * @param  [string] email
@@ -113,26 +126,21 @@ class AuthController extends Controller
     public function forgotPassword(Request $request)
     {
         $request->validate([
-            'email' => 'required|email|exists:users,email',
+            'email' => 'required|email',
         ]);
 
+        // Link built from APP_URL, never from the request Host header (host-header poisoning).
         \App\Notifications\ResetPasswordNotification::createUrlUsing(function ($user, $token) {
-            return url('/reset-password/' . $token . '?email=' . urlencode($user->email));
+            return rtrim(config('app.url'), '/') . '/reset-password/' . $token . '?email=' . urlencode($user->email);
         });
 
-        $status = Password::sendResetLink(
-            $request->only('email')
-        );
-
-        if ($status === Password::RESET_LINK_SENT) {
-            return response()->json([
-                'message' => 'Se ha enviado un enlace de restablecimiento de contraseña a tu correo electrónico.',
-            ]);
-        }
+        // Same answer, and same response time, whether or not the email exists: no account enumeration.
+        $email = $request->input('email');
+        dispatch(fn () => Password::sendResetLink(['email' => $email]))->afterResponse();
 
         return response()->json([
-            'message' => 'No se pudo enviar el enlace de restablecimiento.',
-        ], 400);
+            'message' => 'Si el correo está registrado, te enviaremos un enlace para restablecer la contraseña.',
+        ]);
     }
 
     /**

@@ -23,11 +23,12 @@ Route::group(['prefix' => 'auth'], function () {
     Route::post('login', [AuthController::class, 'login'])->middleware('throttle:auth-login');
 
     // Password Reset Routes
-    Route::post('forgot-password', [AuthController::class, 'forgotPassword']);
-    Route::post('reset-password', [AuthController::class, 'resetPassword']);
+    Route::post('forgot-password', [AuthController::class, 'forgotPassword'])->middleware('throttle:auth-reset');
+    Route::post('reset-password', [AuthController::class, 'resetPassword'])->middleware('throttle:auth-reset');
 
     Route::group(['middleware' => 'auth:sanctum'], function () {
-        Route::get('logout', [AuthController::class, 'logout']);
+        Route::get('logout', [AuthController::class, 'logout']); // v1: revokes every token of the user
+        Route::post('logout', [AuthController::class, 'logoutCurrent']);
         Route::get('user', [AuthController::class, 'user']);
     });
 });
