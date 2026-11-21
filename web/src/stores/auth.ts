@@ -2,6 +2,7 @@ import { FetchError } from 'ofetch'
 import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
 import { api } from '@/lib/api'
+import { useSesionStore } from '@/stores/sesion'
 import { clearSession, getStoredUser, getToken, saveSession, saveUser, type UserData } from '@/lib/session'
 
 export const useAuthStore = defineStore('auth', () => {
@@ -45,6 +46,7 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   function reset() {
+    useSesionStore().reset() // the next user must not see this one's open balance or edits
     clearSession()
     token.value = null
     user.value = null

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ArrowDown, ArrowUp, ChevronLeft, ChevronRight, FilePlus, Search, X } from '@lucide/vue'
-import { computed, onMounted, reactive, ref, watch } from 'vue'
+import { computed, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import Notice from '@/components/Notice.vue'
 import type { BalanceRow, Valle } from '@/domain/types'
@@ -52,6 +52,7 @@ async function load() {
 }
 
 let timer: number | undefined
+onBeforeUnmount(() => window.clearTimeout(timer))
 watch(() => f.q, () => {
   window.clearTimeout(timer)
   timer = window.setTimeout(() => ((f.page = ''), load()), 300)

@@ -57,7 +57,7 @@ async function restaurar(c: Corrida) {
         <div class="min-w-0 flex-1">
           <p class="font-medium">
             {{ tipo[c.tipo] }}
-            <span v-if="c.actual" class="ml-1.5 rounded bg-primary-soft px-1.5 py-0.5 text-[0.6875rem] font-medium text-primary">Actual</span>
+            <span v-if="c.actual" class="ml-1.5 rounded bg-primary-soft px-1.5 py-0.5 text-[0.6875rem] font-medium text-primary">Última versión registrada</span>
           </p>
           <p class="text-xs text-ink-muted">{{ fecha(c.created_at, true) }} · {{ c.usuario?.nombre ?? 'Sin registrar' }}</p>
         </div>
