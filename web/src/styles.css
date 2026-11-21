@@ -36,6 +36,10 @@
   --warn-soft: #fbf0de;
   --danger: #bf3329;
   --danger-soft: #fbe9e7;
+
+  /* Streams of the selected node: entering vs leaving (selection hues, not status). */
+  --flow-in: #1c68c9;
+  --flow-out: #7048c8;
 }
 
 .dark {
@@ -64,6 +68,9 @@
   --warn-soft: #3a2a12;
   --danger: #ff7a6e;
   --danger-soft: #3d1c1a;
+
+  --flow-in: #529eff;
+  --flow-out: #a68bff;
 }
 
 @theme inline {
@@ -225,4 +232,41 @@
   &[aria-invalid='true'] {
     border-color: var(--danger);
   }
+}
+
+/* Balance grids: AG Grid renders cells outside Vue's scoped styles. Unlayered so they beat the grid theme's own rules. */
+.ag-cell.cell-edit {
+  background: color-mix(in srgb, var(--primary) 8%, transparent);
+}
+.ag-cell.cell-fuera {
+  background: var(--danger-soft);
+  color: var(--danger);
+  font-weight: 600;
+}
+.ag-cell.cell-limite {
+  background: var(--warn-soft);
+  color: var(--warn);
+  font-weight: 600;
+}
+.ag-row.row-in {
+  background: color-mix(in srgb, var(--flow-in) 13%, var(--surface));
+}
+.ag-row.row-out {
+  background: color-mix(in srgb, var(--flow-out) 13%, var(--surface));
+}
+.ag-row.row-in .cell-flujo {
+  box-shadow: inset 3px 0 0 var(--flow-in);
+}
+.ag-row.row-out .cell-flujo {
+  box-shadow: inset 3px 0 0 var(--flow-out);
+}
+.ag-row.row-sel {
+  background: var(--primary-soft);
+}
+.ag-row.row-sel .cell-flujo {
+  box-shadow: inset 3px 0 0 var(--primary);
+}
+.ag-header-group-cell {
+  font-weight: 600;
+  color: var(--ink);
 }

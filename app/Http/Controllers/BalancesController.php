@@ -484,7 +484,7 @@ class BalancesController extends Controller
             ->get()
             ->values()
             ->map(function (Balances $balance, int $index) {
-                $creator = $this->resolveBalanceCreator($balance);
+                $creator = $balance->creador();
 
                 return [
                     'numero' => $index + 1,
@@ -507,42 +507,6 @@ class BalancesController extends Controller
             });
 
         return response()->json(['listado' => $listado]);
-    }
-
-    private function resolveBalanceCreator(Balances $balance): ?User
-    {
-        $datosEntrada = $balance->datosEntrada;
-
-        if ($datosEntrada) {
-            if ($datosEntrada->user) {
-                return $datosEntrada->user;
-            }
-
-            $userIdFromFile = $this->extractUserIdFromFilePath($datosEntrada->file_path);
-            if ($userIdFromFile) {
-                $user = User::query()->select('id', 'nombre')->find($userIdFromFile);
-                if ($user) {
-                    return $user;
-                }
-            }
-        }
-
-        if ((int) $balance->user_id === 1) {
-            return null;
-        }
-
-        return $balance->user;
-    }
-
-    private function extractUserIdFromFilePath(?string $filePath): ?int
-    {
-        if (!$filePath || !preg_match('/_(\d{14})_(\d+)\.[^.]+$/', $filePath, $matches)) {
-            return null;
-        }
-
-        $userId = (int) $matches[2];
-
-        return $userId > 0 ? $userId : null;
     }
 
     public function correr_balance(Request $request)

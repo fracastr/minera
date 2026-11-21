@@ -33,12 +33,16 @@ export const router = createRouter({
           meta: { title: 'Inicio', can: ['read', 'Auth'] },
         },
         {
-          path: 'balances', name: 'balances', component: Placeholder,
-          meta: { title: 'Listado', section: 'Balances', can: ['read', 'Balances'], summary: 'Todos los balances guardados, con filtros por valle, proceso, tipo, período y usuario.' },
+          path: 'balances', name: 'balances', component: () => import('@/pages/balances/Listado.vue'),
+          meta: { title: 'Listado', section: 'Balances', can: ['read', 'Balances'] },
         },
         {
-          path: 'balances/nuevo', name: 'balances-nuevo', component: Placeholder,
-          meta: { title: 'Nuevo balance', section: 'Balances', can: ['create', 'Balances'], summary: 'Elige valle y proceso, sube el Excel y entra directo al espacio de balance.' },
+          path: 'balances/nuevo', name: 'balances-nuevo', component: () => import('@/pages/balances/Nuevo.vue'),
+          meta: { title: 'Nuevo balance', section: 'Balances', can: ['create', 'Balances'] },
+        },
+        {
+          path: 'balances/sesion/:id(\\d+)', name: 'balance-sesion', component: () => import('@/pages/balances/Sesion.vue'),
+          meta: { title: 'Espacio de balance', section: 'Balances', can: ['read', 'Balances'] },
         },
         {
           path: 'analytics', name: 'analytics', component: Placeholder,
@@ -84,7 +88,8 @@ router.afterEach((to, from, failure) => {
   if (failure) return
   document.title = to.meta.title ? `${to.meta.title} · Balances CMP` : 'Balances CMP | Compañía Minera del Pacífico'
   // First load: leave focus where the browser puts it. Later navigations: move it to the new content.
-  if (from.matched.length === 0) return
+  // Same page with new query/params (listado filters, a clone taking over the session URL): keep focus where the user is.
+  if (from.matched.length === 0 || to.name === from.name) return
   announcement.value = to.meta.title ?? 'Balances CMP'
   nextTick(() => document.getElementById('contenido')?.focus({ preventScroll: true }))
 })

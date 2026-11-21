@@ -3,6 +3,7 @@ import { ChartColumn, FilePlus, House, Menu, PanelLeftClose, PanelLeftOpen, Rows
 import { DialogContent, DialogDescription, DialogOverlay, DialogPortal, DialogRoot, DialogTitle, TooltipProvider } from 'reka-ui'
 import { computed, onBeforeUnmount, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import Feedback from '@/components/Feedback.vue'
 import SideNav, { type NavGroup } from '@/components/SideNav.vue'
 import UserMenu from '@/components/UserMenu.vue'
 import { can } from '@/lib/abilities'
@@ -137,6 +138,7 @@ onBeforeUnmount(() => desktop.removeEventListener('change', onDesktop))
         </main>
       </div>
     </div>
+    <Feedback />
   </TooltipProvider>
 </template>
 
