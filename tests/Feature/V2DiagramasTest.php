@@ -35,15 +35,17 @@ class V2DiagramasTest extends TestCase
 
         $this->actingAs($viewer)->getJson($this->url())->assertOk()->assertExactJson(['layout' => null]);
 
-        $layout = ['Molienda' => ['x' => 10, 'y' => -20.25], 'Nodo 2' => ['x' => 300.5, 'y' => 0]];
+        // Numeric names stay strings (a JSON object keyed by "1" and "0" would come back as a PHP list).
+        $layout = [['k' => 'Molienda', 'x' => 10, 'y' => -20.25], ['k' => '1', 'x' => 300.5, 'y' => 0], ['k' => '0', 'x' => 5, 'y' => 6]];
         $this->actingAs($operator)->putJson($this->url(), ['layout' => $layout])->assertOk();
-        $this->actingAs($viewer)->getJson($this->url())->assertOk()
-            ->assertJsonPath('layout.Molienda.x', 10)
-            ->assertJsonPath('layout.Molienda.y', -20.3) // stored with 1 decimal
-            ->assertJsonPath('layout.Nodo 2.x', 300.5);
+        $this->actingAs($viewer)->getJson($this->url())->assertOk()->assertExactJson(['layout' => [
+            ['k' => 'Molienda', 'x' => 10, 'y' => -20.3], // stored with 1 decimal
+            ['k' => '1', 'x' => 300.5, 'y' => 0],
+            ['k' => '0', 'x' => 5, 'y' => 6],
+        ]]);
 
         // Overwrite keeps one row per process and records who saved it.
-        $this->actingAs($operator)->putJson($this->url(), ['layout' => ['Molienda' => ['x' => 1, 'y' => 2]]])->assertOk();
+        $this->actingAs($operator)->putJson($this->url(), ['layout' => [['k' => 'Molienda', 'x' => 1, 'y' => 2]]])->assertOk();
         $this->assertSame(1, DB::table('proceso_diagramas')->count());
         $this->assertSame($operator->id, DB::table('proceso_diagramas')->value('updated_by'));
 
@@ -51,6 +53,10 @@ class V2DiagramasTest extends TestCase
             ->assertJsonPath('procesos.0.id', $this->procesoId)
             ->assertJsonPath('procesos.0.guardado', true)
             ->assertJsonPath('procesos.0.usuario', $operator->nombre);
+
+        // Rows saved in the earlier {nodo: {x, y}} form are read as entries.
+        DB::table('proceso_diagramas')->update(['layout' => json_encode(['Molienda' => ['x' => 3, 'y' => 4]])]);
+        $this->actingAs($viewer)->getJson($this->url())->assertExactJson(['layout' => [['k' => 'Molienda', 'x' => 3, 'y' => 4]]]);
 
         // An empty layout resets to automatic.
         $this->actingAs($operator)->putJson($this->url(), ['layout' => []])->assertOk()->assertExactJson(['layout' => null]);
@@ -60,7 +66,7 @@ class V2DiagramasTest extends TestCase
     public function testViewerCannotSaveOrList(): void
     {
         $viewer = User::factory()->create(['role' => 'viewer']);
-        $this->actingAs($viewer)->putJson($this->url(), ['layout' => ['A' => ['x' => 1, 'y' => 2]]])->assertForbidden();
+        $this->actingAs($viewer)->putJson($this->url(), ['layout' => [['k' => 'A', 'x' => 1, 'y' => 2]]])->assertForbidden();
         $this->actingAs($viewer)->getJson('/api/v2/diagramas')->assertForbidden();
         $this->assertSame(0, DB::table('proceso_diagramas')->count());
     }
@@ -70,16 +76,18 @@ class V2DiagramasTest extends TestCase
         $admin = User::factory()->create(['role' => 'admin']);
         $tooMany = [];
         for ($i = 0; $i < 501; $i++) {
-            $tooMany["N{$i}"] = ['x' => $i, 'y' => 0];
+            $tooMany[] = ['k' => "N{$i}", 'x' => $i, 'y' => 0];
         }
         $bad = [
             null,
             'texto',
-            [['x' => 1, 'y' => 2]], // a list, not {nodo: pos}
-            ['A' => ['x' => 1]],
-            ['A' => ['x' => '1', 'y' => 2]],
-            ['A' => ['x' => 1, 'y' => 2, 'z' => 3]],
-            ['A' => ['x' => 1e9, 'y' => 2]],
+            ['A' => ['x' => 1, 'y' => 2]], // the old object form is not accepted on write
+            [['x' => 1, 'y' => 2]],
+            [['k' => 1, 'x' => 1, 'y' => 2]],
+            [['k' => str_repeat('a', 192), 'x' => 1, 'y' => 2]],
+            [['k' => 'A', 'x' => '1', 'y' => 2]],
+            [['k' => 'A', 'x' => 1, 'y' => 2, 'z' => 3]],
+            [['k' => 'A', 'x' => 1e9, 'y' => 2]],
             $tooMany,
         ];
         foreach ($bad as $layout) {
