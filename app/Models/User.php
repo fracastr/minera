@@ -86,6 +86,7 @@ class User extends Authenticatable
         $userData->username = $this->email;
         $userData->email = $this->email;
         $userData->role = $this->role ?? 'viewer';
+        $userData->asistente_habilitado = (bool) config('services.anthropic.enabled');
 
         return $userData;
     }

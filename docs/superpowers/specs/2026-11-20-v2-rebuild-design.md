@@ -46,7 +46,7 @@ Rehacer desde cero la aplicación web de balances de CMP. La v1 (www.sondek.cl) 
 | Gráficos | ECharts 6 | Ya usado (Sankey); exporta PNG para el Excel |
 | Backend | Laravel 13: endpoints nuevos `/api/v2/*` con payloads numéricos limpios | No depende del orden de claves JSON ni de colDefs del servidor |
 | Diagnóstico | Flask: módulo `diagnostico.py` + `POST /diagnostico` (numpy) | Matemática en Python junto al solver; no toca `balance_core` |
-| Asistente IA | Laravel → API de Claude (`claude-sonnet-5-5`) detrás de `AI_ASSISTANT_ENABLED` (apagado por defecto) | Explica el diagnóstico y conversa; la decisión es del usuario |
+| Asistente IA | Laravel → API de Claude (`claude-opus-5-5`, configurable con `AI_ASSISTANT_MODEL`) detrás de `AI_ASSISTANT_ENABLED` (apagado por defecto) | Explica el diagnóstico y conversa; la decisión es del usuario |
 | Excel | Node: xlsx-populate (como hoy) + paso que agrega imágenes PNG vía OOXML (JSZip) | Conserva los dibujos de las plantillas |
 
 Marca: tokens de `cmp-branding` (primario #1C68C9, navy #252A3F, valles Copiapó #B13F95, Huasco #00837A, Elqui #FF6462; Work Sans + Archivo). Modo claro y oscuro.
@@ -185,7 +185,7 @@ Todo lo anterior se decidió de forma autónoma por delegación explícita del u
 - σ desde tolerancias / 1,96;
 - las imágenes en vez de gráficos nativos;
 - las hojas nuevas en vez de reemplazar las dibujadas;
-- el modelo `claude-sonnet-5-5`;
+- el modelo `claude-opus-5-5` (por defecto del skill claude-api; `AI_ASSISTANT_MODEL` lo cambia);
 - el asistente apagado por defecto.
 
 La v2 actual sigue sirviendo en v2.sondek.cl hasta el corte (S7), para no dejar el sitio vacío.
