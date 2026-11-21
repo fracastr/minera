@@ -27,7 +27,8 @@ Route::group(['prefix' => 'auth'], function () {
     Route::post('reset-password', [AuthController::class, 'resetPassword']);
 
     Route::group(['middleware' => 'auth:sanctum'], function () {
-        Route::get('logout', [AuthController::class, 'logout']);
+        Route::get('logout', [AuthController::class, 'logout']); // v1: revokes every token of the user
+        Route::post('logout', [AuthController::class, 'logoutCurrent']);
         Route::get('user', [AuthController::class, 'user']);
     });
 });

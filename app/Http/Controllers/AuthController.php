@@ -105,6 +105,18 @@ class AuthController extends Controller
     }
 
     /**
+     * Logout from this device only: revoke the token used for this request.
+     */
+    public function logoutCurrent(Request $request)
+    {
+        $request->user()->currentAccessToken()->delete();
+
+        return response()->json([
+            'message' => 'Sesión cerrada.',
+        ]);
+    }
+
+    /**
      * Send password reset link
      *
      * @param  [string] email
@@ -113,26 +125,19 @@ class AuthController extends Controller
     public function forgotPassword(Request $request)
     {
         $request->validate([
-            'email' => 'required|email|exists:users,email',
+            'email' => 'required|email',
         ]);
 
         \App\Notifications\ResetPasswordNotification::createUrlUsing(function ($user, $token) {
             return url('/reset-password/' . $token . '?email=' . urlencode($user->email));
         });
 
-        $status = Password::sendResetLink(
-            $request->only('email')
-        );
-
-        if ($status === Password::RESET_LINK_SENT) {
-            return response()->json([
-                'message' => 'Se ha enviado un enlace de restablecimiento de contraseña a tu correo electrónico.',
-            ]);
-        }
+        // Same answer whether or not the email exists, so the endpoint cannot be used to enumerate accounts.
+        Password::sendResetLink($request->only('email'));
 
         return response()->json([
-            'message' => 'No se pudo enviar el enlace de restablecimiento.',
-        ], 400);
+            'message' => 'Si el correo está registrado, te enviaremos un enlace para restablecer la contraseña.',
+        ]);
     }
 
     /**
