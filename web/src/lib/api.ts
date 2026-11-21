@@ -8,9 +8,11 @@ export const api = ofetch.create({
     const token = getToken()
     if (token) options.headers.set('Authorization', `Bearer ${token}`)
   },
-  onResponseError({ response }) {
+  onResponseError({ request, response }) {
     // A 401 with a token means it expired or was revoked; without one it is just a failed login.
-    if (response.status === 401 && getToken()) expireSession()
+    // The auth store handles its own /auth/user and /auth/logout calls.
+    const url = typeof request === 'string' ? request : request.url
+    if (response.status === 401 && getToken() && !/\/auth\/(user|logout)$/.test(url)) expireSession()
   },
 })
 

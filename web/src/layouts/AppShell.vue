@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ChartColumn, FilePlus, House, Menu, PanelLeftClose, PanelLeftOpen, Rows3, Users, Workflow, X } from '@lucide/vue'
 import { DialogContent, DialogDescription, DialogOverlay, DialogPortal, DialogRoot, DialogTitle, TooltipProvider } from 'reka-ui'
-import { computed, ref, watch } from 'vue'
+import { computed, onBeforeUnmount, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import SideNav, { type NavGroup } from '@/components/SideNav.vue'
 import UserMenu from '@/components/UserMenu.vue'
@@ -60,6 +60,11 @@ watch(collapsed, v => {
 
 const drawerOpen = ref(false)
 watch(() => route.fullPath, () => (drawerOpen.value = false))
+// The drawer only exists below lg: close it if the window grows past that.
+const desktop = window.matchMedia('(min-width: 64rem)')
+const onDesktop = (e: MediaQueryListEvent) => e.matches && (drawerOpen.value = false)
+desktop.addEventListener('change', onDesktop)
+onBeforeUnmount(() => desktop.removeEventListener('change', onDesktop))
 </script>
 
 <template>
@@ -71,23 +76,23 @@ watch(() => route.fullPath, () => (drawerOpen.value = false))
       <aside
         class="sticky top-0 hidden h-dvh shrink-0 flex-col bg-rail [--focus:var(--rail-accent)] text-rail-ink transition-[width] duration-200 ease-[var(--ease-out-expo)] lg:flex"
         :class="collapsed ? 'w-16' : 'w-60'"
-        aria-label="Navegación principal"
       >
         <div class="flex h-14 items-center gap-2.5 px-4">
           <img src="/brand/cmp-logo-white.svg" alt="CMP" class="h-6 w-auto shrink-0" :class="{ 'h-5': collapsed }">
           <span v-if="!collapsed" class="font-display text-[0.9375rem] font-semibold">Balances</span>
         </div>
-        <SideNav :groups="groups" :collapsed="collapsed" class="flex-1 overflow-y-auto" />
+        <SideNav id="nav-rail" :groups="groups" :collapsed="collapsed" class="flex-1 overflow-y-auto" />
         <div class="border-t border-white/8 p-2">
           <button
             type="button"
             class="flex h-9 w-full items-center gap-3 rounded-md px-3 text-rail-muted hover:bg-rail-hover hover:text-rail-ink"
-            :aria-label="collapsed ? 'Expandir barra lateral' : 'Contraer barra lateral'"
+            aria-label="Barra lateral"
+            aria-controls="nav-rail"
             :aria-expanded="!collapsed"
             @click="collapsed = !collapsed"
           >
             <component :is="collapsed ? PanelLeftOpen : PanelLeftClose" class="size-4.5 shrink-0" aria-hidden="true" />
-            <span v-if="!collapsed" class="text-[0.8125rem]">Contraer</span>
+            <span v-if="!collapsed" class="text-[0.8125rem]" aria-hidden="true">Contraer</span>
           </button>
         </div>
       </aside>
@@ -107,7 +112,7 @@ watch(() => route.fullPath, () => (drawerOpen.value = false))
                 <X class="size-5" aria-hidden="true" />
               </button>
             </div>
-            <SideNav :groups="groups" :collapsed="false" class="flex-1 overflow-y-auto" />
+            <SideNav :groups="groups" :collapsed="false" class="flex-1 overflow-y-auto" @navigate="drawerOpen = false" />
           </DialogContent>
         </DialogPortal>
       </DialogRoot>
