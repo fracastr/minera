@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ExternalLink, History, LoaderCircle, Play, Save, TriangleAlert } from '@lucide/vue'
+import { FileDown, History, LoaderCircle, Play, Save, TriangleAlert } from '@lucide/vue'
 import { TabsContent, TabsIndicator, TabsList, TabsRoot, TabsTrigger } from 'reka-ui'
 import { computed, defineAsyncComponent, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { onBeforeRouteLeave, onBeforeRouteUpdate, useRoute, useRouter } from 'vue-router'
@@ -9,6 +9,7 @@ import GuardarDialog from '@/components/sesion/GuardarDialog.vue'
 import HistorialTab from '@/components/sesion/HistorialTab.vue'
 import { can } from '@/lib/abilities'
 import { ask } from '@/lib/feedback'
+import { hasta } from '@/lib/hasta'
 import { periodo, valleColor } from '@/lib/format'
 import { useAuthStore } from '@/stores/auth'
 import { useSesionStore } from '@/stores/sesion'
@@ -59,6 +60,30 @@ watch(() => store.sesion?.id, id => {
   if (id && id !== Number(route.params.id)) router.replace({ name: 'balance-sesion', params: { id } })
 })
 
+
+// ── Excel export ────────────────────────────────────────────────────────────
+// A run session sends the diagram and, when the diagnosis is available, its charts as PNGs. They are drawn by
+// copies of the tabs mounted off-screen for the capture, so the export works from any tab and always shows the
+// default view, always in the light theme.
+const captura = ref(false)
+const capDiagrama = ref<{ png: () => Promise<Blob> }>()
+const capDiagnostico = ref<{ pngs: () => Promise<Record<string, Blob>> }>()
+async function imagenes(): Promise<Record<string, Blob>> {
+  const sv = store.sesion
+  if (!sv || !(sv.corrida || sv.balance)) return {}
+  await store.cargarDiagnostico()
+  const conGraficos = !!store.diag
+  captura.value = true
+  try {
+    await hasta(() => capDiagrama.value && (!conGraficos || capDiagnostico.value), 30_000, 'el diagrama tardó demasiado en cargar')
+    const out: Record<string, Blob> = { diagrama: await capDiagrama.value!.png() }
+    if (conGraficos) Object.assign(out, await capDiagnostico.value!.pngs())
+    return out
+  } finally {
+    captura.value = false
+  }
+}
+const exportar = () => store.exportar(imagenes)
 
 async function abrirGuardar() {
   if (await store.ensureWritable()) guardarOpen.value = true
@@ -132,19 +157,20 @@ const tabs = [
           <p v-if="s.balance?.periodo_inicio" class="text-xs text-ink-muted">{{ periodo(s.balance.periodo_inicio, s.balance.periodo_fin) }}</p>
         </div>
         <div class="flex flex-wrap gap-2">
-          <button
-            type="button" class="btn btn-quiet h-9 px-3"
-            :disabled="!!store.busy || store.dirty"
-            :title="store.dirty ? 'Corre o guarda los cambios antes de exportar' : 'Genera el Excel y lo abre en Drive'"
-            @click="store.exportar()"
-          >
-            <LoaderCircle v-if="store.busy === 'exportar'" class="size-4 animate-spin" aria-hidden="true" />
-            <ExternalLink v-else class="size-4" aria-hidden="true" /> Exportar
-          </button>
           <button type="button" class="btn btn-quiet h-9 px-3" @click="tab = 'historial'">
             <History class="size-4" aria-hidden="true" /> Historial
           </button>
           <template v-if="canWrite">
+            <button
+              type="button" class="btn btn-quiet h-9 px-3"
+              :disabled="!!store.busy || store.dirty"
+              :aria-busy="store.busy === 'exportar'"
+              :title="store.dirty ? 'Corre o guarda los cambios antes de exportar' : 'Descarga el Excel con el diagrama y los gráficos'"
+              @click="exportar"
+            >
+              <LoaderCircle v-if="store.busy === 'exportar'" class="size-4 animate-spin" aria-hidden="true" />
+              <FileDown v-else class="size-4" aria-hidden="true" /> {{ store.busy === 'exportar' ? 'Exportando…' : 'Exportar' }}
+            </button>
             <button type="button" class="btn btn-quiet h-9 px-3" :disabled="!!store.busy" @click="abrirGuardar">
               <Save class="size-4" aria-hidden="true" /> Guardar
             </button>
@@ -184,6 +210,13 @@ const tabs = [
       <TabsContent value="historial">
         <HistorialTab :sesion-id="s.id" :version="s.updated_at" :editable="canWrite" />
       </TabsContent>
+    </div>
+
+    <!-- Off-screen copies drawn only while the export captures them (laid out, so measurable; hidden from AT and input). -->
+    <!-- .light: the images go on white Excel sheets, so the copies use the light tokens whatever the app theme. -->
+    <div v-if="captura" class="light pointer-events-none fixed top-0 -left-[20000px] w-[1400px] bg-surface text-ink" aria-hidden="true" inert>
+      <DiagramaTab ref="capDiagrama" :sesion="s" :editable="false" />
+      <DiagnosticoTab v-if="store.diag" ref="capDiagnostico" :sesion="s" :editable="false" exportar />
     </div>
 
     <GuardarDialog v-model:open="guardarOpen" :balance="s.balance" :busy="store.busy === 'guardar'" @guardar="guardar" />

@@ -22,6 +22,7 @@ class GoogleDriveServiceProvider extends ServiceProvider
             $client = new Google_Client();
             $client->setClientId($config['clientId']);
             $client->setClientSecret($config['clientSecret']);
+            $client->setHttpClient(new \GuzzleHttp\Client(['timeout' => \App\Services\DriveUploader::TIMEOUT]));
             $client->refreshToken($config['refreshToken']);
             $service = new \Google_Service_Drive($client);
 

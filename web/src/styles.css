@@ -1,13 +1,15 @@
 @import 'tailwindcss';
 
-@custom-variant dark (&:where(.dark, .dark *));
+/* .light inside .dark forces the light tokens on a subtree (the Excel export draws its images there). */
+@custom-variant dark (&:where(.dark, .dark *):not(:where(.light, .light *)));
 
 /*
  * Balances CMP tokens. Raw values live on :root / .dark; Tailwind utilities read them through @theme inline,
  * so `bg-surface`, `text-ink-muted`, `border-line` etc. switch with the theme.
  * Color carries meaning only: primary = action/selection, status = state, valley = which valley.
  */
-:root {
+:root,
+.light {
   color-scheme: light;
   --canvas: #f4f5f8;
   --surface: #ffffff;
