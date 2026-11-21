@@ -1,62 +1,43 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400"></a></p>
+# Balances CMP
 
-<p align="center">
-<a href="https://travis-ci.org/laravel/framework"><img src="https://travis-ci.org/laravel/framework.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Balances metalúrgicos reconciliados para las plantas de Compañía Minera del Pacífico.
 
-## About Laravel
+## Arquitectura
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+| Pieza | Dónde | Qué hace |
+|---|---|---|
+| API Laravel 13 (PHP 8.3) | `app/`, `routes/api.php` | Auth (tokens), sesiones de balance, diagnóstico, analytics, usuarios y export Excel. Las rutas v1 (`/api/...`) siguen activas; la app usa `/api/v2/...`. |
+| SPA `web/` | Vue 3 + Vite + Tailwind + Pinia | La interfaz completa. Se compila a `public/app-build` y la sirve `resources/views/app.blade.php` en toda ruta no-API (`routes/web.php`). |
+| Solver Flask | EC2, fuera de este repo (`FLASK_API_URL`) | Reconciliación, diagnóstico de errores gruesos y datos para el Excel. |
+| Export Excel | `public/Export/excelnode.js` | Script Node (Node 10 en el servidor) que llena la plantilla del proceso con `xlsx-populate`. Es la única razón del `package.json` de la raíz. |
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+Las rutas antiguas de la app Vue 2 (`/balances/Listado`, `/dashboard/...`, `/admin/users`, `/v3/...`) redirigen a sus equivalentes.
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## Desarrollo
 
-## Learning Laravel
+```bash
+composer install
+cd web && npm ci && npm run dev     # Vite hot (Node 22)
+php artisan serve
+```
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+El entorno local con SQLite, el túnel al solver y los datos de prueba se describen en [docs/desarrollo-local.md](docs/desarrollo-local.md).
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains over 1500 video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+## Build y checks
 
-## Laravel Sponsors
+```bash
+cd web && npx vue-tsc --noEmit && npx vitest run && npx vite build   # → public/app-build
+php artisan test
+npm ci && node public/Export/addImages.test.js                        # raíz: solo xlsx-populate
+```
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the Laravel [Patreon page](https://patreon.com/taylorotwell).
+CI (`.github/workflows/ci.yml`) corre lo mismo: PHPUnit Unit, `web/` (tipos, tests y build) y el test del Excel.
 
-### Premium Partners
+## Deploy
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Cubet Techno Labs](https://cubettech.com)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[Many](https://www.many.co.uk)**
-- **[Webdock, Fast VPS Hosting](https://www.webdock.io/en)**
-- **[DevSquad](https://devsquad.com)**
-- **[Curotec](https://www.curotec.com/)**
-- **[OP.GG](https://op.gg)**
+- `next` → v2.sondek.cl (`/home/ubuntu/minera-v2`), con `.github/workflows/deploy-v2.yml`.
+- `Prod` → www.sondek.cl (`/home/ubuntu/minera`), con su propia copia del script.
 
-## Contributing
+Ambos workflows hacen `git reset --hard` y luego ejecutan `scripts/deploy.sh`. El script corre composer, compila `web/` con Node 22 (`/opt/node22`), borra los builds viejos de Vue 2 y frontend-v3, migra, ejecuta `balance-events:backfill`, regenera las cachés y recarga PHP-FPM.
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
-
-## Code of Conduct
-
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
-
-## Security Vulnerabilities
-
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
-
-## License
-
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+En la raíz nunca se ejecuta `npm install` durante el deploy: el Excel usa los `node_modules` que ya están en el servidor.

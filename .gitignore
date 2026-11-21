@@ -12,8 +12,6 @@
 /public/images/_/
 /public/images/cmp/
 
-# Permitir favicons y logos importantes
-!/public/images/logo/
 !/public/favicon.ico
 
 /storage/*.key
@@ -61,8 +59,8 @@ yarn-error.log*
 /.phpunit.cache
 .env.*
 
-# Vue 3 shell (frontend-v3)
-/frontend-v3/node_modules
+# Old frontends' build output, still produced on Prod (www); deploy.sh removes it on next
+/frontend-v3
 /public/v3-build
 /public/v3.hot
 /public/app-build

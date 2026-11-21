@@ -27,24 +27,11 @@ jobs:
       - name: Unit tests
         run: vendor/bin/phpunit --testsuite=Unit
 
-  js:
-    runs-on: ubuntu-22.04
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: "22"
-
-      # Pure-logic tests only; no npm install needed.
-      - name: JS unit tests
-        run: node --test tests/js/*.test.mjs
-
-  frontend-v3:
+  web:
     runs-on: ubuntu-22.04
     defaults:
       run:
-        working-directory: frontend-v3
+        working-directory: web
     steps:
       - uses: actions/checkout@v4
 
@@ -52,10 +39,34 @@ jobs:
         with:
           node-version: "22"
           cache: npm
-          cache-dependency-path: frontend-v3/package-lock.json
+          cache-dependency-path: web/package-lock.json
 
       - name: Install
         run: npm ci --no-audit --no-fund
 
-      - name: Build (Vue 3 app served at /v3)
+      - name: Type check
+        run: npx vue-tsc --noEmit
+
+      - name: Unit tests
+        run: npx vitest run
+        env:
+          LARAVEL_BYPASS_ENV_CHECK: 1 # vitest starts a Vite server; laravel-vite-plugin refuses that under CI=true
+
+      - name: Build (into public/app-build)
         run: npx vite build
+
+  excel:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      # Root package.json only holds xlsx-populate for public/Export (the server runs it on Node 10).
+      - name: Install
+        run: npm ci --no-audit --no-fund
+
+      - name: Excel export test
+        run: node public/Export/addImages.test.js

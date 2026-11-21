@@ -25,5 +25,21 @@ Route::get('/v3/{any?}', function (\Illuminate\Http\Request $request, $any = '')
     return redirect('/' . ltrim($any, '/') . ($query ? '?' . $query : ''), 301); // ltrim: no //evil.com
 })->where('any', '.*');
 
+// Old Vue 2 paths (www bookmarks) → their v2 equivalents.
+Route::permanentRedirect('balances/Listado', '/balances');
+Route::permanentRedirect('balances/Balances', '/balances');
+Route::permanentRedirect('dashboard/balances', '/inicio');
+Route::permanentRedirect('dashboard/balance-analytics', '/analytics');
+Route::permanentRedirect('admin/users', '/admin/usuarios');
+// Not permanent: where a balance opens depends on the data. Exposes only balance id → session id; the SPA still asks for login.
+Route::get('balances/BalanceFormWizard', function (\Illuminate\Http\Request $request) {
+    if (!$request->filled('balance_id')) return redirect('/balances/nuevo');
+    $sesion = ctype_digit((string) $request->query('balance_id'))
+        ? \App\Models\Balances::query()->find((int) $request->query('balance_id'))?->datosEntrada?->id
+        : null;
+
+    return redirect($sesion ? "/balances/sesion/{$sesion}" : '/balances');
+});
+
 Route::get('/{any}', [ApplicationController::class, 'index'])->where('any', '.*');
 

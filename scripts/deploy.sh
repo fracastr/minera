@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Deploy for the sondek EC2: /home/ubuntu/minera (www, branch Prod) or /home/ubuntu/minera-v2 (v2, branch next).
+# Each checkout runs its own copy of this script; this one (next) builds only web/.
 # Assumes the tree is already reset to its branch (GitHub Actions does git reset first).
 set -euo pipefail
 
@@ -27,40 +28,11 @@ sudo -n composer install \
   --no-interaction \
   --prefer-dist
 
-echo "==> frontend (Laravel Mix / Node 10 on this box)"
-sudo -n npm run prod
-
-echo "==> prune JS chunks older than 7 days"
-# Keep anything the live app.js still references: a silent Mix failure leaves the old bundle serving.
-find public/js/chunks -type f -mtime +7 -print0 | while IFS= read -r -d '' f; do
-  hash="$(basename "$f" | cut -d. -f2)"
-  if grep -qF "$hash" public/js/app.js; then
-    continue
-  fi
-  sudo -n rm -f "$f"
-done
-
-if [ -f frontend-v3/package.json ]; then  # node_modules may linger after git reset
-echo "==> frontend v3 (Vite / Node 22 from /opt/node22; system Node 10 stays for Mix and Excel)"
-V3_PATH="/opt/node22/bin:$PATH"
-(
-  cd frontend-v3
-  # npm ci only when the lockfile changed: it is slow on this box.
-  lock_sha="$(sha256sum package-lock.json | cut -d' ' -f1)"
-  if [ "$(cat node_modules/.lock-sha 2>/dev/null || true)" != "$lock_sha" ]; then
-    sudo -n env PATH="$V3_PATH" npm ci --no-audit --no-fund
-    echo "$lock_sha" | sudo -n tee node_modules/.lock-sha >/dev/null
-  fi
-  sudo -n env PATH="$V3_PATH" npx vite build
-)
-
-echo "==> prune v3 assets older than 7 days"
-# Vite does not empty public/v3-build (it is outside its root); keep whatever the manifest still uses.
-find public/v3-build/assets -type f -mtime +7 -print0 | while IFS= read -r -d '' f; do
-  if grep -qF "$(basename "$f")" public/v3-build/manifest.json; then
-    continue
-  fi
-  sudo -n rm -f "$f"
+if [ ! -f webpack.mix.js ]; then  # only on branches after the S7 cut; Prod (www) still builds Mix into these dirs
+echo "==> remove build leftovers of the old frontends"
+# git reset --hard keeps ignored/untracked dirs: the Vue 2 (Mix) and frontend-v3 builds would stay served.
+for d in public/js public/css public/fonts public/v3-build public/hot public/v3.hot frontend-v3; do
+  if [ -e "$d" ]; then sudo -n rm -rf -- "$d"; fi
 done
 fi
 

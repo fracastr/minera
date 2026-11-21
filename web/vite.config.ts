@@ -6,7 +6,7 @@ import { defineConfig } from 'vitest/config'
 
 export default defineConfig({
   plugins: [
-    // Built into Laravel's public/ next to the old apps; resources/views/app.blade.php reads the manifest.
+    // Built into Laravel's public/app-build; resources/views/app.blade.php reads the manifest.
     laravel({
       input: ['src/main.ts'],
       publicDirectory: '../public',

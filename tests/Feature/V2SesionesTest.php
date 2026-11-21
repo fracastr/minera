@@ -235,6 +235,15 @@ class V2SesionesTest extends TestCase
         $this->assertSame($balanceId, $sesion->fresh()->balance_id);
     }
 
+    public function testOldVue2ReopenLinkRedirectsToTheBalanceSession(): void
+    {
+        $b = Balances::create(['nombre' => 'B', 'proceso_id' => $this->procesoId, 'tipo' => 'mensual', 'periodo_inicio' => '2026-10-01', 'periodo_fin' => '2026-10-31', 'user_id' => $this->operator->id]);
+        $sesion = $this->sesion(['balance_id' => $b->id]);
+
+        $this->get("/balances/BalanceFormWizard?balance_id={$b->id}")->assertRedirect("/balances/sesion/{$sesion->id}");
+        $this->get('/balances/BalanceFormWizard?balance_id=999999')->assertRedirect('/balances');
+    }
+
     public function testSaveValidatesPeriodAndProcess(): void
     {
         $sesion = $this->sesion();
