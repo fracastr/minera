@@ -174,3 +174,23 @@ export function boundsOf(l: Layout, pos: Record<string, Pt> = {}, edges: Layout[
 /** Zoom that fits `b` in a w × h viewport. */
 export const fitZoom = (b: Size, w: number, h: number, pad = 0.04) =>
   Math.min((w * (1 - 2 * pad)) / Math.max(b.width, 1), (h * (1 - 2 * pad)) / Math.max(b.height, 1))
+
+/**
+ * Node positions: unsaved drags (`prev`) first, then saved ones, then ELK. Nodes missing from a saved layout
+ * go below the placed ones, shifted together so ELK's arrangement among them (no overlaps) is kept.
+ */
+export function posiciones(ids: string[], l: Layout, prev: Record<string, Pt>, saved: (id: string) => Pt | undefined): Record<string, Pt> {
+  const fija = (id: string) => prev[id] ?? saved(id)
+  const drawn = ids.filter(id => l.nodes[id])
+  const nuevos = drawn.filter(id => !fija(id))
+  let dy = 0
+  if (nuevos.length && nuevos.length < drawn.length) {
+    const bottom = Math.max(...drawn.filter(id => fija(id)).map(id => fija(id)!.y + l.nodes[id]!.height))
+    dy = bottom + 48 - Math.min(...nuevos.map(id => l.nodes[id]!.y))
+  }
+  return Object.fromEntries(drawn.map(id => {
+    const p = fija(id)
+    const r = l.nodes[id]!
+    return [id, p ? { x: p.x, y: p.y } : { x: r.x, y: r.y + dy }]
+  }))
+}

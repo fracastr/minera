@@ -159,3 +159,16 @@ export function desbalances(fs: Flowsheet, flujos: Flujo[], vista: Vista, reconc
 
 /** Key of a node in the saved layout: the unit name, or "<tipo>:<stream name>" for terminals. */
 export const layoutKey = (n: FsNode) => (n.tipo === 'unidad' ? n.label : `${n.tipo}:${n.label}`)
+
+const MAX_KEY = 191
+/** Node id → saved-layout key, unique (repeats get "#2", "#3"…) and within the server's 191 characters. */
+export function layoutKeys(nodes: FsNode[]): Map<string, string> {
+  const used = new Set<string>()
+  return new Map(nodes.map(n => {
+    const base = layoutKey(n)
+    let key = base.slice(0, MAX_KEY)
+    for (let i = 2; used.has(key); i++) key = `${base.slice(0, MAX_KEY - `#${i}`.length)}#${i}`
+    used.add(key)
+    return [n.id, key]
+  }))
+}

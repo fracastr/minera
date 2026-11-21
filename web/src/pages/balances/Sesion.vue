@@ -33,7 +33,12 @@ const tabInicial = () => (store.sesion?.corrida || store.sesion?.balance ? 'diag
 
 // Load on entry and when the URL changes, but not when a "guardar como nuevo" clone just took over the URL.
 watch(() => Number(route.params.id), id => {
-  if (id && id !== store.sesion?.id) store.load(id).then(() => (tab.value = tabInicial()))
+  if (!id || id === store.sesion?.id) return
+  // A tab the user picked while the session was loading wins over the default.
+  const antes = tab.value
+  store.load(id).then(() => {
+    if (tab.value === antes) tab.value = tabInicial()
+  })
 }, { immediate: true })
 
 async function correr() {

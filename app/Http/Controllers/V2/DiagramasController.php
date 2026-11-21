@@ -43,21 +43,37 @@ class DiagramasController extends Controller
     {
         $layout = DB::table('proceso_diagramas')->where('proceso_id', $proceso->id)->value('layout');
 
-        return response()->json(['layout' => $layout === null ? null : json_decode($layout)]);
+        return response()->json(['layout' => $layout === null ? null : self::entries(json_decode($layout, true))]);
+    }
+
+    /**
+     * Layout as [{k, x, y}] entries: a JSON object keyed by node name would turn names like "1" into PHP ints.
+     * Rows saved before this format hold {nodo: {x, y}} and are read as entries too.
+     */
+    private static function entries(mixed $stored): array
+    {
+        if (! is_array($stored)) {
+            return [];
+        }
+        if (array_is_list($stored)) {
+            return $stored;
+        }
+
+        return array_map(fn ($k, $p) => ['k' => (string) $k, 'x' => $p['x'] ?? 0, 'y' => $p['y'] ?? 0], array_keys($stored), $stored);
     }
 
     public function update(Request $request, Procesos $proceso)
     {
         $layout = $request->input('layout');
-        if (! is_array($layout) || count($layout) > self::MAX_NODOS || ($layout && array_is_list($layout))) {
-            throw ValidationException::withMessages(['layout' => 'La disposición debe ser un objeto {nodo: {x, y}} de a lo más '.self::MAX_NODOS.' nodos.']);
+        if (! is_array($layout) || ! array_is_list($layout) || count($layout) > self::MAX_NODOS) {
+            throw ValidationException::withMessages(['layout' => 'La disposición debe ser una lista [{k, x, y}] de a lo más '.self::MAX_NODOS.' nodos.']);
         }
         $finite = fn ($v) => (is_int($v) || is_float($v)) && is_finite($v) && abs($v) < 1e6;
-        foreach ($layout as $nodo => $pos) {
-            $ok = is_string($nodo) && mb_strlen($nodo) <= 191 && is_array($pos) && count($pos) === 2
-                && $finite($pos['x'] ?? null) && $finite($pos['y'] ?? null);
+        foreach ($layout as $i => $e) {
+            $ok = is_array($e) && count($e) === 3 && is_string($e['k'] ?? null) && mb_strlen($e['k']) <= 191
+                && $finite($e['x'] ?? null) && $finite($e['y'] ?? null);
             if (! $ok) {
-                throw ValidationException::withMessages(['layout' => "Posición inválida para el nodo «{$nodo}»."]);
+                throw ValidationException::withMessages(['layout' => 'Posición inválida en la entrada '.($i + 1).'.']);
             }
         }
 
@@ -68,11 +84,13 @@ class DiagramasController extends Controller
             return response()->json(['layout' => null]);
         }
 
-        $clean = (object) array_map(fn ($p) => ['x' => round((float) $p['x'], 1), 'y' => round((float) $p['y'], 1)], $layout);
-        DB::table('proceso_diagramas')->updateOrInsert(
-            ['proceso_id' => $proceso->id],
-            fn (bool $exists) => ['layout' => json_encode($clean), 'updated_by' => $request->user()->id, 'updated_at' => now()]
-                + ($exists ? [] : ['created_at' => now()]),
+        $clean = array_map(fn ($e) => ['k' => $e['k'], 'x' => round((float) $e['x'], 1), 'y' => round((float) $e['y'], 1)], $layout);
+        $now = now();
+        // One statement, so two saves at once cannot both insert.
+        DB::table('proceso_diagramas')->upsert(
+            [['proceso_id' => $proceso->id, 'layout' => json_encode($clean), 'updated_by' => $request->user()->id, 'created_at' => $now, 'updated_at' => $now]],
+            ['proceso_id'],
+            ['layout', 'updated_by', 'updated_at'],
         );
 
         return response()->json(['layout' => $clean]);

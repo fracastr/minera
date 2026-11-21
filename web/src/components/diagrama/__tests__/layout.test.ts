@@ -3,7 +3,7 @@ import ELK from 'elkjs/lib/elk.bundled.js'
 import { describe, expect, it } from 'vitest'
 import { buildFlowsheet } from '@/domain/flowsheet'
 import type { Flujo } from '@/domain/types'
-import { labelOn, layoutFlowsheet, routeOrthogonal } from '../layout'
+import { labelOn, layoutFlowsheet, posiciones, routeOrthogonal, type Layout } from '../layout'
 
 const v = (x: number) => ({ medido: x, reconciliado: x, tol_inf: 5, tol_sup: 5, desv_inf: 0, desv_sup: 0 })
 const flujo = (idx: number): Flujo => ({ idx, nombre: `F${idx}`, tag: null, descripcion: null, jerarquia: 1, stock: false, tms: v(10), leyes: [] })
@@ -38,5 +38,23 @@ describe('routeOrthogonal', () => {
     expect(back.every(p => p.y <= 84)).toBe(true)
     expect(back[2]!.y).toBe(84)
     expect(labelOn(back, { width: 20, height: 10 })).toMatchObject({ y: 79 })
+  })
+})
+
+describe('posiciones', () => {
+  const l: Layout = {
+    nodes: { a: { x: 0, y: 0, width: 100, height: 40 }, b: { x: 200, y: 0, width: 100, height: 40 }, c: { x: 200, y: 80, width: 100, height: 40 } },
+    edges: {},
+  }
+  it('keeps unsaved drags, then saved positions, then ELK', () => {
+    expect(posiciones(['a', 'b', 'c'], l, {}, () => undefined)).toEqual({ a: { x: 0, y: 0 }, b: { x: 200, y: 0 }, c: { x: 200, y: 80 } })
+    const p = posiciones(['a', 'b', 'c', 'gone'], l, { a: { x: 5, y: 5 } }, id => ({ x: 1, y: 2 }))
+    expect(p).toEqual({ a: { x: 5, y: 5 }, b: { x: 1, y: 2 }, c: { x: 1, y: 2 } })
+  })
+  it('puts nodes new to a saved layout below it without overlapping', () => {
+    const p = posiciones(['a', 'b', 'c'], l, {}, id => (id === 'a' ? { x: 0, y: 300 } : undefined))
+    expect(p.a).toEqual({ x: 0, y: 300 })
+    expect(p.b!.y).toBe(300 + 40 + 48)
+    expect(p.c!.y - p.b!.y).toBe(80) // ELK's spacing among the new ones is kept
   })
 })
