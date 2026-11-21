@@ -104,7 +104,7 @@ const card = 'rounded-lg border border-line bg-surface'
       <section :class="card" class="lg:col-span-3" aria-labelledby="h-alertas">
         <header class="flex items-baseline justify-between gap-3 border-b border-line px-4 py-3">
           <h2 id="h-alertas" class="text-sm font-semibold">Balances con alertas</h2>
-          <span class="text-xs text-ink-muted">Último balance guardado de cada proceso</span>
+          <span class="hidden text-xs text-ink-muted sm:inline">Último balance guardado de cada proceso</span>
         </header>
         <ul v-if="!data" class="divide-y divide-line" aria-hidden="true">
           <li v-for="i in 3" :key="i" class="space-y-2 px-4 py-3.5">
@@ -119,7 +119,7 @@ const card = 'rounded-lg border border-line bg-surface'
                 <div class="flex flex-wrap items-center gap-x-3 gap-y-1.5">
                   <ProcesoChip :proceso="a.proceso" :valle="a.valle" />
                   <span class="min-w-0 truncate font-medium group-hover:text-primary">{{ a.nombre }}</span>
-                  <span class="text-xs text-ink-muted">{{ periodo(a.periodo_inicio, a.periodo_fin) }}</span>
+                  <span v-if="a.periodo_fin" class="text-xs text-ink-muted">{{ periodo(a.periodo_inicio, a.periodo_fin) }}</span>
                 </div>
                 <div class="mt-2 flex flex-wrap gap-1.5 text-xs font-medium">
                   <span v-if="a.fuera" class="rounded bg-danger-soft px-1.5 py-0.5 text-danger">{{ plural(a.fuera, 'medición fuera de tolerancia', 'mediciones fuera de tolerancia') }}</span>

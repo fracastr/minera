@@ -176,7 +176,7 @@ const card = 'rounded-lg border border-line bg-surface p-4'
         <h1 class="font-display text-xl font-semibold">Analytics</h1>
         <p class="mt-1 text-ink-muted">
           Uso de la plataforma por período, valle, proceso y usuario.
-          <span v-if="data" class="whitespace-nowrap">Datos de {{ fecha(data.cached_at, true) }}.</span>
+          <span v-if="data" class="whitespace-nowrap">Datos de {{ fecha(data.cached_at, true) }}</span>
         </p>
       </div>
       <button type="button" class="btn btn-quiet" :disabled="loading" @click="actualizar">

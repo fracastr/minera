@@ -28,7 +28,8 @@ const error = ref('')
 
 async function load() {
   try {
-    usuarios.value = await api<Usuario[]>('/users')
+    // Natural order, so "Usuario 2" comes before "Usuario 10".
+    usuarios.value = (await api<Usuario[]>('/users')).sort((a, b) => a.nombre.localeCompare(b.nombre, 'es', { numeric: true }))
     error.value = ''
   } catch (e) {
     error.value = errorMessage(e, 'No se pudo cargar la lista de usuarios.')
