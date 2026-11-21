@@ -6,6 +6,8 @@ export interface UserData {
   email: string
   role: 'admin' | 'operator' | 'viewer'
   ability: Ability[]
+  /** Server flag AI_ASSISTANT_ENABLED: the Diagnóstico tab shows the assistant panel only when true. */
+  asistente_habilitado?: boolean
 }
 
 // Different keys from the v1 app (accessToken / userData) so both can coexist on one origin.
