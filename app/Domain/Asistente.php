@@ -65,11 +65,11 @@ TXT;
         $nodoNombre = fn ($n) => is_int($n) ? ($dto['nodos'][$n]['nombre'] ?? "Nodo {$n}") : (string) $n;
 
         $sesgos = [];
-        foreach ($diag['tendencia'] ?? [] as $flujo => $t) {
+        foreach ($diag['tendencia'] ?? [] as $clave => $t) { // keyed "nombre|tag"
             foreach ([['tms', $t], ...array_map(fn ($k, $v) => ['ley_'.($k + 1), $v], array_keys($t['leyes'] ?? []), $t['leyes'] ?? [])] as [$var, $v]) {
                 if ($v['sesgo_recurrente'] ?? false) {
                     $sesgos[] = [
-                        'flujo' => (string) $flujo, 'variable' => $var, 'nombre_variable' => $varNombre($var),
+                        'flujo' => (string) ($t['flujo'] ?? strtok((string) $clave, '|')), 'tag' => $t['tag'] ?? null, 'variable' => $var, 'nombre_variable' => $varNombre($var),
                         'direccion' => ($v['signo'] ?? 0) > 0 ? 'el balance lo corrige hacia arriba' : 'el balance lo corrige hacia abajo',
                         'ultimos_ajustes_pct' => array_map(fn ($p) => $r($p['ajuste_pct'], 2), array_slice($v['serie'] ?? [], -4)),
                     ];
