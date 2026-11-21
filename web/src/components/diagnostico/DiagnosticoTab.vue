@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { CircleAlert, CircleCheck, EyeOff, LoaderCircle, MapPin, RotateCcw, Wand2 } from '@lucide/vue'
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, nextTick, onMounted, ref, watch } from 'vue'
 import EChart, { type Tokens } from '@/components/charts/EChart.vue'
 import Notice from '@/components/Notice.vue'
 import {
@@ -151,7 +151,22 @@ const seg = 'h-7 px-2 text-xs font-medium text-ink-muted hover:text-ink aria-pre
 const card = 'rounded-lg border border-line bg-surface p-4'
 const graficoNodos = ref<InstanceType<typeof EChart>>()
 const graficoUso = ref<InstanceType<typeof EChart>>()
-defineExpose({ graficoNodos, graficoUso })
+const graficosTendencia = ref<InstanceType<typeof EChart>[]>([])
+
+/** The charts as PNGs for the Excel export, by upload field; charts not drawn (no data) are left out. */
+async function pngs(): Promise<Record<string, Blob>> {
+  await nextTick()
+  const graficos = { desbalance_nodos: graficoNodos.value, uso_tolerancia: graficoUso.value, tendencia: graficosTendencia.value[0] }
+  const out: Record<string, Blob> = {}
+  for (const [campo, g] of Object.entries(graficos)) {
+    if (!g) continue
+    await g.listo()
+    const url = g.exportPng()
+    if (url) out[campo] = await (await fetch(url)).blob()
+  }
+  return out
+}
+defineExpose({ graficoNodos, graficoUso, pngs })
 </script>
 
 <template>
@@ -244,7 +259,7 @@ defineExpose({ graficoNodos, graficoUso })
                     <div class="h-full rounded-full bg-danger" :style="{ width: `${(Math.abs(s.z ?? 0) / zMax) * 100}%` }" />
                   </div>
                   <EChart
-                    v-if="tendencia(s)" class="mt-2" compacto alto="2.25rem"
+                    v-if="tendencia(s)" ref="graficosTendencia" class="mt-2" compacto alto="2.25rem"
                     :titulo="`Tendencia de ${s.flujo} ${nombreVar(s.variable)}`" :resumen="resumenTendencia(tendencia(s)!)" :option="sparkline(tendencia(s)!)"
                   />
                   <p v-if="tendencia(s)?.sesgo_recurrente" class="mt-1 text-[0.6875rem] font-semibold text-danger" :title="resumenTendencia(tendencia(s)!)">Sesgo recurrente</p>
