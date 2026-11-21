@@ -7,6 +7,7 @@ use App\Http\Controllers\BalanceAnalyticsController;
 use App\Http\Controllers\BalancesController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\UtilsController;
+use App\Http\Controllers\V2;
 
 /*
 |--------------------------------------------------------------------------
@@ -66,4 +67,24 @@ Route::group(['prefix' => 'analytics', 'middleware' => ['auth:sanctum', 'dashboa
     Route::get('by-proceso', [BalanceAnalyticsController::class, 'byProceso']);
     Route::get('timeseries', [BalanceAnalyticsController::class, 'timeseries']);
     Route::get('filter-options', [BalanceAnalyticsController::class, 'filterOptions']);
+});
+
+// API v2 (Balances CMP web/): plain numeric payloads, readable errors. v1 routes above stay as they are.
+Route::group(['prefix' => 'v2', 'middleware' => ['auth:sanctum']], function () {
+    Route::middleware('balance:read')->group(function () {
+        Route::get('catalogo', [V2\BalancesController::class, 'catalogo']);
+        Route::get('balances', [V2\BalancesController::class, 'listado']);
+        Route::get('balances/{balance}/sesion', [V2\BalancesController::class, 'sesion'])->whereNumber('balance');
+        Route::get('sesiones/{sesion}', [V2\SesionesController::class, 'show'])->whereNumber('sesion');
+        Route::get('sesiones/{sesion}/corridas', [V2\SesionesController::class, 'corridas'])->whereNumber('sesion');
+    });
+
+    Route::middleware('balance:write')->group(function () {
+        Route::post('sesiones', [V2\SesionesController::class, 'importar']);
+        Route::put('sesiones/{sesion}/datos', [V2\SesionesController::class, 'guardarDatos'])->whereNumber('sesion');
+        Route::post('sesiones/{sesion}/correr', [V2\SesionesController::class, 'correr'])->whereNumber('sesion');
+        Route::post('sesiones/{sesion}/clonar', [V2\SesionesController::class, 'clonar'])->whereNumber('sesion');
+        Route::post('sesiones/{sesion}/corridas/{corrida}/restaurar', [V2\SesionesController::class, 'restaurar'])->whereNumber(['sesion', 'corrida']);
+        Route::post('sesiones/{sesion}/guardar', [V2\SesionesController::class, 'guardar'])->whereNumber('sesion');
+    });
 });
