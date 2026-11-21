@@ -61,7 +61,7 @@ watch(() => store.sesion?.id, id => {
 // ── Excel export ────────────────────────────────────────────────────────────
 // A run session sends the diagram and, when the diagnosis is available, its charts as PNGs. They are drawn by
 // copies of the tabs mounted off-screen for the capture, so the export works from any tab and always shows the
-// default view (current theme included).
+// default view, always in the light theme.
 const captura = ref(false)
 const capDiagrama = ref<{ png: () => Promise<Blob> }>()
 const capDiagnostico = ref<{ pngs: () => Promise<Record<string, Blob>> }>()
@@ -206,9 +206,10 @@ const tabs = [
     </div>
 
     <!-- Off-screen copies drawn only while the export captures them (laid out, so measurable; hidden from AT and input). -->
-    <div v-if="captura" class="pointer-events-none fixed top-0 -left-[20000px] w-[1400px]" aria-hidden="true" inert>
+    <!-- .light: the images go on white Excel sheets, so the copies use the light tokens whatever the app theme. -->
+    <div v-if="captura" class="light pointer-events-none fixed top-0 -left-[20000px] w-[1400px] bg-surface text-ink" aria-hidden="true" inert>
       <DiagramaTab ref="capDiagrama" :sesion="s" :editable="false" />
-      <DiagnosticoTab v-if="store.diag" ref="capDiagnostico" :sesion="s" :editable="false" />
+      <DiagnosticoTab v-if="store.diag" ref="capDiagnostico" :sesion="s" :editable="false" exportar />
     </div>
 
     <GuardarDialog v-model:open="guardarOpen" :balance="s.balance" :busy="store.busy === 'guardar'" @guardar="guardar" />
