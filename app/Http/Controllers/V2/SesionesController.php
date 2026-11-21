@@ -66,14 +66,16 @@ class SesionesController extends Controller
             $datos['nodos_data'] = $res['nodos_data'];
             $json = $this->encodeSolverResult($datos);
 
-            $sesion = DB::transaction(function () use ($json, $proceso, $fileName, $user) {
-                $sesion = Datos_entrada::create([
+            $sesion = DB::transaction(function () use ($json, $proceso, $fileName, $user, $res) {
+                $sesion = new Datos_entrada([
                     'datos_entrada' => $json,
                     'proceso_id' => $proceso->id,
                     'valle_id' => $proceso->valle_id,
                     'file_path' => $fileName,
                     'user_id' => $user->id,
                 ]);
+                $sesion->solver_estado = $res['solver'];
+                $sesion->save();
                 BalanceCorrida::record($sesion, $user, BalanceCorrida::TIPO_IMPORTACION);
                 BalanceEventService::logImported($sesion, $user);
 
@@ -113,7 +115,7 @@ class SesionesController extends Controller
         $datos['nodos_data'] = $res['nodos_data'];
         $json = $this->encodeSolverResult($datos);
 
-        DB::transaction(function () use ($s, $sent, $json, $request) {
+        DB::transaction(function () use ($s, $sent, $json, $request, $res) {
             // Someone else saved, ran or restored this session while the solver worked: keep their version.
             $current = Datos_entrada::query()->lockForUpdate()->findOrFail($s->id);
             if (md5((string) $current->datos_entrada) !== $sent) {
@@ -122,6 +124,7 @@ class SesionesController extends Controller
                 ], 409));
             }
             $s->datos_entrada = $json;
+            $s->solver_estado = $res['solver'];
             $s->save();
             BalanceCorrida::record($s, $request->user(), BalanceCorrida::TIPO_CORRIDA);
             BalanceEventService::logCorrer($s, $request->user());
@@ -180,6 +183,7 @@ class SesionesController extends Controller
 
         DB::transaction(function () use ($s, $c, $request) {
             $s->datos_entrada = $c->snapshot;
+            $s->solver_estado = null; // the snapshot does not say how its run converged
             $s->save();
             BalanceCorrida::record($s, $request->user(), BalanceCorrida::TIPO_RESTAURACION);
         });
@@ -287,6 +291,8 @@ class SesionesController extends Controller
                 'valle' => ['id' => $s->proceso?->valle?->id, 'nombre' => $s->proceso?->valle?->nombre],
             ],
             'corrida' => BalanceCorrida::where('datos_entrada_id', $s->id)->where('tipo', BalanceCorrida::TIPO_CORRIDA)->exists(),
+            // ok=false: GEKKO did not converge and the reconciled values are clamped to the bounds, not trustworthy
+            'solver' => $s->solver_estado,
             ...SesionMapper::toDto(SesionMapper::decode($s->datos_entrada), $componentes),
             'updated_at' => $s->updated_at?->toIso8601String(),
         ];
@@ -317,6 +323,7 @@ class SesionesController extends Controller
                 }
                 $out[$key] = $value;
             }
+            $out['solver'] = self::solverEstado($raw['solver'] ?? null);
 
             return $out;
         } catch (ConnectionException $e) {
@@ -333,5 +340,23 @@ class SesionesController extends Controller
         }
 
         throw new HttpResponseException(response()->json(['message' => $message], 502));
+    }
+
+    /**
+     * GEKKO status from the solver's optional `solver` key (a JSON string like the others).
+     * Missing (Flask before the status was added) or unreadable means unknown: null, never an error.
+     */
+    private static function solverEstado(mixed $raw): ?array
+    {
+        $s = is_string($raw) ? json_decode($raw, true) : $raw;
+        if (!is_array($s) || !array_key_exists('ok', $s)) {
+            return null;
+        }
+
+        return [
+            'ok' => (bool) $s['ok'],
+            'mensaje' => isset($s['mensaje']) && is_scalar($s['mensaje']) ? mb_substr((string) $s['mensaje'], 0, 500) : null,
+            'iteraciones' => isset($s['iteraciones']) && is_numeric($s['iteraciones']) ? (int) $s['iteraciones'] : null,
+        ];
     }
 }
