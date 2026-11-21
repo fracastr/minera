@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { buildFlowsheet, desbalances, layoutKey, valores } from '../flowsheet'
+import { buildFlowsheet, desbalances, layoutKey, layoutKeys, valores, type FsNode } from '../flowsheet'
 import type { Flujo, Variable } from '../types'
 
 const v = (medido: number, reconciliado = medido, tol = 5): Variable => ({ medido, reconciliado, tol_inf: tol, tol_sup: tol, desv_inf: 0, desv_sup: 0 })
@@ -44,6 +44,16 @@ describe('buildFlowsheet', () => {
 
   it('keys terminals apart from units in the saved layout', () => {
     expect(fs.nodes.map(layoutKey)).toEqual(['N0', 'N1', 'entrada:F0', 'salida:F2', 'stock:F3'])
+  })
+
+  it('makes saved-layout keys unique and at most 191 characters', () => {
+    const unit = (id: string, label: string): FsNode => ({ id, tipo: 'unidad', label })
+    const long = 'x'.repeat(300)
+    const keys = layoutKeys([unit('a', 'Molino'), unit('b', 'Molino'), unit('c', long), unit('d', long)])
+    expect([...keys.values()].slice(0, 2)).toEqual(['Molino', 'Molino#2'])
+    expect(keys.get('c')).toHaveLength(191)
+    expect(keys.get('d')).toMatch(/#2$/)
+    expect(keys.get('d')).toHaveLength(191)
   })
 })
 

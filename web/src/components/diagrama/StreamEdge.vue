@@ -27,7 +27,7 @@ const cls = computed(() => [
     <path class="fs-arrow" :d="arrow" />
     <g
       v-if="data.primary && g.label"
-      class="fs-chip" role="button" tabindex="0" :aria-label="chip.aria"
+      class="fs-chip" role="button" tabindex="0" :aria-label="chip.aria" :aria-pressed="sel"
       :transform="`translate(${g.label.x},${g.label.y})`"
       @keydown.enter.prevent="ctx.abrirFlujo(data.flujo)" @keydown.space.prevent="ctx.abrirFlujo(data.flujo)"
     >

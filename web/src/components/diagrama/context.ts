@@ -32,7 +32,11 @@ export interface DiagramCtx {
   nodosAtenuados: Set<string>
   flujoSel: number | null
   flujoHover: number | null
+  /** Vue Flow id of the selected unit (store.nodoSel). */
+  nodoSelId: string | null
+  editable: boolean
   abrirFlujo: (j: number) => void
+  mover: (id: string, dx: number, dy: number) => void
   hover: (j: number | null, e?: PointerEvent) => void
   elegirNodo: (id: string) => void
 }

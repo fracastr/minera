@@ -82,9 +82,10 @@ export async function diagramSvg(container: HTMLElement, pad = 24): Promise<{ sv
   })
   container.querySelectorAll<HTMLElement>('.vue-flow__node').forEach(node => {
     const svg = node.querySelector<SVGSVGElement>('svg.fs-node')
-    const m = /translate\(\s*(-?[\d.]+)px\s*,\s*(-?[\d.]+)px\s*\)/.exec(node.style.transform)
-    if (!svg || !m) return
-    const [x, y] = [Number(m[1]), Number(m[2])]
+    if (!svg) return
+    // Vue Flow places nodes with a CSS transform in flow coordinates.
+    const m = new DOMMatrixReadOnly(node.style.transform || 'none')
+    const [x, y] = [m.e, m.f]
     const w = Number(svg.getAttribute('width'))
     const h = Number(svg.getAttribute('height'))
     const c = cloneInlined(svg)
@@ -121,21 +122,31 @@ export async function diagramSvg(container: HTMLElement, pad = 24): Promise<{ sv
   return { svg: `<?xml version="1.0" encoding="UTF-8"?>\n${new XMLSerializer().serializeToString(root)}`, width, height }
 }
 
+// Browsers refuse canvases much past ~16 M pixels (Safari's limit): a huge plant gets a smaller scale.
+const MAX_PIXELS = 16_000_000
+
 /** PNG at `scale`× (2× by default) of the SVG, drawn through a canvas. */
 export async function diagramPng(container: HTMLElement, scale = 2): Promise<Blob> {
   const { svg, width, height } = await diagramSvg(container)
-  const img = new Image()
-  img.decoding = 'async'
-  img.src = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`
-  await img.decode()
+  const k = Math.min(scale, Math.sqrt(MAX_PIXELS / Math.max(1, width * height)))
+  const url = URL.createObjectURL(new Blob([svg], { type: 'image/svg+xml' }))
   const canvas = document.createElement('canvas')
-  canvas.width = Math.round(width * scale)
-  canvas.height = Math.round(height * scale)
-  const ctx = canvas.getContext('2d')
-  if (!ctx) throw new Error('El navegador no permite dibujar la imagen.')
-  ctx.scale(scale, scale)
-  ctx.drawImage(img, 0, 0, width, height)
-  return new Promise((resolve, reject) => canvas.toBlob(b => (b ? resolve(b) : reject(new Error('No se pudo generar el PNG.'))), 'image/png'))
+  try {
+    const img = new Image()
+    img.decoding = 'async'
+    img.src = url
+    await img.decode()
+    canvas.width = Math.round(width * k)
+    canvas.height = Math.round(height * k)
+    const ctx = canvas.getContext('2d')
+    if (!ctx) throw new Error('El navegador no permite dibujar la imagen.')
+    ctx.scale(k, k)
+    ctx.drawImage(img, 0, 0, width, height)
+    return await new Promise<Blob>((resolve, reject) => canvas.toBlob(b => (b ? resolve(b) : reject(new Error('No se pudo generar el PNG.'))), 'image/png'))
+  } finally {
+    URL.revokeObjectURL(url)
+    canvas.width = canvas.height = 0 // frees the bitmap now instead of at garbage collection
+  }
 }
 
 export function descargar(data: Blob | string, nombre: string, type = 'image/svg+xml') {

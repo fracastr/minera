@@ -9,6 +9,15 @@ const ctx = inject(DIAGRAM_CTX)!
 
 const v = computed(() => ctx.nodos[props.id])
 const dim = computed(() => ctx.nodosAtenuados.has(props.id))
+const ARROWS: Record<string, [number, number]> = { ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowUp: [0, -1], ArrowDown: [0, 1] }
+function onKey(e: KeyboardEvent) {
+  const d = ARROWS[e.key]
+  if (!d || !ctx.editable) return
+  e.preventDefault()
+  e.stopPropagation() // the canvas would pan otherwise
+  const k = e.shiftKey ? 5 : 1
+  ctx.mover(props.id, d[0] * k, d[1] * k)
+}
 const w = computed(() => props.data.width)
 const h = computed(() => props.data.height)
 // Stockpile glyph: a pile (triangle) on a base line.
@@ -21,7 +30,8 @@ const pila = computed(() => `M2,${h.value - 4} L${w.value / 2},4 L${w.value - 2}
     <svg
       v-if="data.tipo === 'unidad' && v"
       class="fs-node" :width="w" :height="h" :viewBox="`0 0 ${w} ${h}`"
-      role="button" tabindex="0" :aria-label="v.aria"
+      role="button" tabindex="0" :aria-label="v.aria" :aria-pressed="ctx.nodoSelId === id"
+      @keydown="onKey"
       @click.stop="ctx.elegirNodo(id)" @keydown.enter.prevent="ctx.elegirNodo(id)" @keydown.space.prevent="ctx.elegirNodo(id)"
     >
       <rect class="fs-unit" x="0.75" y="0.75" :width="w - 1.5" :height="h - 1.5" rx="3" />

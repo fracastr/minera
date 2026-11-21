@@ -2,9 +2,9 @@
 import '@vue-flow/core/dist/style.css'
 import { FileImage, FileCode2, LoaderCircle, Maximize, Minimize, Minus, Plus, RotateCcw, Save, Scan } from '@lucide/vue'
 import { useVueFlow, VueFlow, type Node, type NodeDragEvent } from '@vue-flow/core'
-import { computed, onBeforeUnmount, onMounted, provide, reactive, ref, shallowRef, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, provide, reactive, ref, shallowRef, watch } from 'vue'
 import Notice from '@/components/Notice.vue'
-import { buildFlowsheet, desbalances, layoutKey, unitId, valores, type FsEdge, type FsNode, type Vista } from '@/domain/flowsheet'
+import { buildFlowsheet, desbalances, layoutKey, layoutKeys, unitId, valores, type Flowsheet, type FsEdge, type FsNode, type Vista } from '@/domain/flowsheet'
 import { NODE_CLOSURE_TOLERANCE_PCT } from '@/domain/reconciliationQuality'
 import type { Sesion } from '@/domain/types'
 import { api, errorMessage } from '@/lib/api'
@@ -13,10 +13,10 @@ import { fmt } from '@/lib/format'
 import { useDiagramImage } from '@/composables/useDiagramImage'
 import { useSesionStore } from '@/stores/sesion'
 import { DIAGRAM_CTX, tono, type Chip, type DiagramCtx, type NodoVista } from './context'
-import { getElk } from './elk'
+import { acquireElk, dropElk, getElk, releaseElk } from './elk'
 import FlowNode from './FlowNode.vue'
 import FlujoPanel from './FlujoPanel.vue'
-import { boundsOf, fitZoom, labelOn, layoutFlowsheet, routeOrthogonal, TERMINAL, type Layout, type Pt, type Size } from './layout'
+import { boundsOf, fitZoom, labelOn, layoutFlowsheet, posiciones, routeOrthogonal, TERMINAL, type Layout, type Pt, type Size } from './layout'
 import StreamEdge from './StreamEdge.vue'
 
 const props = defineProps<{ sesion: Sesion; editable: boolean }>()
@@ -25,7 +25,7 @@ const store = useSesionStore()
 const img = useDiagramImage()
 
 const flowId = `diagrama-${Math.random().toString(36).slice(2)}`
-const { fitView, zoomIn, zoomOut, zoomTo, panBy, setViewport, onNodesInitialized } = useVueFlow(flowId)
+const { fitView, zoomIn, zoomOut, zoomTo, panBy, setViewport, findNode, onNodesInitialized } = useVueFlow(flowId)
 
 // ── View toggles ────────────────────────────────────────────────────────────
 const vista = reactive<Vista>({ componente: null, modo: 'ley' })
@@ -33,7 +33,16 @@ const ver = reactive({ m: true, r: true, e: true })
 const desbalanceEn = ref<'unidades' | 'pct'>('unidades')
 // A saved balance was run before saving (v1 balances have no run history), so its reconciled values are real.
 const corrida = computed(() => props.sesion.corrida || !!props.sesion.balance)
-const dec = (v: Vista) => (v.componente !== null && v.modo === 'ley' ? 2 : 0)
+// Fine tonnage of a component: small plants need decimals to read at all (largest value < 10 → 2, < 100 → 1).
+const decFino = computed(() =>
+  props.sesion.componentes.map((_, k) => {
+    const max = Math.max(0, ...props.sesion.flujos.map(f => {
+      const x = valores(f, { componente: k, modo: 'fino' }, corrida.value)
+      return Math.max(x.m, x.r)
+    }))
+    return max < 10 ? 2 : max < 100 ? 1 : 0
+  }))
+const dec = (v: Vista) => (v.componente === null ? 0 : v.modo === 'ley' ? 2 : decFino.value[v.componente] ?? 0)
 // Sign of the shown (rounded) value, so a tiny residual reads 0 and not −0.
 const signed = (n: number, d: number) => {
   const r = Number(n.toFixed(d))
@@ -43,6 +52,14 @@ const signed = (n: number, d: number) => {
 // ── Topology and layout ─────────────────────────────────────────────────────
 const fs = computed(() => buildFlowsheet(props.sesion))
 const ctx2d = document.createElement('canvas').getContext('2d')
+// Labels are measured with Work Sans: wait for the faces the diagram uses (fallback metrics are narrower).
+const fontsReady = ref(false)
+onMounted(async () => {
+  try {
+    await Promise.all(['500 10.5px', '500 11px', '600 12px'].map(f => document.fonts.load(`${f} "Work Sans"`)))
+  } catch {} // measured with the fallback font then
+  fontsReady.value = true
+})
 function textWidth(text: string, font: string) {
   if (!ctx2d) return text.length * 6.6
   ctx2d.font = font
@@ -72,7 +89,7 @@ const partesWidth = (p: [string, string][]) => textWidth(p.map(([k, v]) => `${k}
 
 // Room for the widest chip of every view, with digits widened, so toggling and small edits never move the layout.
 const labelSizes = computed(() =>
-  props.sesion.flujos.map((f, j) => {
+  fontsReady.value && props.sesion.flujos.map((f, j) => {
     const vals = Math.max(...allVistas.value.map(v => partesWidth(partes(j, v, { m: true, r: true, e: true }).map(([k, s]) => [k, s.replace(/\d/g, '8')]))))
     return { width: Math.ceil(Math.max(textWidth(f.nombre, FONT_NAME), vals) + CHIP_PAD), height: CHIP_H }
   }),
@@ -82,6 +99,9 @@ const nodeSize = (n: FsNode): Size =>
     : n.tipo === 'stock' ? { width: 26, height: 22 } : { width: TERMINAL, height: TERMINAL }
 
 const layout = shallowRef<Layout | null>(null)
+/** The topology `layout` was computed from: nodes and edges are drawn from it, never from a newer one in flight. */
+const lfs = shallowRef<Flowsheet | null>(null)
+const keys = computed(() => layoutKeys(lfs.value?.nodes ?? []))
 const layoutError = ref('')
 // Canvas size: it fills the viewport below its own top, and the layout folds wide plants to its shape.
 const wrap = ref<HTMLElement>()
@@ -102,33 +122,48 @@ onBeforeUnmount(() => window.removeEventListener('resize', medir))
 // Re-layout only when the shape class changes, not on every pixel of a resize.
 const aspecto = computed(() => (canvas.w && canvas.h ? Math.round((canvas.w / canvas.h) * 4) / 4 : null))
 
-const signature = computed(() => JSON.stringify([fs.value.nodes.map(layoutKey), fs.value.edges.map(e => [e.source, e.target]), labelSizes.value.map(s => s.width), aspecto.value]))
+const signature = computed(() => JSON.stringify([fs.value.nodes.map(layoutKey), fs.value.edges.map(e => [e.source, e.target]), labelSizes.value && labelSizes.value.map(s => s.width), aspecto.value]))
 let seq = 0
+acquireElk()
+onBeforeUnmount(() => {
+  seq++ // a layout still in flight is dropped
+  releaseElk()
+})
 watch(signature, async () => {
-  if (aspecto.value === null) return
+  const sizes = labelSizes.value
+  if (aspecto.value === null || !sizes) return
   const mine = ++seq
+  const f = fs.value
   try {
-    await document.fonts?.ready
     // A long plant unrolled left to right is a thin strip; ELK can fold it into rows near the canvas shape.
     // Both are computed and the folded one wins only if it fits at a clearly larger zoom.
-    const label = (e: FsEdge) => labelSizes.value[e.flujo]!
+    const label = (e: FsEdge) => sizes[e.flujo]!
     const candidatos = await Promise.all([
-      layoutFlowsheet(getElk(), fs.value, nodeSize, label),
-      layoutFlowsheet(getElk(), fs.value, nodeSize, label, { 'elk.layered.wrapping.strategy': 'MULTI_EDGE', 'elk.aspectRatio': String(aspecto.value) }),
+      layoutFlowsheet(getElk(), f, nodeSize, label),
+      layoutFlowsheet(getElk(), f, nodeSize, label, { 'elk.layered.wrapping.strategy': 'MULTI_EDGE', 'elk.aspectRatio': String(aspecto.value) }),
     ])
     const zoom = (c: Layout) => fitZoom(boundsOf(c), canvas.w, canvas.h)
     const l = candidatos.reduce((a, b) => (zoom(b) > zoom(a) * 1.15 ? b : a))
     if (mine !== seq) return
     layoutError.value = ''
+    const primera = !layout.value
+    lfs.value = f
     layout.value = l
-    aplicarPosiciones()
+    aplicarPosiciones({ refit: primera })
   } catch (e) {
+    dropElk() // a crashed worker is replaced on the next layout
     if (mine === seq) layoutError.value = e instanceof Error ? e.message : 'No se pudo calcular la disposición.'
   }
 }, { immediate: true })
 
 // ── Saved layout per process ────────────────────────────────────────────────
-const guardado = shallowRef<Record<string, Pt> | null>(null)
+interface Entrada {
+  k: string
+  x: number
+  y: number
+}
+const guardado = shallowRef<Map<string, Pt> | null>(null)
+const desdeEntradas = (e: Entrada[] | null) => (e?.length ? new Map(e.map(({ k, x, y }) => [k, { x, y }])) : null)
 const pos = reactive<Record<string, Pt>>({})
 const movido = ref(false)
 const guardando = ref(false)
@@ -137,27 +172,34 @@ let fitPending = false
 
 async function cargarGuardado() {
   try {
-    guardado.value = (await api<{ layout: Record<string, Pt> | null }>(`/v2/procesos/${props.sesion.proceso.id}/diagrama`)).layout
+    guardado.value = desdeEntradas((await api<{ layout: Entrada[] | null }>(`/v2/procesos/${props.sesion.proceso.id}/diagrama`)).layout)
   } catch {
     guardado.value = null // the automatic layout still works
   }
-  aplicarPosiciones()
+  if (!movido.value) aplicarPosiciones({ refit: true })
 }
 onMounted(cargarGuardado)
 
-/** Saved positions where they exist (nodes no longer in the process are ignored), ELK for the rest. */
-function aplicarPosiciones(usarGuardado = true) {
+/**
+ * Node positions: unsaved drags first (they survive a re-layout), then the saved layout (nodes no longer in
+ * the process are ignored), then ELK. Nodes new to a saved layout go below it, keeping ELK's order among them.
+ * The view is refitted only on the first layout and on Restablecer.
+ */
+function aplicarPosiciones({ usarGuardado = true, refit = false } = {}) {
   const l = layout.value
-  if (!l) return
+  const f = lfs.value
+  if (!l || !f) return
+  const prev: Record<string, Pt> = movido.value && !refit ? { ...pos } : {}
+  const saved = usarGuardado ? guardado.value : null
+  const next = posiciones(f.nodes.map(n => n.id), l, prev, id => saved?.get(keys.value.get(id)!))
   for (const k of Object.keys(pos)) delete pos[k]
-  flowNodes.value = fs.value.nodes.map(n => {
-    const r = l.nodes[n.id]!
-    const saved = usarGuardado ? guardado.value?.[layoutKey(n)] : undefined
-    pos[n.id] = saved ? { x: saved.x, y: saved.y } : { x: r.x, y: r.y }
-    return { id: n.id, type: 'fs', position: { ...pos[n.id]! }, data: { tipo: n.tipo, width: r.width, height: r.height, flujo: n.flujo } }
+  Object.assign(pos, next)
+  flowNodes.value = f.nodes.flatMap(n => {
+    const r = l.nodes[n.id]
+    return r ? [{ id: n.id, type: 'fs', position: { ...pos[n.id]! }, data: { tipo: n.tipo, width: r.width, height: r.height, flujo: n.flujo } }] : []
   })
-  movido.value = false
-  fitPending = true
+  if (!Object.keys(prev).length) movido.value = false
+  if (refit) fitPending = true
 }
 onNodesInitialized(() => {
   if (!fitPending) return
@@ -187,8 +229,8 @@ function onDrag({ node }: NodeDragEvent) {
 async function guardarDisposicion() {
   guardando.value = true
   try {
-    const body = Object.fromEntries(fs.value.nodes.map(n => [layoutKey(n), pos[n.id]!]))
-    guardado.value = (await api<{ layout: Record<string, Pt> }>(`/v2/procesos/${props.sesion.proceso.id}/diagrama`, { method: 'PUT', body: { layout: body } })).layout
+    const body: Entrada[] = (lfs.value?.nodes ?? []).flatMap(n => (pos[n.id] ? [{ k: keys.value.get(n.id)!, ...pos[n.id]! }] : []))
+    guardado.value = desdeEntradas((await api<{ layout: Entrada[] }>(`/v2/procesos/${props.sesion.proceso.id}/diagrama`, { method: 'PUT', body: { layout: body } })).layout)
     movido.value = false
     notify('ok', `Disposición guardada para ${props.sesion.proceso.nombre}.`)
   } catch (e) {
@@ -201,7 +243,7 @@ async function restablecer() {
   if (guardado.value) {
     guardando.value = true
     try {
-      await api(`/v2/procesos/${props.sesion.proceso.id}/diagrama`, { method: 'PUT', body: { layout: {} } })
+      await api(`/v2/procesos/${props.sesion.proceso.id}/diagrama`, { method: 'PUT', body: { layout: [] } })
       guardado.value = null
     } catch (e) {
       notify('danger', errorMessage(e, 'No se pudo restablecer la disposición.'))
@@ -210,36 +252,41 @@ async function restablecer() {
       guardando.value = false
     }
   }
-  aplicarPosiciones(false)
+  movido.value = false
+  aplicarPosiciones({ usarGuardado: false, refit: true })
 }
 
 // ── Geometry: ELK routes, or a simple orthogonal route for edges of moved nodes ─
 const geom = computed(() => {
   const l = layout.value
+  const f = lfs.value
   const out: DiagramCtx['geom'] = {}
-  if (!l) return out
+  if (!l || !f) return out
   const moved = (id: string) => {
     const p = pos[id]
     const r = l.nodes[id]
     return !!p && !!r && (Math.abs(p.x - r.x) > 0.5 || Math.abs(p.y - r.y) > 0.5)
   }
-  for (const e of fs.value.edges) {
+  for (const e of f.edges) {
     const base = l.edges[e.id]
-    if (!base) continue
+    const ls = l.nodes[e.source]
+    const lt = l.nodes[e.target]
+    const ps = pos[e.source]
+    const pt = pos[e.target]
+    if (!base || !ls || !lt || !ps || !pt) continue
+    // Without an ELK label a stream could not be reached from the keyboard: give it one on its longest segment.
+    const conEtiqueta = (g: { points: Pt[]; label: DiagramCtx['geom'][string]['label'] }) =>
+      e.primary && !g.label && g.points.length ? { ...g, label: labelOn(g.points, (labelSizes.value || [])[e.flujo] ?? { width: 120, height: CHIP_H }) } : g
     if (!moved(e.source) && !moved(e.target)) {
-      out[e.id] = base
+      out[e.id] = conEtiqueta(base)
       continue
     }
-    const ls = l.nodes[e.source]!
-    const lt = l.nodes[e.target]!
-    const ps = pos[e.source]!
-    const pt = pos[e.target]!
     const first = base.points[0] ?? { x: ls.x + ls.width, y: ls.y + ls.height / 2 }
     const last = base.points[base.points.length - 1] ?? { x: lt.x, y: lt.y + lt.height / 2 }
     const s = { x: ps.x + first.x - ls.x, y: ps.y + first.y - ls.y }
     const t = { x: pt.x + last.x - lt.x, y: pt.y + last.y - lt.y }
     const points = routeOrthogonal(s, t, Math.max(ps.y + ls.height, pt.y + lt.height))
-    out[e.id] = { points, label: base.label ? labelOn(points, base.label) : null }
+    out[e.id] = conEtiqueta({ points, label: base.label ? labelOn(points, base.label) : null })
   }
   return out
 })
@@ -257,7 +304,7 @@ const chips = computed<Chip[]>(() =>
       nombre: f.nombre,
       partes: p,
       tono: tono(x.estado),
-      ancho: Math.ceil(Math.max(textWidth(f.nombre, FONT_NAME), partesWidth(p)) + CHIP_PAD),
+      ancho: fontsReady.value ? Math.ceil(Math.max(textWidth(f.nombre, FONT_NAME), partesWidth(p)) + CHIP_PAD) : 0,
       aria: `${f.nombre}, ${nombreVista.value}: medido ${fmt(x.m, d)}${corrida.value ? `, reconciliado ${fmt(x.r, d)}, error ${x.e === null ? 'sin dato' : `${fmt(x.e, 2)} %`}` : ''}${estado}`,
     }
   }),
@@ -270,11 +317,12 @@ const nodos = computed(() => {
     const d = ds[n.idx]!
     const txt = desbalanceEn.value === 'pct' ? (d.pct === null ? '—' : `${signed(d.pct, 2)} %`) : `${signed(d.unidades, 0)} ${unidad}`
     const label = n.nombre || `Nodo ${n.idx + 1}`
+    const fuera = corrida.value && d.pct !== null && Math.abs(d.pct) > NODE_CLOSURE_TOLERANCE_PCT
     out[unitId(n.idx)] = {
       label,
       delta: `Δ ${txt}`,
-      deltaTono: corrida.value && d.pct !== null && Math.abs(d.pct) > NODE_CLOSURE_TOLERANCE_PCT ? 'fuera' : 'normal',
-      aria: `Nodo ${label}, desbalance ${corrida.value ? 'reconciliado' : 'medido'} ${txt}. Pulsa para resaltar sus flujos.`,
+      deltaTono: fuera ? 'fuera' : 'normal',
+      aria: `Nodo ${label}, desbalance ${corrida.value ? 'reconciliado' : 'medido'} ${txt}${fuera ? ', fuera de la tolerancia de cierre' : ''}. Pulsa para resaltar sus flujos${props.editable ? '; flechas para moverlo' : ''}.`,
     }
   })
   return out
@@ -301,12 +349,36 @@ const nodosAtenuados = computed(() => {
   return new Set(fs.value.nodes.filter(n => !keep.has(n.id)).map(n => n.id))
 })
 
+// Focus goes back to whatever opened the side panel when it closes.
+let opener: HTMLElement | null = null
+function cerrarPanel() {
+  if (flujoSel.value === null) return
+  flujoSel.value = null
+  const el = opener
+  opener = null
+  nextTick(() => el?.isConnected && el.focus())
+}
+const NUDGE = 8
 const ctx = reactive({
   geom, chips, nodos, foco, nodosAtenuados,
   flujoSel, flujoHover: computed(() => hover.flujo),
+  nodoSelId: computed(() => (store.nodoSel === null ? null : unitId(store.nodoSel))),
+  editable: computed(() => props.editable),
   abrirFlujo: (j: number) => {
-    flujoSel.value = flujoSel.value === j ? null : j
+    if (flujoSel.value === j) return cerrarPanel()
+    if (flujoSel.value === null) opener = document.activeElement instanceof HTMLElement || document.activeElement instanceof SVGElement ? (document.activeElement as HTMLElement) : null
+    flujoSel.value = j
     hover.flujo = null
+  },
+  /** Keyboard alternative to dragging (WCAG 2.5.7): arrows move a focused unit, Shift for bigger steps. */
+  mover: (id: string, dx: number, dy: number) => {
+    const p = pos[id]
+    if (!props.editable || !p) return
+    const np = { x: p.x + dx * NUDGE, y: p.y + dy * NUDGE }
+    pos[id] = np
+    const n = findNode(id)
+    if (n) n.position = { ...np }
+    movido.value = true
   },
   hover: (j: number | null, e?: PointerEvent) => {
     hover.flujo = j
@@ -322,7 +394,12 @@ const ctx = reactive({
 provide(DIAGRAM_CTX, ctx)
 
 // Edges go in together with their nodes: Vue Flow drops edges whose nodes do not exist yet.
-const flowEdges = computed(() => (flowNodes.value.length ? fs.value.edges : []).map(e => ({ id: e.id, source: e.source, target: e.target, type: 'stream', data: { flujo: e.flujo, primary: e.primary, stock: e.stock } })))
+const flowEdges = computed(() => {
+  const ids = new Set(flowNodes.value.map(n => n.id))
+  return (lfs.value?.edges ?? [])
+    .filter(e => ids.has(e.source) && ids.has(e.target))
+    .map(e => ({ id: e.id, source: e.source, target: e.target, type: 'stream', data: { flujo: e.flujo, primary: e.primary, stock: e.stock } }))
+})
 const tooltip = computed(() => {
   if (hover.flujo === null) return null
   const f = props.sesion.flujos[hover.flujo]!
@@ -331,7 +408,7 @@ const tooltip = computed(() => {
 })
 const panelFlujo = computed(() => (flujoSel.value === null ? null : props.sesion.flujos[flujoSel.value] ?? null))
 function limpiar() {
-  flujoSel.value = null
+  cerrarPanel()
   store.nodoSel = null
 }
 
@@ -349,8 +426,13 @@ const onFull = () => (full.value = document.fullscreenElement === wrap.value)
 onMounted(() => document.addEventListener('fullscreenchange', onFull))
 onBeforeUnmount(() => document.removeEventListener('fullscreenchange', onFull))
 async function pantallaCompleta() {
-  if (document.fullscreenElement) await document.exitFullscreen()
-  else await wrap.value?.requestFullscreen?.()
+  try {
+    if (document.fullscreenElement) await document.exitFullscreen()
+    else await wrap.value?.requestFullscreen?.()
+  } catch {
+    notify('danger', 'El navegador no permitió la pantalla completa.')
+    return
+  }
   setTimeout(() => (medir(), ajustar()), 150)
 }
 function onKey(e: KeyboardEvent) {
@@ -371,6 +453,8 @@ const exportando = ref<'' | 'svg' | 'png'>('')
 async function exportar(tipo: 'svg' | 'png') {
   if (!wrap.value) return
   exportando.value = tipo
+  hover.flujo = null // the export shows the diagram, not the pointer's hover
+  await nextTick()
   try {
     if (tipo === 'svg') img.descargar((await img.diagramSvg(wrap.value)).svg, `${archivo.value}.svg`)
     else img.descargar(await img.diagramPng(wrap.value, 2), `${archivo.value}.png`)
@@ -506,7 +590,7 @@ const sueltos = computed(() => fs.value.sueltos.map(j => props.sesion.flujos[j]!
       <FlujoPanel
         v-if="panelFlujo"
         :flujo="panelFlujo" :componentes="sesion.componentes" :corrida="corrida" :editable="editable"
-        @close="flujoSel = null" @editar="emit('editar', panelFlujo.idx)"
+        @close="cerrarPanel" @editar="emit('editar', panelFlujo.idx)"
       />
     </div>
   </section>
