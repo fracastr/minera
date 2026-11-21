@@ -132,7 +132,8 @@ class V2DiagnosticoTest extends TestCase
 
         $t = $this->actingAs($this->operator)->getJson("/api/v2/sesiones/{$s->id}/diagnostico")->assertOk()->json('tendencia');
 
-        $f1 = $t['F1'];
+        $f1 = $t['F1|T1'];
+        $this->assertSame('T1', $f1['tag']);
         $this->assertCount(8, $f1['serie']);
         $this->assertSame('2026-02-28', $f1['serie'][0]['periodo']);
         $this->assertSame($ultimo->id, $f1['serie'][7]['balance_id']);
@@ -198,9 +199,53 @@ class V2DiagnosticoTest extends TestCase
             ->assertOk()->assertJsonPath('solver', ['ok' => false, 'mensaje' => 'Maximum iterations', 'iteraciones' => 250]);
         $this->actingAs($this->operator)->getJson("/api/v2/sesiones/{$s->id}")
             ->assertJsonPath('solver.ok', false)->assertJsonPath('corrida', true);
-        $this->assertSame(['ok' => false, 'mensaje' => 'Maximum iterations', 'iteraciones' => 250], $s->fresh()->solver_estado);
+        $this->assertSame(['ok' => false, 'mensaje' => 'Maximum iterations', 'iteraciones' => 250, 'hash' => md5($s->fresh()->datos_entrada)], $s->fresh()->solver_estado);
         $this->assertArrayNotHasKey('solver', json_decode($s->fresh()->datos_entrada, true)); // v1's JSON is untouched
 
         $this->actingAs($this->operator)->postJson("/api/v2/sesiones/{$s->id}/correr")->assertOk()->assertJsonPath('solver', null);
+    }
+
+    public function testSolverStatusGoesStaleWhenTheDataChangesAfterTheRun(): void
+    {
+        $s = $this->sesion();
+        Http::fake(['solver.test/correr_balance' => Http::response([
+            'datos_entrada' => json_encode($this->datos()),
+            'balances_finales' => json_encode([[100, 100, 60, 60], [100, 100, 60, 60]]),
+            'desviaciones' => json_encode([[0, 0, 0, 0], [0, 0, 0, 0]]),
+            'nodos_data' => json_encode([[0, 0]]),
+            'solver' => json_encode(['ok' => false, 'iteraciones' => 9, 'mensaje' => 'Solution Not Found']),
+        ])]);
+        $this->actingAs($this->operator)->postJson("/api/v2/sesiones/{$s->id}/correr")->assertJsonPath('solver.ok', false);
+
+        // An edit saved after the failed run (PUT datos): the status no longer describes these data.
+        $edit = ['flujos' => [['idx' => 0, 'tms_medido' => 95, 'leyes_medido' => [60], 'tms_tol_inf' => 10, 'tms_tol_sup' => 10, 'leyes_tol' => [[2, 2]], 'jerarquia' => 1]]];
+        $this->actingAs($this->operator)->putJson("/api/v2/sesiones/{$s->id}/datos", $edit)->assertOk()->assertJsonPath('solver', null);
+
+        // Same for a v1 re-run writing the shared row directly.
+        $this->actingAs($this->operator)->postJson("/api/v2/sesiones/{$s->id}/correr")->assertJsonPath('solver.ok', false);
+        DB::table('datos_entradas')->where('id', $s->id)->update(['datos_entrada' => json_encode($this->datos(101))]);
+        $this->actingAs($this->operator)->getJson("/api/v2/sesiones/{$s->id}")->assertJsonPath('solver', null);
+    }
+
+    public function testTrendIgnoresNoiseOnZeroToleranceAndSkipsDuplicateNames(): void
+    {
+        Http::fake(['solver.test/diagnostico' => Http::response($this->flask())]);
+        // tol 0 → 5 % default: a 0.01 % adjustment four times in a row is noise, not bias.
+        $datos = fn (float $rec) => [
+            'flujos' => ['F1', 'Dup', 'Dup'], 'tags' => ['T1', 'TD', 'TD'], 'nodos' => ['N1'], 'matriz' => [[1, -1, 0]],
+            'mediciones' => [[100, $rec, 60, 60], [100, 120, 60, 60], [100, 80, 60, 60]],
+            'restricciones' => [[0, 0, 0, 0], [10, 10, 2, 2], [10, 10, 2, 2]], 'jerarquia' => [1, 1, 1],
+        ];
+        foreach (['2026-01-31', '2026-02-28', '2026-03-31', '2026-04-30'] as $fin) {
+            $b = Balances::create(['nombre' => $fin, 'tipo' => 'mensual', 'periodo_inicio' => $fin, 'periodo_fin' => $fin, 'proceso_id' => $this->procesoId, 'user_id' => $this->operator->id]);
+            $this->sesion($datos(100.01), ['balance_id' => $b->id]);
+        }
+
+        $t = $this->actingAs($this->operator)->getJson("/api/v2/sesiones/{$this->sesion()->id}/diagnostico")->assertOk()->json('tendencia');
+
+        $this->assertSame(['F1|T1'], array_keys($t));
+        $this->assertSame(['F1', 'T1'], [$t['F1|T1']['flujo'], $t['F1|T1']['tag']]);
+        $this->assertCount(4, $t['F1|T1']['serie']);
+        $this->assertFalse($t['F1|T1']['sesgo_recurrente']);
     }
 }

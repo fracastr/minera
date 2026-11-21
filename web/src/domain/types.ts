@@ -127,8 +127,10 @@ export function toEdits(s: Sesion): Edits {
 /** Same rule the server applies on save: TMS delta = fin − ini, TMH from moisture. */
 export function recomputeInventario(i: Inventario): void {
   const tmh = (tms: number) => tms / (1 - i.humedad / 100)
-  i.tms_delta = i.tms_fin - i.tms_ini
+  // Rounded so fin == ini gives exactly 0, not float noise (same as SesionMapper::applyEdits).
+  const r10 = (n: number) => Math.round(n * 1e10) / 1e10
+  i.tms_delta = r10(i.tms_fin - i.tms_ini)
   i.tmh_ini = tmh(i.tms_ini)
   i.tmh_fin = tmh(i.tms_fin)
-  i.tmh_delta = i.tmh_fin - i.tmh_ini
+  i.tmh_delta = r10(tmh(i.tms_fin - i.tms_ini))
 }

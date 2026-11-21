@@ -74,7 +74,7 @@ class SesionesController extends Controller
                     'file_path' => $fileName,
                     'user_id' => $user->id,
                 ]);
-                $sesion->solver_estado = $res['solver'];
+                $sesion->solver_estado = self::conHash($res['solver'], $json);
                 $sesion->save();
                 BalanceCorrida::record($sesion, $user, BalanceCorrida::TIPO_IMPORTACION);
                 BalanceEventService::logImported($sesion, $user);
@@ -124,7 +124,7 @@ class SesionesController extends Controller
                 ], 409));
             }
             $s->datos_entrada = $json;
-            $s->solver_estado = $res['solver'];
+            $s->solver_estado = self::conHash($res['solver'], $json);
             $s->save();
             BalanceCorrida::record($s, $request->user(), BalanceCorrida::TIPO_CORRIDA);
             BalanceEventService::logCorrer($s, $request->user());
@@ -293,7 +293,7 @@ class SesionesController extends Controller
             ],
             'corrida' => BalanceCorrida::where('datos_entrada_id', $s->id)->where('tipo', BalanceCorrida::TIPO_CORRIDA)->exists(),
             // ok=false: GEKKO did not converge and the reconciled values are clamped to the bounds, not trustworthy
-            'solver' => $s->solver_estado,
+            'solver' => self::solverVigente($s),
             ...SesionMapper::toDto(SesionMapper::decode($s->datos_entrada), $componentes),
             'updated_at' => $s->updated_at?->toIso8601String(),
         ];
@@ -341,6 +341,27 @@ class SesionesController extends Controller
         }
 
         throw new HttpResponseException(response()->json(['message' => $message], 502));
+    }
+
+    /** The status is stored with the hash of the data it was computed on, so a later change can invalidate it. */
+    private static function conHash(?array $estado, string $json): ?array
+    {
+        return $estado === null ? null : $estado + ['hash' => md5($json)];
+    }
+
+    /**
+     * The stored status only while datos_entrada is still what that run produced: an edit (PUT datos), a restore
+     * or a v1 re-run on the same row makes it stale, and then it is unknown (null).
+     */
+    private static function solverVigente(Datos_entrada $s): ?array
+    {
+        $e = $s->solver_estado;
+        if (!is_array($e) || ($e['hash'] ?? null) !== md5((string) $s->datos_entrada)) {
+            return null;
+        }
+        unset($e['hash']);
+
+        return $e;
     }
 
     /**

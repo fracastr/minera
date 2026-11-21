@@ -209,10 +209,11 @@ final class SesionMapper
             $d['humedad_inventario'][$i] = $h;
             $d['tms_ini'][$i] = $ini;
             $d['tms_fin'][$i] = $fin;
-            $d['tms_delta'][$i] = $fin - $ini;
+            // Rounded so fin == ini gives exactly 0, not float noise from two divisions.
+            $d['tms_delta'][$i] = round($fin - $ini, 10);
             $d['tmh_ini'][$i] = $tmh($ini);
             $d['tmh_fin'][$i] = $tmh($fin);
-            $d['tmh_delta'][$i] = $tmh($fin) - $tmh($ini);
+            $d['tmh_delta'][$i] = round($tmh($fin - $ini), 10);
             foreach (array_values($inv['leyes']) as $j => $ley) {
                 $d['componentes_inventario'][$i][$j] = self::num($ley);
             }
