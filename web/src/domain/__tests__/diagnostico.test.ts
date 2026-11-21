@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { caudalNodo, flujoDe, sidakZ, sugerencia, toleranciasAmplias } from '../diagnostico'
+import { caudalNodo, claveTendencia, flujoDe, sidakZ, sugerencia, toleranciasAmplias } from '../diagnostico'
 import type { Flujo, Sesion } from '../types'
 
 const v = (medido: number, tol: number) => ({ medido, reconciliado: medido, tol_inf: tol, tol_sup: tol, desv_inf: 0, desv_sup: 0 })
@@ -21,6 +21,11 @@ describe('diagnostico', () => {
     const r = toleranciasAmplias(s)
     expect(r.tolMax).toBeCloseTo((25 * 1.96) / sidakZ(3), 6)
     expect(r.flujos.map(f => [f.flujo, f.variable, f.tolPct])).toEqual([['A', 'TMS', 30]])
+  })
+
+  it('keys the trend like the server: name|tag', () => {
+    expect(claveTendencia({ flujo: 'X', tag: 'T1' })).toBe('X|T1')
+    expect(claveTendencia({ flujo: 'X', tag: null })).toBe('X|')
   })
 
   it('finds the session row by name and tag', () => {

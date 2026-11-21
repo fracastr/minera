@@ -49,7 +49,8 @@ export interface Diagnostico {
     excluidos: string[]
     por_componente: { componente_idx: number; global: Prueba; global_final: Prueba; nodos: NodoDiag[] }[]
   }
-  tendencia: Record<string, SerieVar & { leyes: SerieVar[] }>
+  /** Keyed by claveTendencia (name and tag: names alone repeat across processes' tags). */
+  tendencia: Record<string, SerieVar & { flujo: string; tag: string | null; leyes: SerieVar[] }>
 }
 
 export const ACCION: Record<Accion, string> = {
@@ -70,6 +71,8 @@ export function nombreVariable(v: VariableDiag, componentes: string[]): string {
   const k = leyIdx(v)
   return k < 0 ? 'TMS' : (componentes[k] ?? `Ley ${k + 1}`)
 }
+
+export const claveTendencia = (s: Pick<Equivalente, 'flujo' | 'tag'>) => `${s.flujo}|${s.tag ?? ''}`
 
 export const claveSospechoso = (s: Pick<Equivalente, 'flujo' | 'variable'>) => `${s.flujo}|${s.variable}`
 
