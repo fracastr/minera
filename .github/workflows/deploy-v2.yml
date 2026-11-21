@@ -14,7 +14,7 @@ concurrency:
 jobs:
   deploy:
     runs-on: ubuntu-22.04
-    # Give Mix + composer enough time on the 2 vCPU box.
+    # Give the web/ build + composer enough time on the 2 vCPU box.
     timeout-minutes: 25
     steps:
       - name: Deploy to EC2
