@@ -89,6 +89,7 @@ Route::group(['prefix' => 'v2', 'middleware' => ['auth:sanctum']], function () {
         Route::post('sesiones/{sesion}/clonar', [V2\SesionesController::class, 'clonar'])->whereNumber('sesion');
         Route::post('sesiones/{sesion}/corridas/{corrida}/restaurar', [V2\SesionesController::class, 'restaurar'])->whereNumber(['sesion', 'corrida']);
         Route::post('sesiones/{sesion}/guardar', [V2\SesionesController::class, 'guardar'])->whereNumber('sesion');
+        Route::post('sesiones/{sesion}/exportar', [V2\ExportarController::class, 'exportar'])->whereNumber('sesion');
         Route::post('sesiones/{sesion}/asistente', [V2\AsistenteController::class, 'responder'])->whereNumber('sesion')->middleware('throttle:asistente');
         Route::get('diagramas', [V2\DiagramasController::class, 'index']);
         Route::put('procesos/{proceso}/diagrama', [V2\DiagramasController::class, 'update'])->whereNumber('proceso');

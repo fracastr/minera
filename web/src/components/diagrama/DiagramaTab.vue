@@ -9,6 +9,7 @@ import { NODE_CLOSURE_TOLERANCE_PCT } from '@/domain/reconciliationQuality'
 import type { Sesion } from '@/domain/types'
 import { api, errorMessage } from '@/lib/api'
 import { notify } from '@/lib/feedback'
+import { hasta } from '@/lib/hasta'
 import { fmt } from '@/lib/format'
 import { useDiagramImage } from '@/composables/useDiagramImage'
 import { useSesionStore } from '@/stores/sesion'
@@ -169,6 +170,8 @@ const movido = ref(false)
 const guardando = ref(false)
 const flowNodes = shallowRef<Node[]>([])
 let fitPending = false
+const guardadoCargado = ref(false)
+const nodosMedidos = ref(false)
 
 async function cargarGuardado() {
   try {
@@ -177,6 +180,7 @@ async function cargarGuardado() {
     guardado.value = null // the automatic layout still works
   }
   if (!movido.value) aplicarPosiciones({ refit: true })
+  guardadoCargado.value = true
 }
 onMounted(cargarGuardado)
 
@@ -202,6 +206,7 @@ function aplicarPosiciones({ usarGuardado = true, refit = false } = {}) {
   if (refit) fitPending = true
 }
 onNodesInitialized(() => {
+  nodosMedidos.value = true
   if (!fitPending) return
   fitPending = false
   vistaInicial()
@@ -471,6 +476,20 @@ async function exportar(tipo: 'svg' | 'png') {
     exportando.value = ''
   }
 }
+
+/**
+ * PNG at 2× of the whole diagram for the Excel export, once it is laid out (saved positions applied) and Vue Flow
+ * has measured the nodes. Works while the component is mounted off-screen.
+ */
+async function png(): Promise<Blob> {
+  await hasta(() => layoutError.value || (layout.value && guardadoCargado.value && nodosMedidos.value), 30_000, 'El diagrama tardó demasiado en dibujarse.')
+  if (layoutError.value || !wrap.value) throw new Error(`No se pudo dibujar el diagrama: ${layoutError.value}`)
+  hover.flujo = null
+  await nextTick()
+  await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r))) // edges follow the nodes a frame later
+  return img.diagramPng(wrap.value, 2)
+}
+defineExpose({ png })
 
 const seg = 'h-8 px-2.5 text-[0.8125rem] font-medium text-ink-muted hover:text-ink aria-pressed:bg-surface aria-pressed:text-ink aria-pressed:shadow-sm rounded-[5px] disabled:opacity-45 disabled:hover:text-ink-muted'
 const grupo = 'flex items-center gap-0.5 rounded-md bg-surface-2 p-0.5'

@@ -3,8 +3,17 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import type { Sesion } from '@/domain/types'
 
 const api = vi.fn()
+const raw = vi.fn()
 const ask = vi.fn()
-vi.mock('@/lib/api', () => ({ api: (...a: unknown[]) => api(...a), errorMessage: (_e: unknown, f: string) => f }))
+const descargar = vi.fn()
+vi.mock('@/lib/api', async () => {
+  const { FetchError } = await import('ofetch')
+  return {
+    api: Object.assign((...a: unknown[]) => api(...a), { raw: (...a: unknown[]) => raw(...a) }),
+    errorMessage: (e: unknown, f: string) => (e instanceof FetchError && typeof e.data?.message === 'string' ? e.data.message : f),
+  }
+})
+vi.mock('@/composables/useDiagramImage', () => ({ descargar: (...a: unknown[]) => descargar(...a) }))
 vi.mock('@/lib/feedback', async orig => ({ ...(await orig<object>()), ask: (...a: unknown[]) => ask(...a) }))
 
 const { useSesionStore } = await import('../sesion')
@@ -27,6 +36,8 @@ function deferred<T>() {
 beforeEach(() => {
   setActivePinia(createPinia())
   api.mockReset()
+  raw.mockReset()
+  descargar.mockReset()
   ask.mockReset()
   toasts.splice(0)
 })
@@ -160,5 +171,67 @@ describe('sesion store', () => {
     expect([...store.flujosSospechosos]).toEqual([0])
     store.descartados.add('F|tms')
     expect(store.flujosSospechosos.size).toBe(0)
+  })
+
+  describe('exportar', () => {
+    const respuesta = (headers: Record<string, string>) => ({ headers: new Headers(headers), _data: new Blob(['xlsx']) })
+    // jsdom's Blob has no text() (browsers do).
+    Blob.prototype.text ??= function (this: Blob) {
+      return new Promise<string>(resolve => {
+        const fr = new FileReader()
+        fr.onload = () => resolve(String(fr.result))
+        fr.readAsText(this)
+      })
+    }
+
+    it('posts the PNGs, downloads with the server file name and shows the Drive link', async () => {
+      const store = useSesionStore()
+      api.mockResolvedValueOnce(sesion(1))
+      await store.load(1)
+      raw.mockResolvedValueOnce(respuesta({ 'Content-Disposition': 'attachment; filename=elqui_pleito_2026-03-01.xlsx', 'X-Drive-Link': 'https://drive.google.com/file/d/x/view' }))
+      const p = store.exportar(async () => ({ diagrama: new Blob(['png']) }))
+      expect(store.busy).toBe('exportar')
+      await p
+      const [url, opts] = raw.mock.calls[0]!
+      expect(url).toBe('/v2/sesiones/1/exportar')
+      expect((opts.body as FormData).get('diagrama')).toBeInstanceOf(Blob)
+      expect(descargar).toHaveBeenCalledWith(expect.any(Blob), 'elqui_pleito_2026-03-01.xlsx')
+      expect(toasts.at(-1)?.link?.href).toBe('https://drive.google.com/file/d/x/view')
+      expect(store.busy).toBe('')
+    })
+
+    it('exports without images when the capture fails, and ignores a non-Drive link', async () => {
+      const store = useSesionStore()
+      api.mockResolvedValueOnce(sesion(1))
+      await store.load(1)
+      raw.mockResolvedValueOnce(respuesta({ 'X-Drive-Link': 'https://evil.example/x' }))
+      await store.exportar(async () => { throw new Error('el diagrama tardó demasiado en cargar') })
+      expect([...(raw.mock.calls[0]![1].body as FormData).keys()]).toEqual([])
+      expect(descargar).toHaveBeenCalledWith(expect.any(Blob), 'balance_1.xlsx')
+      expect(toasts[0]?.message).toContain('el diagrama tardó demasiado')
+      expect(toasts.at(-1)).toMatchObject({ tone: 'ok', link: undefined })
+    })
+
+    it('shows the server message of a failed export (JSON read as a Blob)', async () => {
+      const store = useSesionStore()
+      api.mockResolvedValueOnce(sesion(1))
+      await store.load(1)
+      const { FetchError } = await import('ofetch')
+      const err = new FetchError('500')
+      err.data = new Blob([JSON.stringify({ message: 'No se pudo generar el Excel con la plantilla del proceso.' })])
+      raw.mockRejectedValueOnce(err)
+      await store.exportar()
+      expect(descargar).not.toHaveBeenCalled()
+      expect(toasts.at(-1)).toMatchObject({ tone: 'danger', message: 'No se pudo generar el Excel con la plantilla del proceso.' })
+    })
+
+    it('does nothing while there are unsaved edits', async () => {
+      const store = useSesionStore()
+      api.mockResolvedValueOnce(sesion(1))
+      await store.load(1)
+      store.dirty = true
+      await store.exportar()
+      expect(raw).not.toHaveBeenCalled()
+    })
   })
 })

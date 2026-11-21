@@ -40,8 +40,9 @@ const el = ref<HTMLDivElement>()
 const chart = shallowRef<ECharts>()
 const tokens = ref<Tokens>(leer())
 
+// Read on the chart's own element, so a subtree forced to the light theme (.light, the Excel export) gets light colors.
 function leer(): Tokens {
-  const css = getComputedStyle(document.documentElement)
+  const css = getComputedStyle(el.value ?? document.documentElement)
   const v = (n: string) => css.getPropertyValue(n).trim()
   return {
     ink: v('--ink'), inkMuted: v('--ink-muted'), inkFaint: v('--ink-faint'), line: v('--line'), surface: v('--surface'),
@@ -53,18 +54,28 @@ function leer(): Tokens {
 // theme.ts toggles html.dark; follow it.
 const tema = new MutationObserver(() => (tokens.value = leer()))
 let size: ResizeObserver | undefined
+// Drawn = the last setOption finished rendering, animation included (exports wait for it).
+let pintado = false
+const esperando: (() => void)[] = []
 onMounted(() => {
+  tokens.value = leer()
   chart.value = init(el.value!, null, { renderer: 'canvas' })
   chart.value.on('click', p => emit('select', p.dataIndex))
+  chart.value.on('finished', () => {
+    pintado = true
+    esperando.splice(0).forEach(f => f())
+  })
   tema.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] })
   size = new ResizeObserver(() => chart.value?.resize())
   size.observe(el.value!)
 })
 watchEffect(() => {
   const t = tokens.value
+  pintado = false
   chart.value?.setOption({ textStyle: { fontFamily: t.font, color: t.inkMuted }, animationDuration: 300, ...props.option(t) }, true)
 })
 onBeforeUnmount(() => {
+  esperando.splice(0).forEach(f => f()) // nothing left to wait for
   tema.disconnect()
   size?.disconnect()
   chart.value?.dispose()
@@ -74,7 +85,9 @@ onBeforeUnmount(() => {
 function exportPng(): string {
   return chart.value?.getDataURL({ type: 'png', pixelRatio: 2, backgroundColor: tokens.value.surface }) ?? ''
 }
-defineExpose({ exportPng })
+/** Resolves when the chart is fully drawn (initial animation over), so exportPng captures the final frame. */
+const listo = (): Promise<void> => (pintado ? Promise.resolve() : new Promise(r => esperando.push(r)))
+defineExpose({ exportPng, listo })
 </script>
 
 <template>

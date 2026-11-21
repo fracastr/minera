@@ -1,46 +1,44 @@
-console.log("hellow world")
-console.log(suma(5, 7))
-console.log(process.argv);
-const myArgs = process.argv.slice(2);
-//console.log(JSON.parse(myArgs[0]));
-// myArgs = JSON.parse(myArgs);
-// console.log(myArgs)
-console.log(typeof(myArgs[0]))
-console.log(myArgs[0])
-myArgs2 = JSON.parse(myArgs[0])
-data_extra = JSON.parse(myArgs[1])
-file = myArgs[2] + '.xlsx'
-path = myArgs[3]
-fileName = myArgs[4]
-storage = myArgs[5]
-console.log(typeof(myArgs2))
-console.log(myArgs2)
-write_excel(myArgs2, data_extra);
+'use strict';
+// Fills the export template's "Utilidad" and "Datos Extra" sheets and writes <storage>/<id>.xlsx.
+// Runs on the server's Node 10 (ES2018, CommonJS). www (v1) calls it with the first six arguments; v2 adds the
+// seventh to append image sheets.
+//
+//   node excelnode.js <matriz json> <data_extra json> <id> <publicDir> <template> <storage> [<sheets json>]
+//
+// <sheets json>: [{"name": "Diagrama Sistema", "images": [{"title": "...", "path": "/abs/file.png", "maxWidth": 1600}]}]
 
-function suma(a, b){
-    return a + b
-}
-function write_excel (array, data_extra){
-    console.log("hola mundo")
-    const XlsxPopulate = require('xlsx-populate');
-    // fileName ='/Users/pc-mac/Desktop/Exportar_Pellet_3.xlsx'
-    //const fileName = path
-    console.log(process.cwd())
-    // Load an existing workbook
-    XlsxPopulate.fromFileAsync(fileName)
-        .then(function(workbook) {
-        // Modify the workbook.
-        // Set all cell values to the same value:
-        console.log("carga libro");
-        const value = workbook.sheet("Utilidad").range("A1:M100");
-        value.value(array)
+var fs = require('fs');
+var XlsxPopulate = require('xlsx-populate');
+var addImages = require('./addImages');
 
-        const value2 = workbook.sheet("Datos Extra").range("A1:M100");
-        value2.value(data_extra)
-        // value.value((cell, ri, ci, range) => array);
-        console.log(storage + "/" + file);
-        return workbook.toFileAsync(storage + "/" + file)
-    }).catch(function (e) {
-        console.log("FAILURE!!", e);
-      })
-}
+var args = process.argv.slice(2);
+var matriz = JSON.parse(args[0]);
+var dataExtra = JSON.parse(args[1]);
+var out = args[5] + '/' + args[2] + '.xlsx';
+var template = args[4];
+var sheets = args[6] ? JSON.parse(args[6]) : [];
+
+XlsxPopulate.fromFileAsync(template)
+    .then(function (workbook) {
+        workbook.sheet('Utilidad').range('A1:M100').value(matriz);
+        workbook.sheet('Datos Extra').range('A1:M100').value(dataExtra);
+        return workbook.outputAsync();
+    })
+    .then(function (buf) {
+        return addImages(buf, sheets.map(function (s) {
+            return {
+                name: s.name,
+                images: s.images.map(function (i) {
+                    return { title: i.title, maxWidth: i.maxWidth, png: fs.readFileSync(i.path) };
+                }),
+            };
+        }));
+    })
+    .then(function (buf) {
+        fs.writeFileSync(out, buf);
+        console.log(out);
+    })
+    .catch(function (e) {
+        console.error('excelnode failed: ' + (e && e.stack ? e.stack : e));
+        process.exitCode = 1;
+    });

@@ -4,6 +4,7 @@ import { computed, reactive, ref, shallowRef } from 'vue'
 import type { MensajeChat, RespuestaAsistente } from '@/domain/asistente'
 import { claveSospechoso, flujoDe, leyIdx, sugerencia, type Accion, type Diagnostico, type VariableDiag } from '@/domain/diagnostico'
 import { toEdits, type Sesion } from '@/domain/types'
+import { descargar } from '@/composables/useDiagramImage'
 import { api, errorMessage } from '@/lib/api'
 import { ask, notify } from '@/lib/feedback'
 
@@ -212,20 +213,37 @@ export const useSesionStore = defineStore('sesion', () => {
     return true
   }
 
-  async function exportar() {
+  /**
+   * Excel of the stored session (POST /v2/sesiones/{id}/exportar): `imagenes` supplies the PNGs for the extra sheets
+   * (a capture failure exports without them). Downloads the file and shows the Drive copy when the server made one.
+   */
+  async function exportar(imagenes: () => Promise<Record<string, Blob>> = async () => ({})) {
     const s = sesion.value
-    if (!s) return
-    // Open the tab now (a tab opened after an await is blocked as a popup), then point it at Drive.
-    const tab = window.open('', '_blank')
-    if (tab) tab.opener = null
-    const res = await run('exportar', id => api(`/balances/getExcel/${id}/${s.proceso.id}`, { retry: 0, responseType: 'text' }), 'No se pudo generar el Excel.')
-    const url = typeof res?.value === 'string' ? res.value.trim() : ''
-    const safe = /^https:\/\/(drive|docs)\.google\.com\//.test(url)
-    if (tab && safe) tab.location.href = url
-    else tab?.close()
-    if (!res) return
-    if (!safe) notify('danger', 'El Excel se generó, pero el enlace de Drive no es válido.')
-    else if (!tab) notify('ok', 'El Excel está listo. El navegador bloqueó la pestaña nueva:', { href: url, label: 'Abrir en Drive' })
+    if (!s || dirty.value || ops.has('exportar')) return
+    ops.add('exportar')
+    try {
+      let pngs: Record<string, Blob> = {}
+      try {
+        pngs = await imagenes()
+      } catch (e) {
+        notify('danger', `El Excel se exporta sin el diagrama ni los gráficos: ${e instanceof Error ? e.message : 'no se pudieron capturar'}.`)
+      }
+      const body = new FormData()
+      for (const [campo, png] of Object.entries(pngs)) body.append(campo, png, `${campo}.png`)
+      const res = await api.raw<Blob, 'blob'>(`/v2/sesiones/${s.id}/exportar`, { method: 'POST', body, responseType: 'blob', retry: 0 })
+      if (sesion.value !== s) return
+      const nombre = /filename="?([^";]+)"?/.exec(res.headers.get('Content-Disposition') ?? '')?.[1] ?? `balance_${s.id}.xlsx`
+      descargar(res._data!, nombre)
+      const drive = res.headers.get('X-Drive-Link') ?? ''
+      if (/^https:\/\/(drive|docs)\.google\.com\//.test(drive)) notify('ok', 'Excel descargado. También quedó en Drive:', { href: drive, label: 'Abrir en Drive' })
+      else notify('ok', 'Excel descargado.')
+    } catch (e) {
+      // The body was read as a Blob: decode the JSON error so the server's message is shown.
+      if (e instanceof FetchError && e.data instanceof Blob) e.data = await e.data.text().then(JSON.parse).catch(() => null)
+      if (sesion.value === s) notify('danger', errorMessage(e, 'No se pudo generar el Excel.'))
+    } finally {
+      ops.delete('exportar')
+    }
   }
 
   let diagSeq = 0

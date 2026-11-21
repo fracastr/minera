@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { CircleAlert, CircleCheck, EyeOff, LoaderCircle, MapPin, RotateCcw, Wand2 } from '@lucide/vue'
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, nextTick, onMounted, ref, watch } from 'vue'
 import EChart, { type Tokens } from '@/components/charts/EChart.vue'
 import Notice from '@/components/Notice.vue'
 import {
@@ -12,7 +12,8 @@ import type { Sesion } from '@/domain/types'
 import { fmt } from '@/lib/format'
 import { useSesionStore } from '@/stores/sesion'
 
-const props = defineProps<{ sesion: Sesion; editable: boolean }>()
+// `exportar`: the off-screen copy the Excel export captures; it also draws the trend chart sized for the sheet.
+const props = defineProps<{ sesion: Sesion; editable: boolean; exportar?: boolean }>()
 const emit = defineEmits<{ ver: [] }>()
 const store = useSesionStore()
 
@@ -132,7 +133,7 @@ const resumenUso = computed(() => {
 const opcionUso = (t: Tokens) => {
   const rows = [...usos.value].reverse() // ECharts draws category 0 at the bottom
   return {
-    grid: { left: 8, right: 24, top: 8, bottom: 28, containLabel: true },
+    grid: { left: 8, right: 24, top: 24, bottom: 28, containLabel: true }, // top: room for the 80 % / 100 % labels
     xAxis: { type: 'value', name: '% de la tolerancia', nameLocation: 'middle', nameGap: 26, nameTextStyle: { color: t.inkFaint }, axisLabel: { color: t.inkMuted }, splitLine: { lineStyle: { color: t.line } } },
     yAxis: { type: 'category', data: rows.map(a => `${a.flujo} · ${a.variable}`), axisLabel: { color: t.inkMuted, fontSize: 11, width: 170, overflow: 'truncate' }, axisLine: { lineStyle: { color: t.line } } },
     tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' }, valueFormatter: (x: number) => `${fmt(x, 0)} %` },
@@ -151,7 +152,47 @@ const seg = 'h-7 px-2 text-xs font-medium text-ink-muted hover:text-ink aria-pre
 const card = 'rounded-lg border border-line bg-surface p-4'
 const graficoNodos = ref<InstanceType<typeof EChart>>()
 const graficoUso = ref<InstanceType<typeof EChart>>()
-defineExpose({ graficoNodos, graficoUso })
+const graficoTendencias = ref<InstanceType<typeof EChart>>()
+
+// Export trend chart: the top 3 suspects of the ranking (Flask order, dismissed ones left out) that have a history.
+const topTendencias = computed(() =>
+  (d.value?.sospechosos ?? [])
+    .filter(s => !store.descartados.has(claveSospechoso(s)))
+    .flatMap(s => (tendencia(s) ? [{ nombre: `${s.flujo} · ${nombreVar(s.variable)}`, v: tendencia(s)! }] : []))
+    .slice(0, 3))
+const periodoDe = (p: SerieVar['serie'][number]) => p.periodo ?? `#${p.balance_id}`
+const opcionTendencias = (t: Tokens) => {
+  const colores = [t.danger, t.primary, t.warn]
+  return {
+    grid: { left: 8, right: 16, top: 40, bottom: 8, containLabel: true },
+    legend: { top: 0, textStyle: { color: t.inkMuted } },
+    xAxis: {
+      type: 'category', data: [...new Set(topTendencias.value.flatMap(x => x.v.serie.map(periodoDe)))].sort(),
+      axisLabel: { color: t.inkMuted }, axisLine: { lineStyle: { color: t.line } },
+    },
+    yAxis: { type: 'value', name: 'Ajuste %', nameTextStyle: { color: t.inkFaint }, axisLabel: { color: t.inkMuted }, splitLine: { lineStyle: { color: t.line } } },
+    series: topTendencias.value.map((x, i) => ({
+      type: 'line', name: x.nombre, data: x.v.serie.map(p => [periodoDe(p), p.ajuste_pct]), symbolSize: 6,
+      itemStyle: { color: colores[i] }, lineStyle: { width: 2, color: colores[i] },
+    })),
+  }
+}
+
+/** The charts as PNGs for the Excel export, by upload field; charts not drawn (no data) are left out. */
+async function pngs(): Promise<Record<string, Blob>> {
+  await nextTick()
+  const graficos = { desbalance_nodos: graficoNodos.value, uso_tolerancia: graficoUso.value, tendencia: graficoTendencias.value }
+  const out: Record<string, Blob> = {}
+  for (const [campo, g] of Object.entries(graficos)) {
+    if (!g) continue
+    // A chart that never reports `finished` must not hang the export: after 5 s take what is drawn.
+    await Promise.race([g.listo(), new Promise(r => setTimeout(r, 5000))])
+    const url = g.exportPng()
+    if (url) out[campo] = await (await fetch(url)).blob()
+  }
+  return out
+}
+defineExpose({ graficoNodos, graficoUso, pngs })
 </script>
 
 <template>
@@ -303,6 +344,13 @@ defineExpose({ graficoNodos, graficoUso })
               <p class="mt-1 text-xs text-ink-muted">{{ corrida ? 'Ninguna medición tiene una tolerancia acotada.' : 'Corre el balance para ver cuánto de su tolerancia usó cada medición.' }}</p>
             </template>
           </div>
+        </div>
+
+        <div v-if="exportar && topTendencias.length" :class="card">
+          <EChart
+            ref="graficoTendencias" titulo="Tendencia del ajuste de los principales sospechosos" alto="22rem" :option="opcionTendencias"
+            resumen="Ajuste de la reconciliación (%) en los últimos balances guardados de los sospechosos mejor rankeados."
+          />
         </div>
 
         <!-- Tolerances that hide errors -->
