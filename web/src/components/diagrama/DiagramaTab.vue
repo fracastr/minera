@@ -4,7 +4,7 @@ import { FileImage, FileCode2, LoaderCircle, Maximize, Minimize, Minus, Plus, Ro
 import { useVueFlow, VueFlow, type Node, type NodeDragEvent } from '@vue-flow/core'
 import { computed, onBeforeUnmount, onMounted, provide, reactive, ref, shallowRef, watch } from 'vue'
 import Notice from '@/components/Notice.vue'
-import { buildFlowsheet, desbalances, layoutKey, unitId, valores, type FsNode, type Vista } from '@/domain/flowsheet'
+import { buildFlowsheet, desbalances, layoutKey, unitId, valores, type FsEdge, type FsNode, type Vista } from '@/domain/flowsheet'
 import { NODE_CLOSURE_TOLERANCE_PCT } from '@/domain/reconciliationQuality'
 import type { Sesion } from '@/domain/types'
 import { api, errorMessage } from '@/lib/api'
@@ -16,7 +16,7 @@ import { DIAGRAM_CTX, tono, type Chip, type DiagramCtx, type NodoVista } from '.
 import { getElk } from './elk'
 import FlowNode from './FlowNode.vue'
 import FlujoPanel from './FlujoPanel.vue'
-import { labelOn, layoutFlowsheet, routeOrthogonal, TERMINAL, type Layout, type Pt, type Size } from './layout'
+import { boundsOf, fitZoom, labelOn, layoutFlowsheet, routeOrthogonal, TERMINAL, type Layout, type Pt, type Size } from './layout'
 import StreamEdge from './StreamEdge.vue'
 
 const props = defineProps<{ sesion: Sesion; editable: boolean }>()
@@ -25,7 +25,7 @@ const store = useSesionStore()
 const img = useDiagramImage()
 
 const flowId = `diagrama-${Math.random().toString(36).slice(2)}`
-const { fitView, zoomIn, zoomOut, zoomTo, panBy, onNodesInitialized } = useVueFlow(flowId)
+const { fitView, zoomIn, zoomOut, zoomTo, panBy, setViewport, onNodesInitialized } = useVueFlow(flowId)
 
 // ── View toggles ────────────────────────────────────────────────────────────
 const vista = reactive<Vista>({ componente: null, modo: 'ley' })
@@ -83,13 +83,41 @@ const nodeSize = (n: FsNode): Size =>
 
 const layout = shallowRef<Layout | null>(null)
 const layoutError = ref('')
-const signature = computed(() => JSON.stringify([fs.value.nodes.map(layoutKey), fs.value.edges.map(e => [e.source, e.target]), labelSizes.value.map(s => s.width)]))
+// Canvas size: it fills the viewport below its own top, and the layout folds wide plants to its shape.
+const wrap = ref<HTMLElement>()
+const canvas = reactive({ w: 0, h: 0, alto: 416 })
+const MIN_ALTO = 416
+function medir() {
+  const el = wrap.value
+  if (!el) return
+  if (!document.fullscreenElement) canvas.alto = Math.max(MIN_ALTO, Math.round(window.innerHeight - el.getBoundingClientRect().top - window.scrollY - 16))
+  canvas.w = el.clientWidth
+  canvas.h = document.fullscreenElement ? el.clientHeight : canvas.alto
+}
+onMounted(() => {
+  medir()
+  window.addEventListener('resize', medir)
+})
+onBeforeUnmount(() => window.removeEventListener('resize', medir))
+// Re-layout only when the shape class changes, not on every pixel of a resize.
+const aspecto = computed(() => (canvas.w && canvas.h ? Math.round((canvas.w / canvas.h) * 4) / 4 : null))
+
+const signature = computed(() => JSON.stringify([fs.value.nodes.map(layoutKey), fs.value.edges.map(e => [e.source, e.target]), labelSizes.value.map(s => s.width), aspecto.value]))
 let seq = 0
 watch(signature, async () => {
+  if (aspecto.value === null) return
   const mine = ++seq
   try {
     await document.fonts?.ready
-    const l = await layoutFlowsheet(getElk(), fs.value, nodeSize, e => labelSizes.value[e.flujo]!)
+    // A long plant unrolled left to right is a thin strip; ELK can fold it into rows near the canvas shape.
+    // Both are computed and the folded one wins only if it fits at a clearly larger zoom.
+    const label = (e: FsEdge) => labelSizes.value[e.flujo]!
+    const candidatos = await Promise.all([
+      layoutFlowsheet(getElk(), fs.value, nodeSize, label),
+      layoutFlowsheet(getElk(), fs.value, nodeSize, label, { 'elk.layered.wrapping.strategy': 'MULTI_EDGE', 'elk.aspectRatio': String(aspecto.value) }),
+    ])
+    const zoom = (c: Layout) => fitZoom(boundsOf(c), canvas.w, canvas.h)
+    const l = candidatos.reduce((a, b) => (zoom(b) > zoom(a) * 1.15 ? b : a))
     if (mine !== seq) return
     layoutError.value = ''
     layout.value = l
@@ -134,8 +162,22 @@ function aplicarPosiciones(usarGuardado = true) {
 onNodesInitialized(() => {
   if (!fitPending) return
   fitPending = false
-  ajustar()
+  vistaInicial()
 })
+
+// Open readable: fit everything if that stays at 75 % or more, else 75 % anchored on the feeds (left), and the user pans.
+const ZOOM_LEGIBLE = 0.75
+function vistaInicial() {
+  const l = layout.value
+  if (!l) return
+  const b = boundsOf(l, pos, geom.value)
+  if (fitZoom(b, canvas.w, canvas.h) >= ZOOM_LEGIBLE) return ajustar()
+  const z = ZOOM_LEGIBLE
+  const feeds = fs.value.nodes.filter(n => n.tipo === 'entrada').map(n => pos[n.id]!)
+  const x0 = feeds.length ? Math.min(...feeds.map(p => p.x)) : b.x
+  const y0 = feeds.length ? Math.min(...feeds.map(p => p.y)) : b.y
+  setViewport({ x: 24 - x0 * z, y: 24 - Math.max(b.y, y0 - 60) * z, zoom: z })
+}
 
 function onDrag({ node }: NodeDragEvent) {
   pos[node.id] = { x: node.position.x, y: node.position.y }
@@ -259,7 +301,6 @@ const nodosAtenuados = computed(() => {
   return new Set(fs.value.nodes.filter(n => !keep.has(n.id)).map(n => n.id))
 })
 
-const wrap = ref<HTMLElement>()
 const ctx = reactive({
   geom, chips, nodos, foco, nodosAtenuados,
   flujoSel, flujoHover: computed(() => hover.flujo),
@@ -295,7 +336,14 @@ function limpiar() {
 }
 
 // ── View controls ───────────────────────────────────────────────────────────
-const ajustar = () => fitView({ padding: 0.04, maxZoom: 1 })
+// Own fit instead of Vue Flow's: its bounds ignore edge routes, and wrapped rows send long routes past the nodes.
+function ajustar() {
+  const l = layout.value
+  if (!l) return fitView({ padding: 0.04, maxZoom: 1 })
+  const b = boundsOf(l, pos, geom.value)
+  const z = Math.min(1, fitZoom(b, canvas.w, canvas.h))
+  setViewport({ x: (canvas.w - b.width * z) / 2 - b.x * z, y: (canvas.h - b.height * z) / 2 - b.y * z, zoom: z })
+}
 const full = ref(false)
 const onFull = () => (full.value = document.fullscreenElement === wrap.value)
 onMounted(() => document.addEventListener('fullscreenchange', onFull))
@@ -303,7 +351,7 @@ onBeforeUnmount(() => document.removeEventListener('fullscreenchange', onFull))
 async function pantallaCompleta() {
   if (document.fullscreenElement) await document.exitFullscreen()
   else await wrap.value?.requestFullscreen?.()
-  setTimeout(ajustar, 150)
+  setTimeout(() => (medir(), ajustar()), 150)
 }
 function onKey(e: KeyboardEvent) {
   if ((e.target as HTMLElement).closest('input, select, textarea, button')) return
@@ -324,7 +372,7 @@ async function exportar(tipo: 'svg' | 'png') {
   if (!wrap.value) return
   exportando.value = tipo
   try {
-    if (tipo === 'svg') img.descargar(img.diagramSvg(wrap.value).svg, `${archivo.value}.svg`)
+    if (tipo === 'svg') img.descargar((await img.diagramSvg(wrap.value)).svg, `${archivo.value}.svg`)
     else img.descargar(await img.diagramPng(wrap.value, 2), `${archivo.value}.png`)
   } catch (e) {
     notify('danger', e instanceof Error ? e.message : 'No se pudo exportar el diagrama.')
@@ -400,8 +448,9 @@ const sueltos = computed(() => fs.value.sueltos.map(j => props.sesion.flujos[j]!
 
     <div
       ref="wrap"
-      class="fs-wrap relative h-[max(26rem,calc(100dvh-17rem))] overflow-hidden rounded-lg border border-line bg-surface"
+      class="fs-wrap relative overflow-hidden rounded-lg border border-line bg-surface"
       :class="{ 'fs-full': full }"
+      :style="full ? undefined : { height: `${canvas.alto}px` }"
       @keydown="onKey"
     >
       <div v-if="!layout && !layoutError" class="absolute inset-0 grid place-items-center text-ink-muted" role="status">
