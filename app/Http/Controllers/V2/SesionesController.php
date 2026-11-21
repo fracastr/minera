@@ -13,6 +13,7 @@ use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\RequestException;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
@@ -23,7 +24,20 @@ use Illuminate\Support\Facades\Storage;
  */
 class SesionesController extends Controller
 {
-    private const SOLVER_TIMEOUT = 180;
+    /**
+     * Same as v1, which calls Flask with Laravel's default 30 s client timeout and has run that way in production
+     * (Apache + PHP-FPM, whose request limits are well above it). Raise both together if a process needs longer.
+     */
+    private const SOLVER_TIMEOUT = 30;
+
+    /** Uploads live on the private local disk: Flask only needs the absolute path, nothing serves them. */
+    private const UPLOAD_DIR = 'balances-carga';
+
+    /** Response keys each solver endpoint must return. */
+    private const SOLVER_KEYS = [
+        '/get_balance' => ['datos_entrada', 'desviaciones', 'nodos_data'],
+        '/correr_balance' => ['datos_entrada', 'desviaciones', 'nodos_data', 'balances_finales'],
+    ];
 
     public function importar(Request $request)
     {
@@ -34,32 +48,41 @@ class SesionesController extends Controller
         $user = $request->user();
         $proceso = Procesos::findOrFail($request->integer('proceso_id'));
 
-        // nombre_original_timestamp_userid.ext: the listado reads the owner back from this name.
+        // The extension comes from the content, never from the client's file name.
         $file = $request->file('file');
-        $base = preg_replace('/[^\w.-]+/u', '_', pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME));
-        $fileName = $base.'_'.now()->format('YmdHis').'_'.$user->id.'.'.strtolower($file->getClientOriginalExtension());
-        $stored = $file->storeAs('public', $fileName);
+        $ext = $file->guessExtension();
+        if (!in_array($ext, ['xlsx', 'xls'], true)) {
+            return response()->json(['message' => 'El archivo debe ser una planilla Excel (.xlsx o .xls).', 'errors' => ['file' => ['El archivo debe ser una planilla Excel (.xlsx o .xls).']]], 422);
+        }
+        // nombre_YYYYmmddHHMMSS_userid.ext: Balances::creador() reads the owner back from this suffix.
+        $base = mb_substr(preg_replace('/[^\w.-]+/u', '_', pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME)), 0, 100) ?: 'carga';
+        $fileName = $base.'_'.now()->format('YmdHis').'_'.$user->id.'.'.$ext;
+        $stored = $file->storeAs(self::UPLOAD_DIR, $fileName, 'local');
 
         try {
-            $res = $this->solver('/get_balance', ['path_name' => Storage::path($stored), 'nombre_proceso' => $proceso->nombre]);
-        } catch (HttpResponseException $e) {
-            Storage::delete($stored); // a workbook the solver could not read is not kept
+            $res = $this->solver('/get_balance', ['path_name' => Storage::disk('local')->path($stored), 'nombre_proceso' => $proceso->nombre]);
+            $datos = $res['datos_entrada'];
+            $datos['desviaciones'] = $res['desviaciones'];
+            $datos['nodos_data'] = $res['nodos_data'];
+            $json = $this->encodeSolverResult($datos);
+
+            $sesion = DB::transaction(function () use ($json, $proceso, $fileName, $user) {
+                $sesion = Datos_entrada::create([
+                    'datos_entrada' => $json,
+                    'proceso_id' => $proceso->id,
+                    'valle_id' => $proceso->valle_id,
+                    'file_path' => $fileName,
+                    'user_id' => $user->id,
+                ]);
+                BalanceCorrida::record($sesion, $user, BalanceCorrida::TIPO_IMPORTACION);
+                BalanceEventService::logImported($sesion, $user);
+
+                return $sesion;
+            });
+        } catch (\Throwable $e) {
+            Storage::disk('local')->delete($stored); // nothing points at a workbook whose import failed
             throw $e;
         }
-
-        $datos = $res['datos_entrada'];
-        $datos['desviaciones'] = $res['desviaciones'];
-        $datos['nodos_data'] = $res['nodos_data'];
-
-        $sesion = Datos_entrada::create([
-            'datos_entrada' => json_encode($datos),
-            'proceso_id' => $proceso->id,
-            'valle_id' => $proceso->valle_id,
-            'file_path' => $fileName,
-            'user_id' => $user->id,
-        ]);
-        BalanceEventService::logImported($sesion, $user);
-        BalanceCorrida::record($sesion, $user, BalanceCorrida::TIPO_IMPORTACION);
 
         return response()->json(['id' => $sesion->id], 201);
     }
@@ -81,18 +104,28 @@ class SesionesController extends Controller
     {
         $s = $this->find($sesion);
         $this->persistEdits($request, $s); // the solver reads the row itself, so edits go first
+        $sent = md5((string) $s->datos_entrada);
 
         $res = $this->solver('/correr_balance', ['datos_entrada_id' => $s->id]);
-
         $datos = $res['datos_entrada'];
         $datos['mediciones'] = $res['balances_finales'];
         $datos['desviaciones'] = $res['desviaciones'];
         $datos['nodos_data'] = $res['nodos_data'];
-        $s->datos_entrada = json_encode($datos);
-        $s->save();
+        $json = $this->encodeSolverResult($datos);
 
-        BalanceEventService::logCorrer($s, $request->user());
-        BalanceCorrida::record($s, $request->user(), BalanceCorrida::TIPO_CORRIDA);
+        DB::transaction(function () use ($s, $sent, $json, $request) {
+            // Someone else saved, ran or restored this session while the solver worked: keep their version.
+            $current = Datos_entrada::query()->lockForUpdate()->findOrFail($s->id);
+            if (md5((string) $current->datos_entrada) !== $sent) {
+                throw new HttpResponseException(response()->json([
+                    'message' => 'Otra persona modificó esta sesión mientras se corría el balance. Recarga para ver sus cambios y vuelve a correr.',
+                ], 409));
+            }
+            $s->datos_entrada = $json;
+            $s->save();
+            BalanceCorrida::record($s, $request->user(), BalanceCorrida::TIPO_CORRIDA);
+            BalanceEventService::logCorrer($s, $request->user());
+        });
 
         return response()->json($this->dto($s));
     }
@@ -100,11 +133,15 @@ class SesionesController extends Controller
     public function clonar(Request $request, int $sesion)
     {
         $original = $this->find($sesion);
-        $clone = $original->replicate();
-        $clone->balance_id = null;
-        $clone->user_id = $request->user()->id;
-        $clone->save();
-        BalanceCorrida::copyHistory($original->id, $clone->id);
+        $clone = DB::transaction(function () use ($original, $request) {
+            $clone = $original->replicate();
+            $clone->balance_id = null;
+            $clone->user_id = $request->user()->id;
+            $clone->save();
+            BalanceCorrida::copyHistory($original->id, $clone->id);
+
+            return $clone;
+        });
 
         return response()->json(['id' => $clone->id], 201);
     }
@@ -119,12 +156,13 @@ class SesionesController extends Controller
             ->orderByDesc('id')
             ->get();
 
+        // `actual` marks the newest recorded version; edits saved after it (PUT datos, Guardar) are not versions.
         return response()->json(['corridas' => $rows->values()->map(fn (BalanceCorrida $c, int $i) => [
             'id' => $c->id,
             'tipo' => $c->tipo,
             'usuario' => $c->user ? ['id' => $c->user->id, 'nombre' => $c->user->nombre] : null,
             'created_at' => $c->created_at?->toIso8601String(),
-            'actual' => $i === 0, // every change to the session records a version, so the newest is what is loaded
+            'actual' => $i === 0,
         ])]);
     }
 
@@ -140,9 +178,11 @@ class SesionesController extends Controller
             return response()->json(['message' => 'La versión pertenece a otro proceso.'], 422);
         }
 
-        $s->datos_entrada = $c->snapshot;
-        $s->save();
-        BalanceCorrida::record($s, $request->user(), BalanceCorrida::TIPO_RESTAURACION);
+        DB::transaction(function () use ($s, $c, $request) {
+            $s->datos_entrada = $c->snapshot;
+            $s->save();
+            BalanceCorrida::record($s, $request->user(), BalanceCorrida::TIPO_RESTAURACION);
+        });
 
         return response()->json($this->dto($s));
     }
@@ -163,25 +203,27 @@ class SesionesController extends Controller
         }
 
         $campos = ['nombre' => $v['nombre'], 'tipo' => $v['tipo'], 'periodo_inicio' => $v['periodo_inicio'], 'periodo_fin' => $v['periodo_fin']];
-        if ($v['sobrescribir']) {
-            $balance = $s->balance_id ? Balances::find($s->balance_id) : null;
-            if (!$balance) {
-                return response()->json(['message' => 'Esta sesión no tiene un balance guardado que sobrescribir.'], 422);
-            }
-            $balance->fill($campos + ['proceso_id' => $proceso->id])->save();
-        } else {
-            // Re-pointing a saved session would leave its balance without data: clone it first.
-            if ($s->balance_id) {
-                return response()->json(['message' => 'Esta sesión ya pertenece a un balance. Guárdala como copia o sobrescríbelo.'], 422);
-            }
-            $balance = Balances::create($campos + ['proceso_id' => $proceso->id, 'user_id' => $request->user()->id]);
+        $actual = $s->balance_id ? Balances::find($s->balance_id) : null; // null too when balance_id points at a deleted balance
+        if ($v['sobrescribir'] && !$actual) {
+            return response()->json(['message' => 'Esta sesión no tiene un balance guardado que sobrescribir.'], 422);
+        }
+        // Re-pointing a saved session would leave its balance without data: clone it first.
+        if (!$v['sobrescribir'] && $actual) {
+            return response()->json(['message' => 'Esta sesión ya pertenece a un balance. Guárdala como copia o sobrescríbelo.'], 422);
         }
 
-        $s->balance_id = $balance->id;
-        $s->valle_id = $proceso->valle_id;
-        $s->user_id = $s->user_id ?: $request->user()->id;
-        $s->save();
-        BalanceEventService::logSaved($s, $request->user(), $balance->id);
+        $balance = DB::transaction(function () use ($v, $actual, $campos, $proceso, $s, $request) {
+            $balance = $v['sobrescribir']
+                ? tap($actual)->update($campos + ['proceso_id' => $proceso->id])
+                : Balances::create($campos + ['proceso_id' => $proceso->id, 'user_id' => $request->user()->id]);
+            $s->balance_id = $balance->id;
+            $s->valle_id = $proceso->valle_id;
+            $s->user_id = $s->user_id ?: $request->user()->id;
+            $s->save();
+            BalanceEventService::logSaved($s, $request->user(), $balance->id);
+
+            return $balance;
+        });
 
         return response()->json(['balance_id' => $balance->id]);
     }
@@ -203,8 +245,25 @@ class SesionesController extends Controller
         if (!$edits) {
             return;
         }
-        $s->datos_entrada = json_encode(SesionMapper::applyEdits($datos, $edits));
+        if ($error = SesionMapper::shapeError($datos)) {
+            throw new HttpResponseException(response()->json(['message' => $error], 422));
+        }
+        try {
+            $s->datos_entrada = SesionMapper::encode(SesionMapper::applyEdits($datos, $edits));
+        } catch (\JsonException) {
+            throw new HttpResponseException(response()->json(['message' => 'Los datos editados no se pudieron guardar: hay valores no válidos.'], 422));
+        }
         $s->save();
+    }
+
+    private function encodeSolverResult(array $datos): string
+    {
+        try {
+            return SesionMapper::encode($datos);
+        } catch (\JsonException $e) {
+            Log::error('Solver result could not be encoded', ['error' => $e->getMessage()]);
+            throw new HttpResponseException(response()->json(['message' => 'El solver devolvió valores no válidos (infinitos o indefinidos). Revisa las mediciones.'], 502));
+        }
     }
 
     private function dto(Datos_entrada $s): array
@@ -234,21 +293,29 @@ class SesionesController extends Controller
     }
 
     /**
-     * Calls the Flask solver. Its responses are a map of JSON-encoded strings; this returns them decoded.
-     * Any failure becomes a 502 with a message the user can act on.
+     * Calls the Flask solver. Its responses are a map of JSON-encoded strings; this returns them decoded,
+     * with every key the endpoint must send. Any failure becomes a 502 with a message the user can act on.
      */
     private function solver(string $path, array $body): array
     {
+        $url = config('services.flask.url');
+        if (!$url) {
+            Log::error('FLASK_API_URL is not set');
+            throw new HttpResponseException(response()->json(['message' => 'El solver no está configurado. Avisa al administrador.'], 502));
+        }
+
         try {
-            $raw = Http::acceptJson()->timeout(self::SOLVER_TIMEOUT)->post(config('services.flask.url').$path, $body)->throw()->json();
+            $raw = Http::acceptJson()->connectTimeout(5)->timeout(self::SOLVER_TIMEOUT)->post($url.$path, $body)->throw()->json();
             $out = [];
-            foreach (['datos_entrada', 'desviaciones', 'nodos_data', 'balances_finales'] as $key) {
-                if (array_key_exists($key, $raw ?? [])) {
-                    $out[$key] = is_string($raw[$key]) ? json_decode($raw[$key], true, 512, JSON_THROW_ON_ERROR) : $raw[$key];
+            foreach (self::SOLVER_KEYS[$path] as $key) {
+                if (!is_array($raw) || !array_key_exists($key, $raw)) {
+                    throw new \UnexpectedValueException("{$key} missing");
                 }
-            }
-            if (!is_array($out['datos_entrada'] ?? null)) {
-                throw new \UnexpectedValueException('datos_entrada missing');
+                $value = is_string($raw[$key]) ? json_decode($raw[$key], true, 512, JSON_THROW_ON_ERROR) : $raw[$key];
+                if (!is_array($value)) {
+                    throw new \UnexpectedValueException("{$key} is not a list or map");
+                }
+                $out[$key] = $value;
             }
 
             return $out;

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\V2;
 
 use App\Http\Controllers\Controller;
 use App\Models\Balances;
+use App\Models\User;
 use App\Models\Valles;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -47,7 +48,14 @@ class BalancesController extends Controller
         // Period filter: balances whose period overlaps [desde, hasta]; balances without a period fall back to created_at.
         $rows = Balances::query()
             ->select(['id', 'nombre', 'tipo', 'periodo_inicio', 'periodo_fin', 'proceso_id', 'user_id', 'created_at'])
-            ->with(['user:id,nombre', 'datosEntrada.user:id,nombre', 'proceso:id,nombre,valle_id', 'proceso.valle:id,nombre'])
+            // Only the columns the owner heuristic needs: datos_entrada (the balance JSON) is large.
+            ->with([
+                'user:id,nombre',
+                'datosEntrada' => fn ($q) => $q->select(['datos_entradas.id', 'datos_entradas.balance_id', 'datos_entradas.user_id', 'datos_entradas.file_path']),
+                'datosEntrada.user:id,nombre',
+                'proceso:id,nombre,valle_id',
+                'proceso.valle:id,nombre',
+            ])
             ->when($f['proceso_id'] ?? null, fn ($q, $v) => $q->where('proceso_id', $v))
             ->when($f['valle_id'] ?? null, fn ($q, $v) => $q->whereHas('proceso', fn ($p) => $p->where('valle_id', $v)))
             ->when($f['tipo'] ?? null, fn ($q, $v) => $q->where('tipo', $v))
@@ -57,9 +65,16 @@ class BalancesController extends Controller
                 ->orWhere(fn ($n) => $n->whereNull('periodo_inicio')->whereDate('created_at', '<=', $v))))
             ->when($f['q'] ?? null, fn ($q, $v) => $q->where('nombre', 'like', '%'.addcslashes($v, '%_\\').'%'))
             ->orderByDesc('created_at')
-            ->get()
-            ->map(function (Balances $b) {
-                $creador = $b->creador();
+            ->get();
+
+        // Owners read from legacy file names, loaded in one query instead of one per balance.
+        $porArchivo = User::query()->select(['id', 'nombre'])
+            ->whereIn('id', $rows->map(fn (Balances $b) => $b->datosEntrada?->user ? null : Balances::userIdDeArchivo($b->datosEntrada?->file_path))->filter()->unique())
+            ->get()->keyBy('id');
+
+        $rows = $rows
+            ->map(function (Balances $b) use ($porArchivo) {
+                $creador = $b->creador($porArchivo);
 
                 return [
                     'id' => $b->id,
