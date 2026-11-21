@@ -72,6 +72,7 @@ Route::group(['prefix' => 'analytics', 'middleware' => ['auth:sanctum', 'dashboa
 // API v2 (Balances CMP web/): plain numeric payloads, readable errors. v1 routes above stay as they are.
 Route::group(['prefix' => 'v2', 'middleware' => ['auth:sanctum']], function () {
     Route::middleware('balance:read')->group(function () {
+        Route::get('inicio', [V2\InicioController::class, 'show']);
         Route::get('catalogo', [V2\BalancesController::class, 'catalogo']);
         Route::get('balances', [V2\BalancesController::class, 'listado']);
         Route::get('balances/{balance}/sesion', [V2\BalancesController::class, 'sesion'])->whereNumber('balance');

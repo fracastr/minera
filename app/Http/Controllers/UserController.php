@@ -11,6 +11,23 @@ use Illuminate\Validation\Rule;
 
 class UserController extends Controller
 {
+    /** Spanish field names and messages (the defaults would read "El campo name es obligatorio"). */
+    private const ATRIBUTOS = [
+        'name' => 'nombre',
+        'email' => 'correo',
+        'password' => 'contraseña',
+        'role' => 'rol',
+        'activo' => 'activo',
+        'dashboard_access' => 'acceso a analytics',
+    ];
+
+    private const MENSAJES = [
+        'email.unique' => 'Ya existe un usuario con ese correo.',
+        'email.email' => 'El correo no tiene un formato válido.',
+        'password.confirmed' => 'Las contraseñas no coinciden.',
+        'role.in' => 'El rol debe ser administrador, operador o lector.',
+    ];
+
     public function index()
     {
         $users = User::query()
@@ -30,7 +47,7 @@ class UserController extends Controller
             'role' => ['required', Rule::in(UserAbilityService::allowedRoles())],
             'activo' => 'sometimes|boolean',
             'dashboard_access' => 'sometimes|boolean',
-        ]);
+        ], self::MENSAJES, self::ATRIBUTOS);
 
         $user = User::create([
             'nombre' => $validated['name'],
@@ -56,7 +73,7 @@ class UserController extends Controller
             'role' => ['sometimes', Rule::in(UserAbilityService::allowedRoles())],
             'activo' => 'sometimes|boolean',
             'dashboard_access' => 'sometimes|boolean',
-        ]);
+        ], self::MENSAJES, self::ATRIBUTOS);
 
         if (isset($validated['name'])) {
             $user->nombre = $validated['name'];

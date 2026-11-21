@@ -226,13 +226,12 @@ class BalanceAnalyticsService
     {
             $metric = $filters['metric'] ?? 'imported';
             $groupBy = $filters['group_by'] ?? 'month';
-            $format = $this->periodFormat($groupBy);
 
             if ($metric === 'correr') {
                 $rows = $this->eventsJoinedQuery($filters)
                     ->where('balance_events.event_type', BalanceEvent::TYPE_CORRER)
                     ->select(
-                        DB::raw("DATE_FORMAT(datos_entradas.created_at, '{$format}') as period"),
+                        DB::raw($this->periodExpression('datos_entradas.created_at', $groupBy).' as period'),
                         DB::raw('count(*) as total')
                     )
                     ->groupBy('period')
@@ -241,7 +240,7 @@ class BalanceAnalyticsService
             } else {
                 $rows = $this->sessionsQuery($filters)
                     ->select(
-                        DB::raw("DATE_FORMAT(created_at, '{$format}') as period"),
+                        DB::raw($this->periodExpression('created_at', $groupBy).' as period'),
                         DB::raw('count(*) as total')
                     )
                     ->groupBy('period')
@@ -373,16 +372,19 @@ class BalanceAnalyticsService
         return $period;
     }
 
-    private function periodFormat(string $groupBy): string
+    /**
+     * SQL that buckets a timestamp column into the period key (YYYY-MM, YYYY-MM-DD or ISO YYYY-Www).
+     * MySQL keeps its DATE_FORMAT; SQLite (local and tests) uses strftime with the same output.
+     */
+    private function periodExpression(string $column, string $groupBy): string
     {
-        switch ($groupBy) {
-            case 'day':
-                return '%Y-%m-%d';
-            case 'week':
-                return '%x-W%v';
-            case 'month':
-            default:
-                return '%Y-%m';
-        }
+        $sqlite = DB::connection()->getDriverName() === 'sqlite';
+        $format = match ($groupBy) {
+            'day' => '%Y-%m-%d',
+            'week' => $sqlite ? '%G-W%V' : '%x-W%v',
+            default => '%Y-%m',
+        };
+
+        return $sqlite ? "strftime('{$format}', {$column})" : "DATE_FORMAT({$column}, '{$format}')";
     }
 }
