@@ -160,6 +160,32 @@ class V2AsistenteTest extends TestCase
             && $c['input_tokens'] === 1050 && $c['output_tokens'] === 110 && !array_key_exists('texto', $c)))->once();
     }
 
+    public function testOpenAiCompatibleProviderRoundTripsTools(): void
+    {
+        config(['services.anthropic.provider' => 'openai', 'services.anthropic.openai_key' => 'gk', 'services.anthropic.openai_model' => 'm', 'services.anthropic.openai_base_url' => 'https://groq.test/v1']);
+        Http::fake(['groq.test/v1/chat/completions' => Http::sequence()
+            ->push(['choices' => [['finish_reason' => 'tool_calls', 'message' => ['role' => 'assistant', 'content' => 'F1 es sospechoso.', 'tool_calls' => [
+                ['id' => 'c1', 'type' => 'function', 'function' => ['name' => 'proponer_accion', 'arguments' => '{"flujo":"F1","variable":"tms","tipo":"corregir_valor","valor":100,"motivo":"z = 5"}']],
+            ]]]], 'usage' => ['prompt_tokens' => 10, 'completion_tokens' => 5]])
+            ->push(['choices' => [['finish_reason' => 'stop', 'message' => ['role' => 'assistant', 'content' => 'Revisa F1.']]], 'usage' => ['prompt_tokens' => 20, 'completion_tokens' => 3]])]);
+
+        $this->actingAs($this->operator)->postJson($this->url(), $this->pregunta())->assertOk()
+            ->assertJsonPath('texto', "F1 es sospechoso.\n\nRevisa F1.")
+            ->assertJsonPath('propuestas.0.valor', 100)
+            ->assertJsonPath('uso', ['input_tokens' => 30, 'output_tokens' => 8]);
+
+        $sent = Http::recorded(fn ($r) => str_contains($r->url(), 'groq.test'))->map(fn ($p) => $p[0])->values();
+        $this->assertCount(2, $sent);
+        $this->assertSame('Bearer gk', $sent[0]->header('Authorization')[0]);
+        $first = $sent[0]->data();
+        $this->assertSame('system', $first['messages'][0]['role']);
+        $this->assertStringContainsString('<datos_sesion>', $first['messages'][1]['content']);
+        $this->assertSame('proponer_accion', $first['tools'][0]['function']['name']);
+        $second = $sent[1]->data()['messages'];
+        $this->assertSame('c1', $second[2]['tool_calls'][0]['id']);
+        $this->assertSame(['role' => 'tool', 'tool_call_id' => 'c1', 'content' => 'propuesta registrada'], $second[3]);
+    }
+
     public function testProposalValuesAreBounded(): void
     {
         // F1/F2 measured 130/100 with 10 % tolerance: a correction may move them 30 %; tolMax for 2 flows ≈ 21.9 %.

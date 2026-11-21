@@ -43,6 +43,11 @@ return [
         // Comma-separated anthropic-beta values; without a server-side-fallback-* beta no `fallbacks` is sent.
         'betas' => env('AI_ASSISTANT_BETAS', 'server-side-fallback-2026-07-01'),
         'enabled' => (bool) env('AI_ASSISTANT_ENABLED', false),
+        // 'openai' = any OpenAI-compatible chat API (Groq free tier by default); the request is translated at the edge.
+        'provider' => env('AI_ASSISTANT_PROVIDER', 'anthropic'),
+        'openai_key' => env('AI_ASSISTANT_OPENAI_KEY'),
+        'openai_model' => env('AI_ASSISTANT_OPENAI_MODEL', 'openai/gpt-oss-120b'),
+        'openai_base_url' => rtrim(env('AI_ASSISTANT_OPENAI_URL', 'https://api.groq.com/openai/v1'), '/'),
         'base_url' => rtrim(env('ANTHROPIC_BASE_URL', 'https://api.anthropic.com'), '/'),
     ],
 

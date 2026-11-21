@@ -165,6 +165,9 @@ class AsistenteController extends Controller
     /** @throws ConnectionException on a timeout or network failure (the caller decides what to keep) */
     private function llamar(array $payload, float $timeout, array $betas): array
     {
+        if (config('services.anthropic.provider') === 'openai') {
+            return $this->llamarOpenAi($payload, $timeout);
+        }
         $key = config('services.anthropic.key');
         if (!$key) {
             Log::error('ANTHROPIC_API_KEY is not set while AI_ASSISTANT_ENABLED is true');
@@ -178,15 +181,67 @@ class AsistenteController extends Controller
             return Http::withHeaders($headers)->acceptJson()->connectTimeout(min(5, $timeout))->timeout($timeout)
                 ->post(config('services.anthropic.base_url').'/v1/messages', $payload)->throw()->json() ?? [];
         } catch (RequestException $e) {
-            $status = $e->response->status();
-            // Only the API's error type: its message can echo request content.
-            Log::error('Asistente failed', ['status' => $status, 'type' => $e->response->json('error.type')]);
-            if ($status === 429) {
-                $retry = $e->response->header('retry-after');
-                throw new HttpResponseException(response()->json(['message' => 'El asistente está recibiendo demasiadas consultas. Intenta nuevamente en un momento.'], 429, $retry !== '' ? ['Retry-After' => $retry] : []));
-            }
-            $this->fail(502, self::NO_RESPONDIO);
+            $this->fallo($e);
         }
+    }
+
+    /** Same contract as llamar(), over an OpenAI-compatible chat API: Anthropic-shaped payload in, Anthropic-shaped reply out. */
+    private function llamarOpenAi(array $payload, float $timeout): array
+    {
+        $key = config('services.anthropic.openai_key');
+        if (!$key) {
+            Log::error('AI_ASSISTANT_OPENAI_KEY is not set while AI_ASSISTANT_PROVIDER=openai');
+            $this->fail(502, 'El asistente no está configurado. Avisa al administrador.');
+        }
+        $texto = fn ($c) => is_string($c) ? $c : implode("\n\n", array_column(array_filter($c, fn ($b) => ($b['type'] ?? null) === 'text'), 'text'));
+        $messages = [['role' => 'system', 'content' => $texto($payload['system'])]];
+        foreach ($payload['messages'] as $m) {
+            $bloques = is_array($m['content']) ? $m['content'] : [];
+            $resultados = array_filter($bloques, fn ($b) => ($b['type'] ?? null) === 'tool_result');
+            if ($resultados) {
+                foreach ($resultados as $r) {
+                    $messages[] = ['role' => 'tool', 'tool_call_id' => $r['tool_use_id'], 'content' => $r['content']];
+                }
+                continue;
+            }
+            $llamadas = array_values(array_map(fn ($b) => ['id' => $b['id'], 'type' => 'function', 'function' => ['name' => $b['name'], 'arguments' => json_encode($b['input'] ?? new \stdClass())]],
+                array_filter($bloques, fn ($b) => ($b['type'] ?? null) === 'tool_use')));
+            $messages[] = ['role' => $m['role'], 'content' => $texto($m['content'])] + ($llamadas ? ['tool_calls' => $llamadas] : []);
+        }
+        try {
+            $res = Http::withToken($key)->acceptJson()->connectTimeout(min(5, $timeout))->timeout($timeout)
+                ->post(config('services.anthropic.openai_base_url').'/chat/completions', [
+                    'model' => config('services.anthropic.openai_model'),
+                    'max_tokens' => $payload['max_tokens'],
+                    'messages' => $messages,
+                    'tools' => array_map(fn ($t) => ['type' => 'function', 'function' => ['name' => $t['name'], 'description' => $t['description'], 'parameters' => $t['input_schema']]], $payload['tools']),
+                ])->throw()->json() ?? [];
+        } catch (RequestException $e) {
+            $this->fallo($e);
+        }
+        $msg = $res['choices'][0]['message'] ?? [];
+        $content = trim($msg['content'] ?? '') !== '' ? [['type' => 'text', 'text' => $msg['content']]] : [];
+        foreach ($msg['tool_calls'] ?? [] as $c) {
+            $content[] = ['type' => 'tool_use', 'id' => $c['id'] ?? '', 'name' => $c['function']['name'] ?? '', 'input' => json_decode($c['function']['arguments'] ?? '', true)];
+        }
+
+        return [
+            'content' => $content,
+            'stop_reason' => ($res['choices'][0]['finish_reason'] ?? null) === 'tool_calls' ? 'tool_use' : 'end_turn',
+            'usage' => ['input_tokens' => $res['usage']['prompt_tokens'] ?? 0, 'output_tokens' => $res['usage']['completion_tokens'] ?? 0],
+        ];
+    }
+
+    private function fallo(RequestException $e): never
+    {
+        $status = $e->response->status();
+        // Only the API's error type: its message can echo request content.
+        Log::error('Asistente failed', ['status' => $status, 'type' => $e->response->json('error.type')]);
+        if ($status === 429) {
+            $retry = $e->response->header('retry-after');
+            throw new HttpResponseException(response()->json(['message' => 'El asistente está recibiendo demasiadas consultas. Intenta nuevamente en un momento.'], 429, $retry !== '' ? ['Retry-After' => $retry] : []));
+        }
+        $this->fail(502, self::NO_RESPONDIO);
     }
 
     private function fail(int $status, string $message): never
