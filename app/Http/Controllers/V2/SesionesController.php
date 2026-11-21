@@ -353,7 +353,7 @@ class SesionesController extends Controller
      * The stored status only while datos_entrada is still what that run produced: an edit (PUT datos), a restore
      * or a v1 re-run on the same row makes it stale, and then it is unknown (null).
      */
-    private static function solverVigente(Datos_entrada $s): ?array
+    public static function solverVigente(Datos_entrada $s): ?array
     {
         $e = $s->solver_estado;
         if (!is_array($e) || ($e['hash'] ?? null) !== md5((string) $s->datos_entrada)) {

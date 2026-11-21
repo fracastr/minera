@@ -1,13 +1,13 @@
 <script setup lang="ts">
 // ECharts 6, tree-shaken: only the charts and components the app draws. Colors come from the CSS tokens and are
 // re-read when the theme flips, so the same option renders light and dark.
-import { BarChart, LineChart } from 'echarts/charts'
+import { BarChart, LineChart, PieChart } from 'echarts/charts'
 import { GridComponent, LegendComponent, MarkLineComponent, TooltipComponent } from 'echarts/components'
 import { init, use, type EChartsCoreOption, type ECharts } from 'echarts/core'
 import { CanvasRenderer } from 'echarts/renderers'
 import { onBeforeUnmount, onMounted, ref, shallowRef, watchEffect } from 'vue'
 
-use([BarChart, LineChart, GridComponent, LegendComponent, MarkLineComponent, TooltipComponent, CanvasRenderer])
+use([BarChart, LineChart, PieChart, GridComponent, LegendComponent, MarkLineComponent, TooltipComponent, CanvasRenderer])
 
 export interface Tokens {
   ink: string
@@ -33,6 +33,8 @@ const props = defineProps<{
   /** Sparkline: title and summary only for screen readers. */
   compacto?: boolean
 }>()
+/** Index of the data point the user clicked (e.g. analytics drill-down). */
+const emit = defineEmits<{ select: [index: number] }>()
 
 const el = ref<HTMLDivElement>()
 const chart = shallowRef<ECharts>()
@@ -58,6 +60,7 @@ const esperando: (() => void)[] = []
 onMounted(() => {
   tokens.value = leer()
   chart.value = init(el.value!, null, { renderer: 'canvas' })
+  chart.value.on('click', p => emit('select', p.dataIndex))
   chart.value.on('finished', () => {
     pintado = true
     esperando.splice(0).forEach(f => f())
