@@ -38,7 +38,10 @@ return [
     // Balance assistant (Claude Messages API). Off unless AI_ASSISTANT_ENABLED=true; the endpoint 404s while off.
     'anthropic' => [
         'key' => env('ANTHROPIC_API_KEY'),
-        'model' => env('AI_ASSISTANT_MODEL', 'claude-sonnet-5-5'),
+        'model' => env('AI_ASSISTANT_MODEL', 'claude-opus-5-5'),
+        'api_version' => env('AI_ASSISTANT_API_VERSION', '2026-10-21'),
+        // Comma-separated anthropic-beta values; without a server-side-fallback-* beta no `fallbacks` is sent.
+        'betas' => env('AI_ASSISTANT_BETAS', 'server-side-fallback-2026-07-01'),
         'enabled' => (bool) env('AI_ASSISTANT_ENABLED', false),
         'base_url' => rtrim(env('ANTHROPIC_BASE_URL', 'https://api.anthropic.com'), '/'),
     ],
