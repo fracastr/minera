@@ -25,6 +25,9 @@ class AsistenteController extends Controller
     /** Below this, another model call is not worth starting. */
     private const MIN_LLAMADA_SEGUNDOS = 5;
     private const MAX_ROUNDS = 3;
+    // shortcut: Groq free tier = 8000 tokens/min counting max_tokens and a ~6.3k-token context, so one round with a small
+    // output budget; raise both on a paid tier.
+    private const OPENAI_MAX_TOKENS = 1500;
     private const MAX_TOKENS = 4096;
     private const NO_RESPONDIO = 'El asistente no respondió. Intenta nuevamente en unos segundos.';
     private const NOTA_TIEMPO = '(Se alcanzó el tiempo máximo de respuesta; la respuesta puede estar incompleta.)';
@@ -91,7 +94,8 @@ class AsistenteController extends Controller
         $claves = [];
         $cortado = false;
         $uso = ['input_tokens' => 0, 'output_tokens' => 0, 'cache_read_input_tokens' => 0, 'cache_creation_input_tokens' => 0];
-        for ($round = 1; $round <= self::MAX_ROUNDS; $round++) {
+        $maxRondas = config('services.anthropic.provider') === 'openai' ? 1 : self::MAX_ROUNDS;
+        for ($round = 1; $round <= $maxRondas; $round++) {
             $restante = Carbon::now()->diffInMilliseconds($deadline, false) / 1000;
             if ($restante < self::MIN_LLAMADA_SEGUNDOS) {
                 if ($round === 1) {
@@ -151,7 +155,7 @@ class AsistenteController extends Controller
             $messages[] = ['role' => 'user', 'content' => $results];
         }
 
-        Log::info('Asistente: uso', ['user_id' => $request->user()->id, 'sesion' => $s->id, 'rondas' => min($round, self::MAX_ROUNDS), 'cortado' => $cortado, ...$uso]);
+        Log::info('Asistente: uso', ['user_id' => $request->user()->id, 'sesion' => $s->id, 'rondas' => min($round, $maxRondas), 'cortado' => $cortado, ...$uso]);
 
         $texto = implode("\n\n", $textos) ?: ($propuestas ? 'Estas son mis propuestas:' : 'El asistente no generó una respuesta.');
 
@@ -212,7 +216,8 @@ class AsistenteController extends Controller
             $res = Http::withToken($key)->acceptJson()->connectTimeout(min(5, $timeout))->timeout($timeout)
                 ->post(config('services.anthropic.openai_base_url').'/chat/completions', [
                     'model' => config('services.anthropic.openai_model'),
-                    'max_tokens' => $payload['max_tokens'],
+                    'max_tokens' => min($payload['max_tokens'], self::OPENAI_MAX_TOKENS),
+                    'reasoning_effort' => 'medium',
                     'messages' => $messages,
                     'tools' => array_map(fn ($t) => ['type' => 'function', 'function' => ['name' => $t['name'], 'description' => $t['description'], 'parameters' => $t['input_schema']]], $payload['tools']),
                 ])->throw()->json() ?? [];
