@@ -2,8 +2,8 @@
 import { Check, LoaderCircle, MapPin, RotateCcw, SendHorizontal, Sparkles, Wand2 } from '@lucide/vue'
 import { computed, nextTick, ref, watch } from 'vue'
 import Notice from '@/components/Notice.vue'
-import { bloques, edicionDePropuesta, type Propuesta } from '@/domain/asistente'
-import { ACCION, flujoDe, leyIdx, nombreVariable } from '@/domain/diagnostico'
+import { bloques, edicionDePropuesta, flujoDePropuesta, type Edicion, type Propuesta } from '@/domain/asistente'
+import { ACCION, leyIdx, nombreVariable } from '@/domain/diagnostico'
 import type { Sesion } from '@/domain/types'
 import { fmt } from '@/lib/format'
 import { useSesionStore } from '@/stores/sesion'
@@ -45,7 +45,9 @@ watch(() => [store.chat.length, store.chatCargando, store.chatError], () => next
 
 const unidad = (p: Propuesta) => (leyIdx(p.variable) < 0 ? 't' : '%')
 const dec = (p: Propuesta) => (leyIdx(p.variable) < 0 ? 0 : 2)
-const edicion = (p: Propuesta) => edicionDePropuesta(p, props.sesion)
+const calculo = (p: Propuesta) => edicionDePropuesta(p, props.sesion, store.diag?.diagnostico.sospechosos)
+const edicion = (p: Propuesta): Edicion | null => { const e = calculo(p); return e && !('error' in e) ? e : null }
+const fueraDeRango = (p: Propuesta) => { const e = calculo(p); return e && 'error' in e ? e.error : null }
 
 async function aplicar(p: Propuesta) {
   const e = edicion(p)
@@ -53,7 +55,7 @@ async function aplicar(p: Propuesta) {
   if (e && (await store.aplicarSugerencia(e.flujo, e.variable, e.accion, e.sugerido))) p.aplicada = true
 }
 function ver(p: Propuesta) {
-  const f = flujoDe(props.sesion.flujos, p.flujo)
+  const f = flujoDePropuesta(p, props.sesion.flujos)
   if (!f) return
   store.overlaySospechosos = true
   store.flujoPulso = f.idx
@@ -114,8 +116,9 @@ function ver(p: Propuesta) {
               </p>
               <p v-else-if="p.valor !== null" class="mt-0.5 text-[0.8125rem]"><span class="text-ink-muted">Valor</span> {{ fmt(p.valor, dec(p)) }} {{ unidad(p) }}</p>
               <p class="mt-1.5 text-xs text-ink-muted">{{ p.motivo }}</p>
+              <p v-if="fueraDeRango(p)" class="mt-1 text-xs font-medium text-warn">No se puede aplicar: {{ fueraDeRango(p) }}</p>
               <div class="mt-2 flex flex-wrap gap-2">
-                <button type="button" class="btn btn-quiet h-7 px-2 text-xs" :disabled="!flujoDe(sesion.flujos, p.flujo)" @click="ver(p)"><MapPin class="size-3.5" aria-hidden="true" /> Ver en diagrama</button>
+                <button type="button" class="btn btn-quiet h-7 px-2 text-xs" :disabled="!flujoDePropuesta(p, sesion.flujos)" @click="ver(p)"><MapPin class="size-3.5" aria-hidden="true" /> Ver en diagrama</button>
                 <template v-if="editable && edicion(p)">
                   <span v-if="p.aplicada" class="flex items-center gap-1 text-xs font-medium text-ok"><Check class="size-3.5" aria-hidden="true" /> Aplicada</span>
                   <button v-else type="button" class="btn btn-primary h-7 px-2 text-xs" :disabled="!!store.busy" @click="aplicar(p)"><Wand2 class="size-3.5" aria-hidden="true" /> Aplicar</button>
