@@ -7,6 +7,7 @@ import { ajuste } from '@/domain/reconciliationQuality'
 import type { Flujo, Sesion, Variable } from '@/domain/types'
 import { fmt } from '@/lib/format'
 import { columnTypes, gridTheme, parseNumber } from '@/lib/grid'
+import { useSesionStore } from '@/stores/sesion'
 
 // One grid for what v1 split into two scroll-synced grids: per variable, measured / reconciled / tolerances / deviations.
 const props = defineProps<{ sesion: Sesion; editable: boolean; nodo: number | null }>()
@@ -15,6 +16,19 @@ const emit = defineEmits<{ edit: [] }>()
 const api = shallowRef<GridApi<Flujo>>()
 const streams = computed(() => (props.nodo === null ? null : nodeStreams(props.sesion.matriz, props.nodo)))
 watch(streams, () => api.value?.redrawRows())
+
+// "Editar en Datos" from the diagram: scroll to that flow, focus its measured TMS and flash the row.
+const store = useSesionStore()
+function enfocar() {
+  const idx = store.flujoFoco
+  const row = idx === null ? undefined : api.value?.getRowNode(String(idx))
+  if (!api.value || !row || row.rowIndex === null) return
+  store.flujoFoco = null
+  api.value.ensureIndexVisible(row.rowIndex, 'middle')
+  api.value.setFocusedCell(row.rowIndex, 'tms.medido')
+  api.value.flashCells({ rowNodes: [row] })
+}
+watch(() => store.flujoFoco, enfocar)
 
 const num = (decimals: number, min = decimals) => (p: ValueFormatterParams) => fmt(p.value as number, decimals, min)
 const editableCol = (field: string, headerName: string, decimals: number, min = decimals): ColDef<Flujo> => ({
@@ -99,7 +113,7 @@ const height = computed(() => `${Math.min(props.sesion.flujos.length, 16) * 30 +
     :tooltip-show-delay="300"
     :single-click-edit="true"
     :stop-editing-when-cells-lose-focus="true"
-    @grid-ready="(e: { api: GridApi<Flujo> }) => (api = e.api)"
+    @grid-ready="(e: { api: GridApi<Flujo> }) => { api = e.api; enfocar() }"
     @cell-value-changed="onChange"
   />
 </template>

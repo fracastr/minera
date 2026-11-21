@@ -53,8 +53,8 @@ export const router = createRouter({
         },
         {
           // Admin and operator: operator's only write ability is on Balances.
-          path: 'admin/diagramas', name: 'admin-diagramas', component: Placeholder,
-          meta: { title: 'Diagramas de proceso', section: 'Administración', can: ['update', 'Balances'], summary: 'Disposición guardada de los diagramas de flujo de cada proceso.' },
+          path: 'admin/diagramas', name: 'admin-diagramas', component: () => import('@/pages/admin/Diagramas.vue'),
+          meta: { title: 'Diagramas de proceso', section: 'Administración', can: ['update', 'Balances'] },
         },
       ],
     },

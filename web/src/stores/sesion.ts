@@ -14,6 +14,8 @@ export const useSesionStore = defineStore('sesion', () => {
   const loadError = ref('')
   /** Node whose streams are highlighted in the flows grid. */
   const nodoSel = ref<number | null>(null)
+  /** Flow to bring into view in the flows grid ("Editar en Datos" from the diagram). */
+  const flujoFoco = ref<number | null>(null)
   /** Saved balance reopened: the user already chose to overwrite it in this visit (v1 asks once). */
   const sobrescribir = ref(false)
 
@@ -26,6 +28,7 @@ export const useSesionStore = defineStore('sesion', () => {
       sesion.value = await api<Sesion>(`/v2/sesiones/${id}`)
       dirty.value = false
       nodoSel.value = null
+      flujoFoco.value = null
       sobrescribir.value = false
     } catch (e) {
       sesion.value = null
@@ -128,5 +131,5 @@ export const useSesionStore = defineStore('sesion', () => {
     if (url !== undefined && !safe) notify('danger', 'El Excel se generó, pero el enlace de Drive no es válido.')
   }
 
-  return { sesion, dirty, busy, loadError, nodoSel, estado, load, ensureWritable, correr, guardar, restaurar, exportar }
+  return { sesion, dirty, busy, loadError, nodoSel, flujoFoco, estado, load, ensureWritable, correr, guardar, restaurar, exportar }
 })

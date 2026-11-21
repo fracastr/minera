@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ExternalLink, History, LoaderCircle, Play, Save } from '@lucide/vue'
 import { TabsContent, TabsIndicator, TabsList, TabsRoot, TabsTrigger } from 'reka-ui'
-import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { computed, defineAsyncComponent, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { onBeforeRouteLeave, useRoute, useRouter } from 'vue-router'
 import Notice from '@/components/Notice.vue'
 import UnderConstruction from '@/components/UnderConstruction.vue'
@@ -14,19 +14,34 @@ import { periodo, valleColor } from '@/lib/format'
 import { useAuthStore } from '@/stores/auth'
 import { useSesionStore } from '@/stores/sesion'
 
+// The flowsheet (Vue Flow + ELK) loads only when its tab opens.
+const DiagramaTab = defineAsyncComponent(() => import('@/components/diagrama/DiagramaTab.vue'))
+
 const route = useRoute()
 const router = useRouter()
 const auth = useAuthStore()
 const store = useSesionStore()
 
 const canWrite = computed(() => can(auth.user?.ability, 'update', 'Balances'))
-const tab = ref('datos')
+// A session that has been run opens on the diagram; one only imported opens on its data.
+const tabInicial = () => (store.sesion?.corrida || store.sesion?.balance ? 'diagrama' : 'datos')
+const tab = ref(store.sesion?.id === Number(route.params.id) ? tabInicial() : 'datos')
 const guardarOpen = ref(false)
 const s = computed(() => store.sesion)
 
+async function correr() {
+  await store.correr()
+  if (store.sesion?.corrida && !store.dirty) tab.value = 'diagrama'
+}
+
+function editarEnDatos(flujo: number) {
+  store.flujoFoco = flujo
+  tab.value = 'datos'
+}
+
 // Load on entry and when the URL changes, but not when a "guardar como nuevo" clone just took over the URL.
 watch(() => Number(route.params.id), id => {
-  if (id && id !== store.sesion?.id) store.load(id)
+  if (id && id !== store.sesion?.id) store.load(id).then(() => (tab.value = tabInicial()))
 }, { immediate: true })
 watch(() => store.sesion?.id, id => {
   if (id && id !== Number(route.params.id)) router.replace({ name: 'balance-sesion', params: { id } })
@@ -115,7 +130,7 @@ const tabs = [
             <button type="button" class="btn btn-quiet h-9 px-3" :disabled="!!store.busy" @click="abrirGuardar">
               <Save class="size-4" aria-hidden="true" /> Guardar
             </button>
-            <button type="button" class="btn btn-primary h-9 px-4" :disabled="!!store.busy" @click="store.correr()">
+            <button type="button" class="btn btn-primary h-9 px-4" :disabled="!!store.busy" @click="correr">
               <LoaderCircle v-if="store.busy === 'correr'" class="size-4 animate-spin" aria-hidden="true" />
               <Play v-else class="size-4" aria-hidden="true" />
               {{ store.busy === 'correr' ? 'Corriendo…' : 'Correr' }}
@@ -136,7 +151,7 @@ const tabs = [
 
     <div class="pt-6" :aria-busy="store.busy === 'correr'">
       <TabsContent value="diagrama">
-        <UnderConstruction summary="El flowsheet interactivo del proceso, con medido, reconciliado y error sobre cada flujo." />
+        <DiagramaTab :sesion="s" :editable="canWrite" @editar="editarEnDatos" />
       </TabsContent>
       <TabsContent value="datos">
         <DatosTab v-model:nodo="store.nodoSel" :sesion="s" :editable="canWrite" @edit="onEdit" />
