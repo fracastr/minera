@@ -1,6 +1,7 @@
 import { FetchError } from 'ofetch'
 import { defineStore } from 'pinia'
 import { computed, reactive, ref, shallowRef } from 'vue'
+import type { MensajeChat, RespuestaAsistente } from '@/domain/asistente'
 import { claveSospechoso, flujoDe, leyIdx, sugerencia, type Accion, type Diagnostico, type VariableDiag } from '@/domain/diagnostico'
 import { toEdits, type Sesion } from '@/domain/types'
 import { descargar } from '@/composables/useDiagramImage'
@@ -28,6 +29,10 @@ export const useSesionStore = defineStore('sesion', () => {
   /** Diagram overlay: mark the suspect streams; `flujoPulso` pulses one ("Ver en diagrama"). */
   const overlaySospechosos = ref(false)
   const flujoPulso = ref<number | null>(null)
+  /** Assistant conversation (S4): in memory only, per session; reset() clears it. */
+  const chat = ref<MensajeChat[]>([])
+  const chatCargando = ref(false)
+  const chatError = ref('')
   /** Saved balance reopened: the user already chose to overwrite it in this visit (v1 asks once). */
   const sobrescribir = ref(false)
 
@@ -56,6 +61,9 @@ export const useSesionStore = defineStore('sesion', () => {
     descartados.clear()
     overlaySospechosos.value = false
     flujoPulso.value = null
+    chat.value = []
+    chatCargando.value = false
+    chatError.value = ''
     writable = null
     ops.clear()
   }
@@ -296,6 +304,27 @@ export const useSesionStore = defineStore('sesion', () => {
     return true
   }
 
-  return { diag, diagCargando, diagError, descartados, overlaySospechosos, flujoPulso, flujosSospechosos, cargarDiagnostico, aplicarSugerencia,
+  /** Sends a question (or, without one, retries the last) with the conversation so far. */
+  async function preguntarAsistente(texto?: string) {
+    const s = sesion.value
+    if (!s || chatCargando.value) return
+    if (texto) chat.value.push({ rol: 'usuario', texto })
+    // The API takes the last 20 messages, starting with the user's, each at most 4000 characters.
+    const mensajes = chat.value.slice(-20).map(({ rol, texto }) => ({ rol, texto: texto.slice(0, 4000) }))
+    while (mensajes.length && mensajes[0]!.rol !== 'usuario') mensajes.shift()
+    if (mensajes.at(-1)?.rol !== 'usuario') return
+    chatCargando.value = true
+    chatError.value = ''
+    try {
+      const res = await api<RespuestaAsistente>(`/v2/sesiones/${s.id}/asistente`, { method: 'POST', body: { mensajes }, retry: 0 })
+      if (sesion.value === s) chat.value.push({ rol: 'asistente', texto: res.texto, propuestas: res.propuestas })
+    } catch (e) {
+      if (sesion.value === s) chatError.value = errorMessage(e, 'El asistente no respondió. Intenta nuevamente.')
+    } finally {
+      if (sesion.value === s) chatCargando.value = false
+    }
+  }
+
+  return { chat, chatCargando, chatError, preguntarAsistente, diag, diagCargando, diagError, descartados, overlaySospechosos, flujoPulso, flujosSospechosos, cargarDiagnostico, aplicarSugerencia,
     sesion, dirty, busy, loadError, nodoSel, flujoFoco, estado, reset, load, ensureWritable, edited, correr, guardar, restaurar, exportar }
 })

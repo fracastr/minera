@@ -232,7 +232,7 @@ class SesionesController extends Controller
         return response()->json(['balance_id' => $balance->id]);
     }
 
-    private function find(int $id): Datos_entrada
+    public static function find(int $id): Datos_entrada
     {
         $s = Datos_entrada::query()->find($id);
         if (!$s) {
@@ -270,7 +270,8 @@ class SesionesController extends Controller
         }
     }
 
-    private function dto(Datos_entrada $s): array
+    /** The session as the SPA (and the assistant context) sees it. */
+    public static function dto(Datos_entrada $s): array
     {
         $s->loadMissing(['proceso:id,nombre,valle_id,componentes', 'proceso.valle:id,nombre', 'balance']);
         $componentes = json_decode($s->proceso?->componentes ?? '', true)['data'] ?? [];
