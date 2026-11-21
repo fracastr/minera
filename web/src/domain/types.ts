@@ -57,6 +57,8 @@ export interface Sesion {
   proceso: { id: number; nombre: string; valle: { id: number; nombre: string } }
   componentes: string[]
   corrida: boolean
+  /** GEKKO status of the last solver call; ok=false: it did not converge and the reconciled values are not trustworthy. null = unknown. */
+  solver: { ok: boolean; mensaje: string | null; iteraciones: number | null } | null
   flujos: Flujo[]
   nodos: Nodo[]
   /** nodes × flows: +1 the flow enters the node, −1 it leaves. */

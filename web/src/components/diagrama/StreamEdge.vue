@@ -16,7 +16,8 @@ const hot = computed(() => sel.value || ctx.flujoHover === props.data.flujo)
 const cls = computed(() => [
   `t-${chip.value?.tono ?? 'normal'}`,
   foco.value ? `f-${foco.value}` : '',
-  { sel: sel.value, hot: hot.value, stock: props.data.stock },
+  { sel: sel.value, hot: hot.value, stock: props.data.stock, pulso: ctx.pulso === props.data.flujo },
+  ctx.sospechosos ? (ctx.sospechosos.has(props.data.flujo) ? 'sosp' : 'no-sosp') : '',
 ])
 </script>
 

@@ -1,10 +1,9 @@
 <script setup lang="ts">
-import { ExternalLink, History, LoaderCircle, Play, Save } from '@lucide/vue'
+import { ExternalLink, History, LoaderCircle, Play, Save, TriangleAlert } from '@lucide/vue'
 import { TabsContent, TabsIndicator, TabsList, TabsRoot, TabsTrigger } from 'reka-ui'
 import { computed, defineAsyncComponent, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { onBeforeRouteLeave, onBeforeRouteUpdate, useRoute, useRouter } from 'vue-router'
 import Notice from '@/components/Notice.vue'
-import UnderConstruction from '@/components/UnderConstruction.vue'
 import DatosTab from '@/components/sesion/DatosTab.vue'
 import GuardarDialog from '@/components/sesion/GuardarDialog.vue'
 import HistorialTab from '@/components/sesion/HistorialTab.vue'
@@ -16,6 +15,8 @@ import { useSesionStore } from '@/stores/sesion'
 
 // The flowsheet (Vue Flow + ELK) loads only when its tab opens.
 const DiagramaTab = defineAsyncComponent(() => import('@/components/diagrama/DiagramaTab.vue'))
+// ECharts loads only with the diagnosis.
+const DiagnosticoTab = defineAsyncComponent(() => import('@/components/diagnostico/DiagnosticoTab.vue'))
 
 const route = useRoute()
 const router = useRouter()
@@ -37,7 +38,8 @@ watch(() => Number(route.params.id), id => {
 
 async function correr() {
   await store.correr()
-  if (store.sesion?.corrida && !store.dirty) tab.value = 'diagrama'
+  // From Datos the result is best seen on the diagram; Diagnóstico stays put to show the re-test.
+  if (store.sesion?.corrida && !store.dirty && tab.value === 'datos') tab.value = 'diagrama'
 }
 
 function editarEnDatos(flujo: number) {
@@ -105,6 +107,12 @@ const tabs = [
           <div class="mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-1">
             <h1 class="truncate font-display text-lg font-semibold">{{ s.balance?.nombre ?? 'Sin guardar' }}</h1>
             <span class="rounded px-1.5 py-0.5 text-[0.6875rem] font-semibold" :class="estadoStyle">{{ store.estado }}</span>
+            <span
+              v-if="s.solver?.ok === false" class="inline-flex items-center gap-1 rounded bg-danger-soft px-1.5 py-0.5 text-[0.6875rem] font-semibold text-danger"
+              role="status" :title="`El solver no convergió${s.solver.mensaje ? `: ${s.solver.mensaje}` : ''}. Los valores reconciliados no son confiables.`"
+            >
+              <TriangleAlert class="size-3.5" aria-hidden="true" /> Solver sin converger: resultados no confiables
+            </span>
             <span v-if="store.dirty" class="inline-flex items-center gap-1.5 text-xs font-medium text-warn" role="status">
               <span class="size-1.5 rounded-full bg-warn" aria-hidden="true" /> Cambios sin guardar
             </span>
@@ -155,7 +163,7 @@ const tabs = [
         <DatosTab v-model:nodo="store.nodoSel" :sesion="s" :editable="canWrite" :locked="!!store.busy" @edit="store.edited()" />
       </TabsContent>
       <TabsContent value="diagnostico">
-        <UnderConstruction summary="Mediciones sospechosas ordenadas, desbalance por nodo y sugerencias de corrección." />
+        <DiagnosticoTab :sesion="s" :editable="canWrite" @ver="tab = 'diagrama'" />
       </TabsContent>
       <TabsContent value="historial">
         <HistorialTab :sesion-id="s.id" :version="s.updated_at" :editable="canWrite" />
